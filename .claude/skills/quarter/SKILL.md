@@ -13,7 +13,7 @@ Generate a plan for the current quarter from vault contents.
 
 1. Get current date and determine the quarter (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
 2. Check if `_workspace/guido-amici/agenda/planning/YYYY-QN.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
-3. **Gather all active/paused projects** — grep `info/organization/projects/*.md` for `status: active` and `status: paused`, read them
+3. **Gather all active/paused projects** — grep `_workspace/guido-amici/agenda/projects/*.md` for `status: active` and `status: paused`, read them
 4. **Gather all pending/in-progress tasks** — grep `info/organization/tasks/*.md` for `status: pending` or `status: in-progress`, read them
 5. **Group tasks by due month** — tasks due within the quarter grouped by month; tasks due before quarter start → Overdue
 6. **Map projects to monthly milestones** — based on project next actions and linked tasks, suggest which month each project should hit its next milestone
