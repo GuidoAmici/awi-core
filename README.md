@@ -264,21 +264,17 @@ Plays notification sound when a delegated task completes. Only triggers when `CL
 
 ## Directory Structure
 
+### AWI (engine + personal workspace)
+
 ```
 awi/
 ├── CLAUDE.md                           # Claude Code session instructions
 ├── AGENTS.md                           # Codex CLI session instructions
 ├── GEMINI.md                           # Gemini CLI session instructions
 ├── README.md                           # This file
-├── .gitignore
 │
 ├── _documentation/
-│   ├── system/                         # Workflow frameworks (synced to public repo)
-│   │   └── chief-of-staff/
-│   │       └── references/
-│   │           ├── file-formats.md
-│   │           └── installation.md
-│   ├── _schedule/                      # Personal action layer (private)
+│   ├── _agenda/                        # Personal agenda (private)
 │   │   ├── tasks/
 │   │   ├── projects/
 │   │   ├── products/
@@ -289,36 +285,51 @@ awi/
 │   │   ├── planning/
 │   │   ├── outputs/
 │   │   └── user-profile-inference/
-│   └── _context/                       # LLM context files (private)
-│       ├── users/                      # Vault user login profiles
-│       ├── codebase/                   # Per-app context stubs
-│       └── wikis/                      # Company knowledge bases (submodules)
-│
-├── _codebase/                          # Application repos (submodules)
+│   ├── _context/                       # Personal context (private)
+│   │   └── users/                      # Vault user login profiles
+│   └── system/                         # Workflow framework (synced to public repo)
+│       └── chief-of-staff/
+│           ├── references/
+│           │   ├── file-formats.md
+│           │   └── installation.md
+│           └── workflow/
 │
 └── .claude/
-    ├── settings.json                   # Permissions and hooks config
+    ├── settings.json
     ├── reference/
-    │   ├── file-formats.md             # Templates for all file types
-    │   └── employees.json              # Delegation targets
+    │   └── employees.json
     ├── hooks/
     │   ├── auto-commit.sh
     │   └── stop-sound.sh
     └── skills/
-        ├── new/                        # Quick capture
-        ├── today/                      # Daily planning
-        ├── today-start/                # Morning check-in
-        ├── today-end/                  # End-of-day review
-        ├── week/                       # Weekly plan
-        ├── week-review/                # Friday ritual
-        ├── quarter/                    # Quarterly goals
-        ├── year/                       # Annual plan
-        ├── history/                    # Recent activity
-        ├── delegate/                   # Task delegation
-        ├── wrap-session/               # Session close ritual
-        ├── awi-user-create/            # Create vault user
-        ├── awi-user-login/             # Load user profile
-        └── initialize/                 # Vault initialization
+        ├── new/          today/        today-start/    today-end/
+        ├── week/         week-review/  quarter/        year/
+        ├── history/      delegate/     wrap-session/
+        ├── awi-user-create/            awi-user-login/
+        └── initialize/                 # Scaffolds workspace repos
+```
+
+### `<name>-workspace` (company/client instance)
+
+Created by `/initialize <name>`. Each workspace is a standalone repo:
+
+```
+newhaze-workspace/
+├── CLAUDE.md                           # Points to AWI context
+│
+├── _documentation/
+│   ├── _agenda/                        # Company agenda
+│   │   ├── tasks/     projects/    outputs/
+│   │   ├── people/    daily/       weekly/
+│   │   └── planning/
+│   └── _context/
+│       ├── wiki/                       # Company wiki (submodule)
+│       └── codebase/                   # App context stubs
+│
+└── _codebase/                          # App submodules
+    ├── newhaze-api/
+    ├── newhaze-learn/
+    └── ...
 ```
 
 ---
