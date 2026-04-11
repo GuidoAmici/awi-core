@@ -74,7 +74,7 @@ Check if person/project already exists before creating (use Glob on `_workspace/
 
 ## File Paths
 
-All files go under `info/`:
+All files go under `_workspace/guido-amici/agenda/`:
 - Tasks → `_workspace/guido-amici/agenda/tasks/<slug>.md`
 - Projects → `_workspace/guido-amici/agenda/projects/<slug>.md`
 - People → `_workspace/guido-amici/agenda/people/<slug>.md`
