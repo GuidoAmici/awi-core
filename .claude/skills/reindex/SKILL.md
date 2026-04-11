@@ -80,9 +80,9 @@ Only for folders that benefit from structural explanation (typically 3+ subfolde
 - Only include a **Conventions** section if there are real rules to document
 - Keep it under ~30 lines
 
-### 5. Wiki submodule root — skip
+### 5. Wiki submodule roots — skip
 
-`_documentation/_context/newhaze-wiki` is a git submodule root. Do NOT write `.abstract.md` or `.overview.md` inside it — its own `CLAUDE.md` and `_index.md` are authoritative. The parent folder `_documentation/_context/` should mention it in its `.overview.md` folder map.
+Submodule roots under `_documentation/_context/workspaces/` (e.g. `newhaze-wiki`, `afin-wiki`) are git submodule roots. Do NOT write `.abstract.md` or `.overview.md` inside them — their own `CLAUDE.md` and `_index.md` are authoritative. The parent folder `_documentation/_context/workspaces/` should mention them in its `.overview.md` folder map.
 
 ### 6. Codebase app pointer stubs
 
