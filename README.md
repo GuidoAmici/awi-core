@@ -8,6 +8,13 @@ A git-tracked Obsidian vault designed for Claude Code. Natural language in, orga
 
 ## What It Does
 
+**AWI** is a system factory — it serves two roles simultaneously:
+
+1. **Personal OS** — your own agenda, planning, and daily rhythm live here
+2. **Workspace factory** — use `/initialize <name>` to spin up a self-contained `<name>-workspace` repo for any company or client, with its own agenda, wiki, and codebase
+
+Each workspace follows the same structure and is operated by the same skills. AWI is the engine that runs all of them.
+
 **AWI** transforms Claude Code into an executive assistant that:
 
 - **Captures naturally** — Say "meeting with Sarah Friday about Q2 planning" and watch it create linked person notes, tasks, and project files
