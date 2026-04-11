@@ -13,4 +13,4 @@
 
 ## End of Session
 
-Before closing every session, tell the user one or more things you observed or learned about them during the conversation — ideally things they may not be consciously aware of about themselves. Then save those observations to `_documentation/_schedule/user-profile-inference/YYYY-MM-DD - <FullName>.md` with the user's name as the H1 heading and the date in the filename.
+Before closing every session, tell the user one or more things you observed or learned about them during the conversation — ideally things they may not be consciously aware of about themselves. Then save those observations to `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` with the user's name as the H1 heading and the date in the filename.
