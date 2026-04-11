@@ -77,7 +77,7 @@ Check if person/project already exists before creating (use Glob on `info/` subf
 All files go under `info/`:
 - Tasks → `_workspace/guido-amici/agenda/tasks/<slug>.md`
 - Projects → `_workspace/guido-amici/agenda/projects/<slug>.md`
-- People → `info/organization/people/<slug>.md`
+- People → `_workspace/guido-amici/agenda/people/<slug>.md`
 - Ideas → `info/organization/ideas/<slug>.md`
 
 ## Product/App/Feature References
