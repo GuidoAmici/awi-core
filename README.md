@@ -273,6 +273,15 @@ awi/
 ├── GEMINI.md                           # Gemini CLI session instructions
 ├── README.md                           # This file
 │
+├── system/                             # Workflow framework (synced to public repo)
+│   └── chief-of-staff/
+│       ├── references/
+│       │   ├── file-formats.md
+│       │   └── installation.md
+│       └── workflow/
+│
+├── users/                              # Vault user login profiles
+│
 ├── _documentation/
 │   ├── _agenda/                        # Personal agenda (private)
 │   │   ├── tasks/
@@ -285,14 +294,10 @@ awi/
 │   │   ├── planning/
 │   │   ├── outputs/
 │   │   └── user-profile-inference/
-│   ├── _context/                       # Personal context (private)
-│   │   └── users/                      # Vault user login profiles
-│   └── system/                         # Workflow framework (synced to public repo)
-│       └── chief-of-staff/
-│           ├── references/
-│           │   ├── file-formats.md
-│           │   └── installation.md
-│           └── workflow/
+│   └── _context/                       # Personal context (private)
+│       ├── writing-style.md
+│       ├── business-profile.md
+│       └── workspaces/                 # Wiki submodules
 │
 └── .claude/
     ├── settings.json
