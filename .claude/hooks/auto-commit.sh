@@ -27,12 +27,18 @@ REL_PATH="${FILE_PATH#$VAULT_ROOT/}"
 git check-ignore -q "$FILE_PATH" 2>/dev/null && exit 0
 
 # Derive type from path
-# Structure: _documentation/_agenda/<type>/  or  _documentation/_context/  or  system/  or  users/
+# Structure:
+#   _workspace/<name>/agenda/<type>/  — operational content
+#   _workspace/<name>/documentation/  — context/wiki
+#   _workspace/<name>/codebase/       — code
+#   _system/                          — framework docs
+#   _system/users/                    — vault users
 IFS='/' read -ra PARTS <<< "$REL_PATH"
-if [ "${PARTS[0]}" = "_documentation" ]; then
-  LAYER="${PARTS[1]}"   # _agenda, _context, ...
-  SUBFOLDER="${PARTS[2]}" # tasks, projects, people, ...
-  if [ "$LAYER" = "_agenda" ]; then
+if [ "${PARTS[0]}" = "_workspace" ]; then
+  # PARTS[1] = workspace name, PARTS[2] = agenda|documentation|codebase, PARTS[3] = subfolder
+  LAYER="${PARTS[2]}"
+  SUBFOLDER="${PARTS[3]}"
+  if [ "$LAYER" = "agenda" ]; then
     case "$SUBFOLDER" in
       tasks) TYPE="task" ;;
       projects) TYPE="project" ;;
@@ -44,17 +50,21 @@ if [ "${PARTS[0]}" = "_documentation" ]; then
       products) TYPE="product" ;;
       planning) TYPE="planning" ;;
       user-profile-inference) TYPE="user-profile-inference" ;;
-      *) TYPE="${SUBFOLDER:-_agenda}" ;;
+      *) TYPE="${SUBFOLDER:-agenda}" ;;
     esac
-  elif [ "$LAYER" = "_context" ]; then
-    TYPE="context"
+  elif [ "$LAYER" = "documentation" ]; then
+    TYPE="documentation"
+  elif [ "$LAYER" = "codebase" ]; then
+    TYPE="codebase"
   else
-    TYPE="${LAYER:-_documentation}"
+    TYPE="${LAYER:-_workspace}"
   fi
-elif [ "${PARTS[0]}" = "system" ]; then
-  TYPE="system"
-elif [ "${PARTS[0]}" = "users" ]; then
-  TYPE="user"
+elif [ "${PARTS[0]}" = "_system" ]; then
+  if [ "${PARTS[1]}" = "users" ]; then
+    TYPE="user"
+  else
+    TYPE="system"
+  fi
 else
   TYPE="${PARTS[0]}"
 fi
