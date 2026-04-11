@@ -34,7 +34,7 @@ Check ARGUMENTS.
 ### Step 2 — Check for conflicts
 
 ```bash
-ls ./_documentation/_context/users/
+ls ./users/
 ```
 
 If a file named `<username>.md` already exists (case-insensitive), stop and warn:
@@ -77,7 +77,7 @@ ls ./_documentation/_agenda/people/
 
 If `<FullName>.md` (CamelCase, no spaces) already exists, skip creating the person file and note it.
 
-**Create user file** at `_documentation/_context/users/<username>.md`:
+**Create user file** at `users/<username>.md`:
 
 ```markdown
 ---
@@ -123,7 +123,7 @@ Output:
 ✓ User '<username>' created and linked to <Full Name>.
 
 Files created:
-- _documentation/_context/users/<username>.md
+- users/<username>.md
 - _documentation/_agenda/people/<FullNameCamelCase>.md
 
 Run /awi-user-login <username> to start a session.
