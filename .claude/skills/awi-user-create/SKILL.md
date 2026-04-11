@@ -11,7 +11,7 @@ subagent_type: general-purpose
 Usage: `/awi-user-create <username>`
 
 Creates:
-- `_documentation/_context/users/<username>.md` — login identity
+- `users/<username>.md` — login identity
 - `_documentation/_agenda/people/<FullName>.md` — person profile
 
 ---
