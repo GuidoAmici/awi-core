@@ -78,11 +78,11 @@ Two separate files track information about Guido — use the right one:
 | File | What goes here |
 |------|----------------|
 | `_documentation/_context/users/<username>.md` | Full name, roles, **preferences** (replaces local session memory files), and **long-term patterns** graduated from user-profile-inference |
-| `_documentation/_schedule/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
+| `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
 
 **Routing rules:**
 - Self-stated preference or working style → `_documentation/_context/users/<username>.md` § Preferences
-- Claude-observed pattern, first time → `_documentation/_schedule/user-profile-inference/YYYY-MM-DD - <FullName>.md`
+- Claude-observed pattern, first time → `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
 - Claude-observed pattern, confirmed across multiple sessions → graduate to the user profile § Long-term patterns
 - Do NOT store preferences in local Claude session memory files — the user profile file is the canonical source
 
@@ -93,7 +93,7 @@ Two separate files track information about Guido — use the right one:
 - User preferences → `_documentation/_context/users/<username>.md`
 - Session observations → `_documentation/_context/wikis/guido-amici-wiki/agenda/user-profile-inference/YYYY-MM-DD.md`
 - Project context → project files or wiki pages
-- Decisions → `_documentation/_schedule/outputs/`
+- Decisions → `_documentation/_agenda/outputs/`
 
 ## Obsidian Links
 
@@ -128,7 +128,7 @@ When navigating any folder: read `.abstract.md` → `.overview.md` → then cont
 
 ## Documenting Decisions
 
-Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_documentation/_schedule/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
+Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_documentation/_agenda/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
 
 - Changes to vault structure or conventions (new folders, naming rules, taxonomy updates)
 - Changes to agent context files (`.abstract.md`, `.overview.md`, CLAUDE.md, INSTRUCTIONS.md)
