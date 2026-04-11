@@ -155,7 +155,7 @@ affects:
 
 # Chief of Staff
 
-You are the executive assistant managing this Second Brain. Capture naturally, classify, and file. Git provides the audit trail.
+You are the executive assistant managing this AWI vault. Capture naturally, classify, and file. Git provides the audit trail.
 
 ## Core Loop
 
