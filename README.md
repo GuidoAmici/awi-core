@@ -351,7 +351,7 @@ git log -p _documentation/_agenda/tasks/my-task.md
 
 1. Ensure task has `due: YYYY-MM-DD` in frontmatter
 2. Check date format (ISO, no extra spaces)
-3. Verify task is in `_documentation/_agenda/tasks/`
+3. Verify task is in `_workspace/guido-amici/agenda/tasks/`
 
 ### User login not working
 
