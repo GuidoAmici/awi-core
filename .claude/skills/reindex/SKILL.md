@@ -1,16 +1,16 @@
 ---
 name: reindex
-description: Re-index the _documentation tree and _codebase app folders by creating or updating .abstract.md (L0) and .overview.md (L1) files, following the OpenViking context navigation convention.
+description: Re-index the _system/ tree and all _workspace/ folders by creating or updating .abstract.md (L0) and .overview.md (L1) files, following the OpenViking context navigation convention.
 ---
 
-# /reindex — Documentation Tree Re-index
+# /reindex — Context Navigation Re-index
 
-Walks the entire `_documentation/` tree and every app folder in `_codebase/`, ensuring all folders have accurate `.abstract.md` and `.overview.md` files per the OpenViking L0/L1 convention.
+Walks `_system/` and all `_workspace/<name>/` subtrees, ensuring all folders have accurate `.abstract.md` and `.overview.md` files per the OpenViking L0/L1 convention.
 
 ## When to run
 
-- After renaming, moving, or restructuring folders inside `_documentation/` or `_codebase/`
-- After adding new top-level sections, subfolders, or app submodules
+- After renaming, moving, or restructuring folders inside `_system/` or `_workspace/`
+- After adding new workspace submodules or app submodules
 - When context files feel stale or out of sync with actual contents
 
 ## Context files defined
@@ -30,10 +30,10 @@ Walks the entire `_documentation/` tree and every app folder in `_codebase/`, en
 ### 1. Discover all folders
 
 ```bash
-find _documentation -mindepth 1 -type d | sort
+find _system _workspace -mindepth 1 -type d | sort
 ```
 
-Also check the root `_documentation/` folder itself.
+Also check the root `_system/` and `_workspace/` folders themselves.
 
 ### 2. For each folder — decide what's needed
 
@@ -76,45 +76,29 @@ Only for folders that benefit from structural explanation (typically 3+ subfolde
 <Any naming rules, frontmatter requirements, or workflow rules specific to this folder.>
 ```
 
-- Use the vault path as the heading (e.g., `# _documentation/schedule — Overview`)
+- Use the vault path as the heading (e.g., `# _system/chief-of-staff — Overview`)
 - Only include a **Conventions** section if there are real rules to document
 - Keep it under ~30 lines
 
-### 5. Wiki submodule roots — skip
+### 5. Workspace submodule roots — skip internals
 
-Submodule roots under `_documentation/_context/workspaces/` (e.g. `newhaze-wiki`, `afin-wiki`) are git submodule roots. Do NOT write `.abstract.md` or `.overview.md` inside them — their own `CLAUDE.md` and `_index.md` are authoritative. The parent folder `_documentation/_context/workspaces/` should mention them in its `.overview.md` folder map.
+Each `_workspace/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If the submodule is initialized (content present), you may index it. If it's a bare pointer, skip.
+
+Wiki and codebase app submodules inside `_workspace/<name>/documentation/` or `_workspace/<name>/codebase/` are also git submodule roots — skip writing context files inside them. The parent folder's `.overview.md` should mention them in its folder map.
 
 ### 6. Codebase app pointer stubs
 
-Each app submodule in `_codebase/` must have `.abstract.md` **and** `.overview.md` as pointer stubs — one line each, redirecting to the real context file in `_documentation/_context/codebase/`.
+Each app submodule in `_workspace/<name>/codebase/` must have `.abstract.md` as a pointer stub redirecting to the context file in `_workspace/<name>/documentation/`.
 
-**Stub format** (same for both files):
+**Stub format:**
 ```
-Context: _documentation/_context/codebase/<app>.md
+Context: _workspace/<name>/documentation/<app>.md
 ```
 
-**How to match a `_codebase/<folder>` to its context file:**
-
-1. Try exact name match: `_documentation/_context/codebase/<folder>.md`
-2. If no match, read the `app:` frontmatter field from each `.md` file in `_documentation/_context/codebase/` and match against the folder name
-3. If still no match, skip with a warning — do not create a stub pointing to a non-existent file
-
-Known name mismatches (verify at runtime — may change):
-
-| `_codebase/` folder | context file |
-|---|---|
-| `newhaze-intern-panel` | `newhaze-inner-panel.md` |
-| `newhaze-b2b-panel` | `newhaze-outer-panel.md` |
-
-Non-app entries (`scripts/`, `supabase/`, `docker-compose.dev.yml`) — skip, no stub needed.
-
-**Discover app folders at runtime:**
+**Discover app submodule folders at runtime:**
 ```bash
-# Submodule folders only (exclude non-app dirs)
-git submodule status | awk '{print $2}' | grep "^_codebase/"
+git submodule status | awk '{print $2}' | grep "^_workspace/"
 ```
-
-**Update existing stubs** if they reference an old path (e.g., old `.mdn` extension or old `info/organization/context/apps/` path).
 
 ### 7. After writing all files
 
@@ -126,41 +110,46 @@ Report a summary table:
 
 | Tree | Created | Updated | Skipped |
 |------|---------|---------|---------|
-| `_documentation/` | N | N | N |
-| `_codebase/` stubs | N | N | N |
+| `_system/` | N | N | N |
+| `_workspace/` | N | N | N |
 
-## Folder coverage (as of last restructure)
+## Folder coverage
 
-Folders that must have `.abstract.md`:
+Folders that must have `.abstract.md` (re-run `find _system _workspace -mindepth 1 -type d` at runtime — this list may be stale):
 
 ```
-_documentation/
-_documentation/_context/
-_documentation/_context/workspaces/
-_documentation/_agenda/
-_documentation/_agenda/daily/
-_documentation/_agenda/ideas/
-_documentation/_agenda/ideas/mental-models/
-_documentation/_agenda/outputs/
-_documentation/_agenda/people/
-_documentation/_agenda/planning/
-_documentation/_agenda/products/
-_documentation/_agenda/projects/
-_documentation/_agenda/tasks/
-_documentation/_agenda/user-profile-inference/
-_documentation/_agenda/weekly/
-system/chief-of-staff/
-system/chief-of-staff/references/
-users/
+_system/
+_system/users/
+_system/chief-of-staff/
+_system/chief-of-staff/references/
+_system/awi/
+_system/gtd/
+_workspace/
+_workspace/<name>/
+_workspace/<name>/agenda/
+_workspace/<name>/agenda/tasks/
+_workspace/<name>/agenda/projects/
+_workspace/<name>/agenda/people/
+_workspace/<name>/agenda/daily/
+_workspace/<name>/agenda/weekly/
+_workspace/<name>/agenda/outputs/
+_workspace/<name>/agenda/planning/
+_workspace/<name>/agenda/ideas/
+_workspace/<name>/agenda/user-profile-inference/
+_workspace/<name>/documentation/
+_workspace/<name>/codebase/
 ```
 
 Folders that should also have `.overview.md`:
 
 ```
-_documentation/
-_documentation/_context/
-_documentation/_agenda/
-system/chief-of-staff/
+_system/
+_system/users/
+_system/chief-of-staff/
+_workspace/
+_workspace/<name>/
+_workspace/<name>/agenda/
+_workspace/<name>/documentation/
 ```
 
-> Re-run `find _documentation -mindepth 1 -type d` at the start of each execution — the list above may be stale.
+> Re-run `find _system _workspace -mindepth 1 -type d` at the start of each execution — the list above may be stale.
