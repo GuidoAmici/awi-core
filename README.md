@@ -264,8 +264,6 @@ Plays notification sound when a delegated task completes. Only triggers when `CL
 
 ## Directory Structure
 
-### AWI (engine + personal workspace)
-
 ```
 awi/
 ├── CLAUDE.md                           # Claude Code session instructions
@@ -273,36 +271,32 @@ awi/
 ├── GEMINI.md                           # Gemini CLI session instructions
 ├── README.md                           # This file
 │
-├── system/                             # Workflow framework (synced to public repo)
-│   └── chief-of-staff/
-│       ├── references/
-│       │   ├── file-formats.md
-│       │   └── installation.md
-│       └── workflow/
+├── _system/                            # AWI engine — framework docs (partially public)
+│   ├── INSTRUCTIONS.md                 # Canonical source of truth for all AI agents
+│   ├── users/                          # Vault user profiles
+│   ├── chief-of-staff/                 # Claude Code operator references
+│   ├── awi/                            # AWI architecture docs
+│   └── gtd/                            # GTD methodology adaptations
 │
-├── users/                              # Vault user login profiles
-│
-├── _documentation/
-│   ├── _agenda/                        # Personal agenda (private)
-│   │   ├── tasks/
-│   │   ├── projects/
-│   │   ├── products/
-│   │   ├── people/
-│   │   ├── ideas/
-│   │   ├── daily/
-│   │   ├── weekly/
-│   │   ├── planning/
-│   │   ├── outputs/
-│   │   └── user-profile-inference/
-│   └── _context/                       # Personal context (private)
-│       ├── writing-style.md
-│       ├── business-profile.md
-│       └── workspaces/                 # Wiki submodules
+├── _workspace/                         # One submodule per company/person
+│   ├── guido-amici/                    # Personal workspace (separate git repo)
+│   │   ├── agenda/                     # tasks/ projects/ people/ daily/ outputs/ …
+│   │   ├── documentation/              # writing-style, business-profile, wiki
+│   │   └── codebase/                   # personal code repos (submodules)
+│   ├── newhaze/                        # NewHaze workspace (separate git repo)
+│   │   ├── agenda/
+│   │   ├── documentation/              # newhaze-wiki (submodule)
+│   │   └── codebase/                   # newhaze-api, newhaze-learn, … (submodules)
+│   └── <name>/                         # Created by /initialize <name>
+│       ├── agenda/
+│       ├── documentation/
+│       └── codebase/
 │
 └── .claude/
     ├── settings.json
-    ├── reference/
-    │   └── employees.json
+    ├── config/
+    │   ├── public-whitelist
+    │   └── public-repo-path
     ├── hooks/
     │   ├── auto-commit.sh
     │   └── stop-sound.sh
@@ -312,29 +306,6 @@ awi/
         ├── history/      delegate/     wrap-session/
         ├── awi-user-create/            awi-user-login/
         └── initialize/                 # Scaffolds workspace repos
-```
-
-### `<name>-workspace` (company/client instance)
-
-Created by `/initialize <name>`. Each workspace is a standalone repo:
-
-```
-newhaze-workspace/
-├── CLAUDE.md                           # Points to AWI context
-│
-├── _documentation/
-│   ├── _agenda/                        # Company agenda
-│   │   ├── tasks/     projects/    outputs/
-│   │   ├── people/    daily/       weekly/
-│   │   └── planning/
-│   └── _context/
-│       ├── wiki/                       # Company wiki (submodule)
-│       └── codebase/                   # App context stubs
-│
-└── _codebase/                          # App submodules
-    ├── newhaze-api/
-    ├── newhaze-learn/
-    └── ...
 ```
 
 ---
