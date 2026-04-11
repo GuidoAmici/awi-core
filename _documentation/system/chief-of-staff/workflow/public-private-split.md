@@ -27,7 +27,7 @@ The public repo is a forkable template. A new operator forks it, runs init, and 
 - Skills (`.claude/skills/`)
 - Hooks (`.claude/hooks/`)
 - System documentation (`_documentation/system/chief-of-staff/`)
-- Generic ideas and mental models (`_documentation/_schedule/ideas/`)
+- Generic ideas and mental models (`_documentation/_agenda/ideas/`)
 - Root docs (`CLAUDE.md`, `INSTRUCTIONS.md`, etc.)
 
 **Context** — specific to this client:
