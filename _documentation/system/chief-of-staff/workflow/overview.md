@@ -1,0 +1,115 @@
+---
+kind: workflow
+---
+
+# AWI Workflow Overview
+
+AWI (Agentic Workflow Integrator) is a git-tracked system factory operated by an AI agent. It has two roles:
+
+1. **Personal OS** — the operator's own agenda, context, and daily rhythm live here
+2. **Workspace factory** — spins up `<name>-workspace` repos for companies and clients, each self-contained with their own agenda, wiki, and codebase
+
+---
+
+## Three layers (per workspace)
+
+| Layer | Path | What lives here |
+|---|---|---|
+| **Agenda** | `_documentation/_agenda/` | Tasks, projects, daily plans, people, outputs, ideas, planning |
+| **Context** | `_documentation/_context/` | Wiki submodule, codebase docs, user profiles, writing style |
+| **System** | `_documentation/system/` | Workflow framework, skills, hooks (AWI engine only) |
+
+The agenda changes constantly. The context is stable reference. The system is read-only workflow infrastructure.
+
+---
+
+## Workspace model
+
+```
+awi/                        ← engine + personal workspace
+  _documentation/
+    _agenda/                ← operator's personal agenda
+    _context/               ← operator's personal context + user registry
+    system/                 ← workflow framework (shared)
+  .claude/skills/           ← all skills (the factory)
+
+<name>-workspace/           ← company/client instance (created by /initialize)
+  _documentation/
+    _agenda/                ← company tasks, projects, outputs
+    _context/
+      wiki/                 ← company wiki submodule
+      codebase/             ← app context stubs
+  _codebase/                ← app submodules
+  CLAUDE.md                 ← loads AWI context
+```
+
+---
+
+## Daily rhythm
+
+```
+Morning
+  └── /today-start      → check-in: energy, schedule, commitments
+  └── /today            → generates time-bounded plan from selected tasks
+
+During the day
+  └── /new <capture>    → classifies input and files it in the right folder
+  └── /delegate <task>  → forks an autonomous agent for background work
+  └── /break <motive>   → logs break time for accurate work tracking
+
+End of day
+  └── /today-end        → day retrospective vs plan
+  └── /wrap-session     → saves observations, sweeps unsaved info
+```
+
+Every write operation auto-commits with a `cos:` prefix. No manual commits needed.
+
+---
+
+## Weekly rhythm
+
+```
+Start of week (Monday)
+  └── /today-start      → mental model reminder if set
+
+End of week (Friday)
+  └── /week-review      → re-rank backlog, select next week's batch
+
+Anytime
+  └── /week             → view current week's plan and progress
+```
+
+---
+
+## Capture → classify → file
+
+When new information arrives (`/new` or direct message):
+
+1. **Classify** — task | project | product | person | idea
+2. **Extract** — due dates, owners, product/app links, structured fields
+3. **File** — write to the correct subfolder under `_documentation/_agenda/`
+4. **Link** — connect to related project, product, or person file
+
+When uncertain, classify with confidence 0.5–0.7 and note it in the commit. Below 0.5, ask.
+
+---
+
+## Decisions → outputs → wiki
+
+Every significant decision must be recorded as an output:
+
+```
+_documentation/_agenda/outputs/YYYY-MM-DD-<slug>.md
+```
+
+The output's `affects:` field lists every wiki file that changed as a result. This closes the loop between the decision record and the living reference.
+
+---
+
+## AI agent roles
+
+| Agent | Handles |
+|---|---|
+| Claude (AWI) | Architecture, strategy, context, scheduling, classification |
+| Gemini (delegated) | Mechanical frontend edits (CSS, components, assets) |
+| Background delegates | Autonomous tasks via `/delegate` — run in forked terminals |
