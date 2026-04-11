@@ -32,7 +32,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 - **If ARGUMENTS is empty or blank** — list available users and STOP:
   ```bash
-  ls ./_documentation/_context/users/
+  ls ./users/
   ```
   Output filenames without `.md` as the username list:
   ```
@@ -50,7 +50,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 1. List available user files:
    ```bash
-   ls ./_documentation/_context/users/
+   ls ./users/
    ```
 
 2. Match the argument case-insensitively against filenames (without `.md`). If no match found, show the list and ask who is logging in.
@@ -59,7 +59,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 4. If `person` is missing or blank — stop and warn:
    ```
-   User '<username>' has no linked person. Add a `person: <Name>` field to _documentation/_context/users/<username>.md.
+   User '<username>' has no linked person. Add a `person: <Name>` field to users/<username>.md.
    ```
 
 5. Read the linked person's file at `_documentation/_agenda/people/<person>.md` — name, roles, preferences, long-term patterns.
