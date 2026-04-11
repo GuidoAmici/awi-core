@@ -153,7 +153,7 @@ When you use `/new`, the system:
 2. **Classifies** each as task, project, person, or idea
 3. **Extracts** due dates, tags, names
 4. **Links** entities via `[[wiki-style]]` links
-5. **Writes** files to the appropriate folder under `_documentation/_schedule/`
+5. **Writes** files to the appropriate folder under `_documentation/_agenda/`
 6. **Auto-commits** via PostToolUse hook
 
 ### Classification Rules
@@ -337,7 +337,7 @@ git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
 git diff HEAD~1
 
 # File history
-git log -p _documentation/_schedule/tasks/my-task.md
+git log -p _documentation/_agenda/tasks/my-task.md
 ```
 
 ---
@@ -357,12 +357,12 @@ git log -p _documentation/_schedule/tasks/my-task.md
 
 1. Ensure task has `due: YYYY-MM-DD` in frontmatter
 2. Check date format (ISO, no extra spaces)
-3. Verify task is in `_documentation/_schedule/tasks/`
+3. Verify task is in `_documentation/_agenda/tasks/`
 
 ### User login not working
 
 1. Confirm user file exists: `ls _documentation/_context/users/`
-2. Verify `person:` field in the user file links to a file in `_documentation/_schedule/people/`
+2. Verify `person:` field in the user file links to a file in `_documentation/_agenda/people/`
 3. Re-run `/awi-user-create <username>` if the profile is missing
 
 ---
