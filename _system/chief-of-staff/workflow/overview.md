@@ -97,7 +97,7 @@ When uncertain, classify with confidence 0.5–0.7 and note it in the commit. Be
 Every significant decision must be recorded as an output:
 
 ```
-_documentation/_agenda/outputs/YYYY-MM-DD-<slug>.md
+_workspace/guido-amici/agenda/outputs/YYYY-MM-DD-<slug>.md
 ```
 
 The output's `affects:` field lists every wiki file that changed as a result. This closes the loop between the decision record and the living reference.
