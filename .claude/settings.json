@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(grep:*)",
+      "Bash(git commit:*)"
+    ]
+  },
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -Command \"(New-Object Media.SoundPlayer '$(wslpath -w $CLAUDE_PROJECT_DIR/.claude/hooks/notify-sound.wav)').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.ps1",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.ps1",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/stop-sound.sh || powershell.exe -Command \"(New-Object Media.SoundPlayer '$(wslpath -w $CLAUDE_PROJECT_DIR/.claude/hooks/stop-sound.wav)').PlaySync()\""
+          }
+        ]
+      }
+    ]
+  }
+}
