@@ -78,7 +78,7 @@ Two separate files track information about Guido — use the right one:
 | File | What goes here |
 |------|----------------|
 | `_documentation/_context/users/<username>.md` | Full name, roles, **preferences** (replaces local session memory files), and **long-term patterns** graduated from user-profile-inference |
-| `_documentation/_context/wikis/guido-amici-wiki/agenda/user-profile-inference/YYYY-MM-DD.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
+| `_documentation/_schedule/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
 
 **Routing rules:**
 - Self-stated preference or working style → `_documentation/_context/users/<username>.md` § Preferences
