@@ -1,13 +1,13 @@
 ---
 name: check-index
-description: Audit every folder in _documentation/ and _codebase/ for missing .abstract.md and .overview.md files. Reports gaps without modifying anything.
+description: Audit every folder in _system/ and _workspace/ for missing .abstract.md and .overview.md files. Reports gaps without modifying anything.
 allowed-tools: Bash
 model: haiku
 ---
 
 # /check-index — Context File Audit
 
-Scans every folder in `_documentation/` and `_codebase/` and reports which ones are missing `.abstract.md` or `.overview.md`.
+Scans every folder in `_system/` and all initialized `_workspace/<name>/` subtrees and reports which ones are missing `.abstract.md` or `.overview.md`.
 
 This is a read-only audit. It never creates or modifies files. To fix gaps, run `/reindex`.
 
@@ -16,16 +16,17 @@ This is a read-only audit. It never creates or modifies files. To fix gaps, run 
 ### 1. Discover all folders
 
 ```bash
-find _documentation -mindepth 1 -type d | sort
-find _codebase -mindepth 1 -maxdepth 1 -type d | sort
+find _system -mindepth 1 -type d | sort
+find _workspace -mindepth 1 -maxdepth 3 -type d | sort
 ```
 
 ### 2. Skip rules
 
 Do NOT flag as missing for:
-- `_documentation/_context/newhaze-wiki` — git submodule root, has its own index
+- Git submodule roots inside `_workspace/<name>/codebase/` or `_workspace/<name>/documentation/` — they have their own indexes
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders (check at runtime)
+- Uninitialized submodule paths (empty directories)
 
 ### 3. For each folder, check
 
@@ -38,12 +39,12 @@ Do NOT flag as missing for:
 
 ### 4. Output format
 
-Print a summary table:
-
 ```
 FOLDER                                          .abstract.md   .overview.md
-_documentation/                                 OK             OK
-_documentation/_context/                        MISSING        WARNING
+_system/                                        OK             OK
+_system/users/                                  MISSING        WARNING
+_workspace/                                     OK             —
+_workspace/guido-amici/agenda/                  OK             OK
 ...
 ```
 
