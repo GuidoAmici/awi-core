@@ -72,7 +72,7 @@ Example:
 
 Two distinct files serve different purposes — use the right one:
 
-Use the logged-in user's username (from `/login-second-brain`) as `<Username>` throughout this step.
+Use the logged-in user's username (from `/awi-user-login`) as `<Username>` throughout this step.
 
 | File | What goes here |
 |------|----------------|
