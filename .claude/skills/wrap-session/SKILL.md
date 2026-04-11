@@ -8,11 +8,12 @@ subagent_type: general-purpose
 
 # /wrap-session - End of Session
 
-Four things before closing:
+Five things before closing:
 1. **Session summary** — what was done and where things stand
 2. **Daily file update** — log completed work and tasks added on the run
 3. **Observations** — behavioral patterns noticed about the user this session
 4. **Unsaved info** — anything mentioned in conversation that wasn't filed to the vault
+5. **Rename session** — use `/rename` to give the conversation a descriptive title
 
 ---
 
@@ -34,7 +35,7 @@ Tell this to the user out loud before moving on.
 
 ## Step 2 — Daily file update
 
-Read today's daily file at `_documents/organization/daily/YYYY-MM-DD.md`.
+Read today's daily file at `_documentation/_agenda/daily/YYYY-MM-DD.md`.
 
 If it doesn't exist yet, skip this step and note it in the output.
 
@@ -95,11 +96,11 @@ Each observation must include a **pros/cons split**: what this pattern enables o
 
 **Before writing**, read existing entries so you don't repeat:
 ```bash
-ls /home/unixadmin/second-brain/_documents/organization/user-profile-inference/ | sort -r | head -3
+ls _documentation/_agenda/user-profile-inference/ | sort -r | head -3
 ```
 Then read the most recent 1–2 files.
 
-Save to `_documents/organization/user-profile-inference/YYYY-MM-DD - <Username>.md`:
+Save to `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <Username>.md`:
 - If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
 - If new: create with `# <Username>` as H1, `## YYYY-MM-DD` as section heading
 
@@ -116,11 +117,11 @@ One short paragraph. Specific, grounded in what happened this session.
 
 ### 3b — Self-stated facts → people/<Username>.md § Preferences
 
-If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_documents/organization/people/<Username>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_documentation/_agenda/people/<Username>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
 
 ### 3c — Pattern graduation
 
-If a pattern from `user-profile-inference/` has now appeared across multiple sessions and can be considered stable, move it to `_documents/organization/people/<Username>.md` under `## Long-term patterns`.
+If a pattern from `user-profile-inference/` has now appeared across multiple sessions and can be considered stable, move it to `_documentation/_agenda/people/<Username>.md` under `## Long-term patterns`.
 
 **Tell the user all observations and any graduations out loud** — don't just silently write them.
 
@@ -133,11 +134,21 @@ Scan the conversation for anything **mentioned but not filed**:
 - Ideas or decisions that belong in the vault
 - Project status changes not yet reflected in files
 - People or meetings mentioned in passing
-- Outputs (plans, designs, decisions) that should be in `_documents/organization/outputs/`
+- Outputs (plans, designs, decisions) that should be in `_documentation/_agenda/outputs/`
 
 For each item found: name it and ask whether to file it now or skip.
 
 If nothing unsaved: say so in one line.
+
+---
+
+---
+
+## Step 5 — Rename session
+
+Use `/rename` to give the conversation a short, descriptive title based on what was done. The title should reflect the main work of the session — not generic phrases like "wrap session" or today's date.
+
+Examples: `Wiki personal GuidoAmici — agenda structure`, `Fix auth middleware — compliance rewrite`, `Newhaze learn audit v2`.
 
 ---
 
