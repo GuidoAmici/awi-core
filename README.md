@@ -147,7 +147,7 @@ A separate Claude instance spawns in a new terminal, working in the employee's r
 | `/delegate <task>` | Fork terminal for autonomous work | `/delegate write the quarterly report` |
 | `/awi-user-create <username>` | Create a new vault user | `/awi-user-create whyto` |
 | `/awi-user-login <username>` | Load user profile for session | `/awi-user-login whyto` |
-| `/initialize [path]` | Scaffold a fresh vault from scratch | `/initialize` |
+| `/initialize <name>` | Scaffold a new `<name>-workspace` repo | `/initialize newhaze` |
 | `/wrap-session` | End-of-session ritual | `/wrap-session` |
 
 ---
