@@ -252,7 +252,7 @@ Triggers after every `Write` or `Edit` operation on vault content:
 .claude/hooks/auto-commit.sh
 ```
 
-- Only commits files in `_documentation/` folders
+- Only commits files in `_documentation/`, `system/`, and `users/` folders
 - Generates commit messages: `cos: new task - task-name`
 - Filter all activity: `git log --grep="cos:"`
 
