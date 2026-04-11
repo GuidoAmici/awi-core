@@ -82,7 +82,7 @@ Two separate files track information about Guido — use the right one:
 
 **Routing rules:**
 - Self-stated preference or working style → `_documentation/_context/users/<username>.md` § Preferences
-- Claude-observed pattern, first time → `user-profile-inference/YYYY-MM-DD.md`
+- Claude-observed pattern, first time → `_documentation/_schedule/user-profile-inference/YYYY-MM-DD - <FullName>.md`
 - Claude-observed pattern, confirmed across multiple sessions → graduate to the user profile § Long-term patterns
 - Do NOT store preferences in local Claude session memory files — the user profile file is the canonical source
 
