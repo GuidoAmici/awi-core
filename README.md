@@ -185,7 +185,7 @@ When you use `/new`, the system:
 
 ## File Formats
 
-All files use YAML frontmatter. See `system/chief-of-staff/references/file-formats.md` for full templates.
+All files use YAML frontmatter. See `_system/chief-of-staff/references/file-formats.md` for full templates.
 
 ### Task
 
