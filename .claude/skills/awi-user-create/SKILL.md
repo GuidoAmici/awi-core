@@ -11,7 +11,7 @@ subagent_type: general-purpose
 Usage: `/awi-user-create <username>`
 
 Creates:
-- `users/<username>.md` — login identity
+- `_system/users/<username>.md` — login identity
 - `_documentation/_agenda/people/<FullName>.md` — person profile
 
 ---
@@ -34,7 +34,7 @@ Check ARGUMENTS.
 ### Step 2 — Check for conflicts
 
 ```bash
-ls ./users/
+ls ./_system/users/
 ```
 
 If a file named `<username>.md` already exists (case-insensitive), stop and warn:
@@ -77,7 +77,7 @@ ls ./_documentation/_agenda/people/
 
 If `<FullName>.md` (CamelCase, no spaces) already exists, skip creating the person file and note it.
 
-**Create user file** at `users/<username>.md`:
+**Create user file** at `_system/users/<username>.md`:
 
 ```markdown
 ---
@@ -123,7 +123,7 @@ Output:
 ✓ User '<username>' created and linked to <Full Name>.
 
 Files created:
-- users/<username>.md
+- _system/users/<username>.md
 - _documentation/_agenda/people/<FullNameCamelCase>.md
 
 Run /awi-user-login <username> to start a session.
