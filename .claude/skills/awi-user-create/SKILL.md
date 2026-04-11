@@ -12,7 +12,7 @@ Usage: `/awi-user-create <username>`
 
 Creates:
 - `_documentation/_context/users/<username>.md` — login identity
-- `_documentation/_schedule/people/<FullName>.md` — person profile
+- `_documentation/_agenda/people/<FullName>.md` — person profile
 
 ---
 
@@ -72,7 +72,7 @@ After the 4th answer, do NOT ask more questions. Proceed to Step 5.
 
 **Check if the person file already exists:**
 ```bash
-ls ./_documentation/_schedule/people/
+ls ./_documentation/_agenda/people/
 ```
 
 If `<FullName>.md` (CamelCase, no spaces) already exists, skip creating the person file and note it.
@@ -86,7 +86,7 @@ person: <FullNameCamelCase>
 ---
 ```
 
-**Create person file** at `_documentation/_schedule/people/<FullNameCamelCase>.md`:
+**Create person file** at `_documentation/_agenda/people/<FullNameCamelCase>.md`:
 
 Use the gathered answers to populate the profile. Derive `tags` from their role and interests (lowercase, hyphenated). Keep each section concise.
 
@@ -124,7 +124,7 @@ Output:
 
 Files created:
 - _documentation/_context/users/<username>.md
-- _documentation/_schedule/people/<FullNameCamelCase>.md
+- _documentation/_agenda/people/<FullNameCamelCase>.md
 
 Run /awi-user-login <username> to start a session.
 ```
