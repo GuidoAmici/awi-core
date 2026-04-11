@@ -11,7 +11,7 @@ Usage: `/awi-user-login <username>`
 
 ## User file format
 
-User files live in `users/<username>.md`. The **filename is the username**. The file must contain a `person` field linking to a file in `_documentation/_agenda/people/`:
+User files live in `_system/users/<username>.md`. The **filename is the username**. The file must contain a `person` field linking to a file in `_documentation/_agenda/people/`:
 
 ```markdown
 ---
@@ -32,7 +32,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 - **If ARGUMENTS is empty or blank** — list available users and STOP:
   ```bash
-  ls ./users/
+  ls ./_system/users/
   ```
   Output filenames without `.md` as the username list:
   ```
@@ -50,7 +50,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 1. List available user files:
    ```bash
-   ls ./users/
+   ls ./_system/users/
    ```
 
 2. Match the argument case-insensitively against filenames (without `.md`). If no match found, show the list and ask who is logging in.
@@ -59,7 +59,7 @@ Look at the ARGUMENTS value passed to this skill.
 
 4. If `person` is missing or blank — stop and warn:
    ```
-   User '<username>' has no linked person. Add a `person: <Name>` field to users/<username>.md.
+   User '<username>' has no linked person. Add a `person: <Name>` field to _system/users/<username>.md.
    ```
 
 5. Read the linked person's file at `_documentation/_agenda/people/<person>.md` — name, roles, preferences, long-term patterns.
