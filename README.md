@@ -331,7 +331,7 @@ git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
 git diff HEAD~1
 
 # File history
-git log -p _documentation/_agenda/tasks/my-task.md
+git log -p _workspace/guido-amici/agenda/tasks/my-task.md
 ```
 
 ---
