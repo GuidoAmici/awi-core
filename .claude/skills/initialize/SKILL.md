@@ -1,11 +1,11 @@
 ---
 name: initialize
-description: Scaffold a new <name>-workspace repo for a company or client. Creates the standard _agenda/ + _context/ + _codebase/ structure, initializes git, and registers the workspace in AWI. Usage: /initialize <name>
+description: Scaffold a new workspace repo for a company or client. Creates a separate git repo with agenda/, documentation/, and codebase/ structure, then registers it as a submodule under _workspace/<name>/. Usage: /initialize <name>
 ---
 
 # /initialize — Scaffold a Workspace
 
-Creates a new `<name>-workspace` repo with the standard AWI structure.
+Creates a new standalone git repo for a company or client and registers it as a submodule under `_workspace/<name>/`.
 
 ## Usage
 
@@ -13,7 +13,7 @@ Creates a new `<name>-workspace` repo with the standard AWI structure.
 /initialize <name>
 ```
 
-Where `<name>` is the company or client slug (e.g. `newhaze`, `afin`, `guido`).
+Where `<name>` is the company or client slug (e.g. `newhaze`, `afin`, `guido-amici`).
 
 ---
 
@@ -26,7 +26,7 @@ Check ARGUMENTS.
 - **If ARGUMENTS has a value** — use it as `<name>`. Proceed to Step 2.
 - **If ARGUMENTS is empty** — ask:
   ```
-  What is the workspace name? (e.g. newhaze, afin, guido)
+  What is the workspace name? (e.g. newhaze, afin, guido-amici)
   ```
   Wait for reply. Use it as `<name>`.
 
@@ -34,12 +34,16 @@ Check ARGUMENTS.
 
 ### Step 2 — Determine target path
 
+The new repo will be created as a sibling of the AWI root, then registered as a submodule.
+
+Default target: `../<name>` (sibling of current AWI root).
+
 Ask:
 ```
-Where should <name>-workspace be created? (default: sibling of this repo)
+Where should the <name> repo be created? (default: ../<name>)
 ```
 
-Default: parent directory of the current AWI root (i.e., `../`).
+Accept the default or use the provided path.
 
 ---
 
@@ -51,17 +55,13 @@ python3 .claude/skills/initialize/scripts/init_workspace.py <name> [path]
 
 This creates:
 ```
-<name>-workspace/
-  _documentation/
-    _agenda/
-      tasks/   projects/   people/   ideas/
-      daily/   weekly/     outputs/  planning/
-      user-profile-inference/
-    _context/
-      users/
-      codebase/
-  _codebase/
-  CLAUDE.md
+<name>/
+  agenda/
+    tasks/   projects/   people/   ideas/
+    daily/   weekly/     outputs/  planning/
+    user-profile-inference/
+  documentation/
+  codebase/
   .gitignore
 ```
 
@@ -69,50 +69,61 @@ And runs `git init` + initial commit.
 
 ---
 
-### Step 4 — Ask about wiki
+### Step 4 — Create GitHub repo
+
+Ask:
+```
+Should I create a GitHub repo for <name>? (y/n)
+```
+
+- **Yes** →
+  ```bash
+  gh repo create GuidoAmici/<name> --private --description "<name> workspace"
+  git -C ../<name> remote add origin https://github.com/GuidoAmici/<name>.git
+  git -C ../<name> push -u origin main
+  ```
+- **No** → skip. Can be done later.
+
+---
+
+### Step 5 — Register as submodule in AWI
+
+```bash
+git submodule add https://github.com/GuidoAmici/<name>.git _workspace/<name>
+git commit -m "cos: add workspace submodule - <name>"
+```
+
+If no GitHub repo was created, skip this step and note that the submodule registration can be done later once the repo is published.
+
+---
+
+### Step 6 — Ask about wiki/documentation submodule
 
 ```
-Does <name> have a wiki repo? (y/n)
+Does <name> have a wiki or documentation repo? (y/n)
 ```
 
 - **Yes** → ask for the GitHub URL, then:
   ```bash
-  git submodule add <url> _documentation/_context/wiki
-  git commit -m "cos: add wiki submodule"
+  git -C _workspace/<name> submodule add <url> documentation/wiki
+  git -C _workspace/<name> commit -m "cos: add wiki submodule"
   ```
-- **No** → skip. Wiki can be added later with `git submodule add`.
+- **No** → skip. Can be added later.
 
 ---
 
-### Step 5 — Register in AWI
-
-Append to `.claude/reference/workspaces.json` (create if missing):
-
-```json
-{
-  "<name>": {
-    "path": "<absolute-path-to-workspace>",
-    "wiki": "<wiki-url-or-null>"
-  }
-}
-```
-
----
-
-### Step 6 — Confirm
+### Step 7 — Confirm
 
 Output:
 ```
-✓ <name>-workspace created at <path>
+✓ <name> workspace created
 
 Structure:
-  _documentation/_agenda/    ← tasks, projects, people, daily, weekly, outputs
-  _documentation/_context/   ← users, codebase[, wiki]
-  _codebase/                 ← app submodules go here
+  _workspace/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
+  _workspace/<name>/documentation/  ← wiki, context files
+  _workspace/<name>/codebase/       ← app submodules go here
 
 Next steps:
-  1. cd <path>/<name>-workspace
-  2. claude
-  3. /awi-user-create <username>
-  4. /awi-user-login <username>
+  1. Add codebase app repos: git submodule add <url> _workspace/<name>/codebase/<app>
+  2. /awi-user-login <username>
 ```
