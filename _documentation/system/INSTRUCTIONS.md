@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A git-tracked Obsidian vault. Contains personal action layer (tasks, projects, plans) and shared company context (wiki, products, people).
+A git-tracked Obsidian vault and AI executive assistant. Contains personal action layer (tasks, projects, plans) and shared company context (wiki, products, people).
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
