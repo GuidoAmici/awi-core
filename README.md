@@ -345,7 +345,7 @@ git log -p _documentation/_agenda/tasks/my-task.md
    "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
    ```
 2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
-3. Confirm file is under `_documentation/`, `system/`, or `users/`
+3. Confirm file is under `_workspace/` or `_system/`
 
 ### Tasks not appearing in /today
 
