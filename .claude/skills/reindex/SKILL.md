@@ -136,8 +136,7 @@ Folders that must have `.abstract.md`:
 ```
 _documentation/
 _documentation/_context/
-_documentation/_context/codebase/
-_documentation/_context/users/
+_documentation/_context/workspaces/
 _documentation/_agenda/
 _documentation/_agenda/daily/
 _documentation/_agenda/ideas/
@@ -150,8 +149,9 @@ _documentation/_agenda/projects/
 _documentation/_agenda/tasks/
 _documentation/_agenda/user-profile-inference/
 _documentation/_agenda/weekly/
-_documentation/system/chief-of-staff/
-_documentation/system/chief-of-staff/references/
+system/chief-of-staff/
+system/chief-of-staff/references/
+users/
 ```
 
 Folders that should also have `.overview.md`:
@@ -160,7 +160,7 @@ Folders that should also have `.overview.md`:
 _documentation/
 _documentation/_context/
 _documentation/_agenda/
-_documentation/system/chief-of-staff/
+system/chief-of-staff/
 ```
 
 > Re-run `find _documentation -mindepth 1 -type d` at the start of each execution — the list above may be stale.
