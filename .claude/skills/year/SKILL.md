@@ -13,7 +13,7 @@ Generate a high-level plan for the year from vault contents and user input.
 
 1. Get current date and year
 2. Check if `_workspace/guido-amici/agenda/planning/YYYY-annual.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
-3. **Gather all projects** — read all `info/organization/projects/*.md` regardless of status
+3. **Gather all projects** — read all `_workspace/guido-amici/agenda/projects/*.md` regardless of status
 4. **Gather all tasks** — grep for `status: pending` or `status: in-progress` in `info/organization/tasks/*.md`
 5. **Review completed work** — grep for `status: complete` in tasks and projects to understand momentum
 6. **Cluster into themes** — group projects and tasks by domain tags into 3-5 strategic themes
