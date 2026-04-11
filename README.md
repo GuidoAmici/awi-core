@@ -384,7 +384,7 @@ git log -p _documentation/_agenda/tasks/my-task.md
 
 ### User login not working
 
-1. Confirm user file exists: `ls _documentation/_context/users/`
+1. Confirm user file exists: `ls users/`
 2. Verify `person:` field in the user file links to a file in `_documentation/_agenda/people/`
 3. Re-run `/awi-user-create <username>` if the profile is missing
 
