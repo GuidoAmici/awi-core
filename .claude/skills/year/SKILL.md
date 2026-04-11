@@ -12,7 +12,7 @@ Generate a high-level plan for the year from vault contents and user input.
 ## Steps
 
 1. Get current date and year
-2. Check if `info/organization/planning/YYYY-annual.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
+2. Check if `_workspace/guido-amici/agenda/planning/YYYY-annual.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
 3. **Gather all projects** — read all `info/organization/projects/*.md` regardless of status
 4. **Gather all tasks** — grep for `status: pending` or `status: in-progress` in `info/organization/tasks/*.md`
 5. **Review completed work** — grep for `status: complete` in tasks and projects to understand momentum
@@ -21,7 +21,7 @@ Generate a high-level plan for the year from vault contents and user input.
 8. **Derive yearly goals** — 3-5 high-level goals that are measurable and outcome-oriented
 9. **Identify dependencies** — which goals/projects block others? Note the critical path
 10. **Ask user for input** — present draft goals and ask if anything is missing or needs reprioritizing
-11. Create `info/organization/planning/YYYY-annual.md`
+11. Create `_workspace/guido-amici/agenda/planning/YYYY-annual.md`
 
 ## Theme Clustering
 
