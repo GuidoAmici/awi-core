@@ -1,48 +1,42 @@
-# Second Brain
+# Agentic Workflow Integrator (AWI)
 
-A git-tracked Obsidian vault. Contains personal action layer (tasks, projects, plans) and shared company context (wiki, products, people).
+A system factory and personal OS. AWI is the engine — it runs the operator's personal agenda and scaffolds `<name>-workspace` repos for companies and clients. Each workspace follows the same `_agenda/` + `_context/` + `_codebase/` structure and is operated by the same skills.
 
-Always run `powershell -c "Get-Date"` to get the current date and time.
+Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
 ## Structure
 
-```
-_codebase/                - Application repos + docker-compose + scripts
-  newhaze-api/           - Backend (.NET) — submodule
-  newhaze-learn/         - Education platform (Next.js) — submodule
-  newhaze-website/       - Public site (Next.js) — submodule
-  newhaze-ui/            - Shared UI library — submodule
-  newhaze-intern-panel/  - Employee dashboard (React + Vite) — submodule
-  newhaze-b2b-panel/     - B2B client dashboard (React + Vite) — submodule
-  newhaze-consumer-panel/ - Consumer dashboard (React + Vite) — submodule
-  supabase/              - Database / auth config — submodule
-  docker-compose.dev.yml
-  scripts/               - Utilities
+AWI is the engine and personal workspace. Company/client work lives in separate `<name>-workspace` repos created by `/initialize <name>`.
 
-_documentation/           - System docs, context files, and references
-  context/               - LLM context and company knowledge base
-    newhaze-wiki/        - Company knowledge base — submodule (NewHaze/wiki)
-      _index.md          - Wiki entry point
-      _glosario.md       - Terminology glossary
-      identidad/         - Brand, visual identity, history
-      empresa/           - Team, areas
-      operaciones/       - Sales, purchases, production-logistics
-      arquitectura-digital/ - Technical reference for all apps
-        stack.md         - Master rules, stack, environments, module status
-        frontend.md      - Frontend coding context (React/Next.js)
-        backend.md       - Backend coding context (.NET)
-        status.md        - Operational state (what works today)
-      app-design/        - App design docs (UX, system design, content strategy)
-        learn/           - Learn platform: levels, XP, Twick, UX flows
-        blog.md          - Blog content strategy and article map
-    codebase/            - Per-app context files (<app>.md)
-    users/               - Vault user profiles
-    writing-style.md     - Voice and tone
-    business-profile.md  - Company context
-  second-brain-core/     - System documentation: file formats, skill references, vault conventions
-    references/
-      file-formats.md    - Full file format templates
-  schedule/              - Scheduled agent definitions
+```
+awi/
+  system/                    - Workflow framework (skills reference, COS docs)
+    chief-of-staff/
+      references/
+        file-formats.md      - Full file format templates
+      workflow/              - COS workflow documentation
+  users/                     - Vault user profiles
+  _documentation/
+    _agenda/                 - Personal agenda (tasks, projects, daily, etc.)
+    _context/
+      workspaces/            - Workspace wikis (submodules) + personal wiki
+        newhaze-wiki/        - NewHaze wiki submodule
+        afin-wiki/           - AFIN wiki submodule
+        guido-amici-wiki/    - Personal wiki
+      writing-style.md       - Voice and tone
+      business-profile.md    - Personal/operator context
+  .claude/
+    skills/                  - All skills (the factory)
+    hooks/                   - Auto-commit, sync-public, etc.
+
+<name>-workspace/            - Company/client instance (created by /initialize)
+  _documentation/
+    _agenda/                 - Company tasks, projects, outputs, daily
+    _context/
+      wiki/                  - Company wiki submodule
+      codebase/              - Per-app context files (<app>.md)
+  _codebase/                 - App submodules
+  CLAUDE.md
 ```
 
 ## Taxonomy
@@ -58,11 +52,11 @@ _documentation/           - System docs, context files, and references
 
 ## File Formats
 
-All files use YAML frontmatter with markdown body. See `_documentation/second-brain-core/references/file-formats.md` for full templates.
+All files use YAML frontmatter with markdown body. See `system/chief-of-staff/references/file-formats.md` for full templates.
 
 | Type | Key Fields |
 |------|------------|
-| Task | `type: task`, `due: YYYY-MM-DD`, `status: pending\|in-progress\|complete\|cancelled`, `priority: critical\|high\|medium\|low`, `last-updated: YYYY-MM-DD` |
+| Task | `type: task`, `due: YYYY-MM-DD`, `status: pending\|in-progress\|complete\|cancelled`, `priority: critical\|high\|medium\|low`, `energy: high\|medium\|low`, `duration: 30m`, `last-updated: YYYY-MM-DD` |
 | Project | `type: project`, `status: active\|paused\|complete\|archived`, `last-updated: YYYY-MM-DD`, next action in body |
 | Product | `type: product`, `last-updated: YYYY-MM-DD`, description + linked apps/projects |
 | Person | `type: person`, `last-contact: YYYY-MM-DD`, follow-ups in body |
@@ -75,14 +69,23 @@ Two separate files track information about Guido — use the right one:
 
 | File | What goes here |
 |------|----------------|
-| `_documentation/context/users/<username>.md` | Full name, roles, **preferences** (replaces local session memory files), and **long-term patterns** graduated from user-profile-inference |
-| `user-profile-inference/YYYY-MM-DD.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
+| `users/<username>.md` | Full name, roles, **preferences** (replaces local session memory files), and **long-term patterns** graduated from user-profile-inference |
+| `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
 
 **Routing rules:**
-- Self-stated preference or working style → `_documentation/context/users/<username>.md` § Preferences
-- Claude-observed pattern, first time → `user-profile-inference/YYYY-MM-DD.md`
+- Self-stated preference or working style → `users/<username>.md` § Preferences
+- Claude-observed pattern, first time → `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
 - Claude-observed pattern, confirmed across multiple sessions → graduate to the user profile § Long-term patterns
 - Do NOT store preferences in local Claude session memory files — the user profile file is the canonical source
+
+## AI Agent Memory
+
+**Never use the AI agent's local memory system** (e.g. Claude's `~/.claude/` memory files). AWI is the memory system. All context, observations, preferences, and decisions belong in vault files:
+
+- User preferences → `users/<username>.md`
+- Session observations → `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
+- Project context → project files or wiki pages
+- Decisions → `_documentation/_agenda/outputs/`
 
 ## Obsidian Links
 
@@ -98,10 +101,12 @@ Use `[[slug]]` wiki links throughout. Conventions:
 
 ## Context Files
 
-Before writing or complex tasks, check `_documentation/context/` for:
+Before writing or complex tasks, check `_documentation/_context/` for:
 - `writing-style.md` - Voice and tone
-- `business-profile.md` - Company context
-- `codebase/` - Per-app context files (one `.md` file per app repo)
+- `business-profile.md` - Operator context
+- `workspaces/` - Company/personal wikis and reference knowledge
+
+For workspace-specific codebase context, check the relevant `<name>-workspace/_documentation/_context/codebase/`.
 
 ## Context Navigation (OpenViking L0/L1)
 
@@ -111,13 +116,13 @@ Every meaningful folder has up to two context files:
 - **`.overview.md` (L1)** — 1–2 paragraphs with structure, key files, and rules. Read when working within that path.
 - **L2** — the actual content files already in the folder.
 
-**App repo context** (e.g. `_codebase/newhaze-api/`) uses pointer stubs: each `.abstract.md` and `.overview.md` contains a single line redirecting to `_documentation/context/codebase/<app>.md`. The real content lives there — tracked in the second-brain repo, not in the app repos.
+**App repo context** lives in the relevant `<name>-workspace/_documentation/_context/codebase/<app>.md`. Each app submodule in `_codebase/` uses pointer stubs (`.abstract.md`, `.overview.md`) redirecting there.
 
 When navigating any folder: read `.abstract.md` → `.overview.md` → then content files. Never dive into content files cold.
 
 ## Documenting Decisions
 
-Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_documentation/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
+Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_documentation/_agenda/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
 
 - Changes to vault structure or conventions (new folders, naming rules, taxonomy updates)
 - Changes to agent context files (`.abstract.md`, `.overview.md`, CLAUDE.md, INSTRUCTIONS.md)
@@ -136,7 +141,7 @@ affects:
   - wiki/identidad/identidad-visual
 ```
 
-- Paths are relative to `_documentation/context/newhaze-wiki/`, no `.md` extension.
+- Paths are relative to the workspace's wiki root (e.g. `_documentation/_context/wiki/`), no `.md` extension.
 - Purely analytical outputs (audits, research, UX mapping) with no permanent changes use `affects: []`.
 - If the wiki *should* be updated but hasn't been yet, list the file anyway — it flags a pending sync.
 
@@ -144,7 +149,7 @@ affects:
 
 # Chief of Staff
 
-You are the executive assistant managing this Second Brain. Capture naturally, classify, and file. Git provides the audit trail.
+You are the executive assistant managing this AWI vault. Capture naturally, classify, and file. Git provides the audit trail.
 
 ## Core Loop
 
@@ -192,7 +197,7 @@ Filter: `git log --grep="cos:"`
 | `/daily-review` | End of day - planned vs actual |
 | `/history` | Recent git activity |
 | `/delegate <task>` | Autonomous task completion |
-| `/sb-user-login <username>` | Load user profile for session |
+| `/awi-user-login <username>` | Load user profile for session |
 | `/wrap-session` | End-of-session ritual |
 
 ## Gemini Delegation — Frontend Changes
@@ -206,7 +211,7 @@ Every action = a commit.
 ```bash
 git log --since="8am" --grep="cos:" --oneline  # Today's activity
 git diff HEAD~1                                 # What changed
-git log -p _documentation/context/...              # File history
+git log -p _documentation/_context/...              # File history
 ```
 
 ## End of Session
@@ -216,3 +221,5 @@ Run `/wrap-session`. It handles observations, daily file update, and unsaved inf
 ## Linking
 
 Use Obsidian wiki-style links `[[slug]]` in the markdown body to connect entities. When creating a task linked to a project, update the project file to include `[[task-slug]]`. Check if person/project already exists before creating duplicates.
+
+**Backlinks are mandatory on creation.** When creating any new file that references other files via `[[...]]` links, immediately update each referenced file to link back to the new one. Backlinks are part of the creation step — not a follow-up audit.

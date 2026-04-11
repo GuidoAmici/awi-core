@@ -13,13 +13,13 @@ Triggers after every `Write` or `Edit` operation on vault content.
 **Behavior:**
 - Only commits files under `_documents/`
 - Derives commit type from subfolder (`tasks/` → `task`, `people/` → `person`, etc.)
-- `second-brain-core` subfolder → type `second-brain-core`
+- `chief-of-staff` subfolder → type `chief-of-staff`
 
 **Commit format:**
 ```
 cos: new task - task-name
 cos: update person - guido
-cos: new second-brain-core - file-formats
+cos: new chief-of-staff - file-formats
 ```
 
 **Filter all activity:**

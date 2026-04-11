@@ -76,7 +76,7 @@ Forks terminal for autonomous work. See `delegation.md` for full setup.
 
 ## `/login-second-brain` — Load User Profile
 
-Loads person profile from `_documents/organization/people/`. See `_documents/second-brain-core/references/classification.md` for routing rules.
+Loads person profile from `_documents/organization/people/`. See `_documents/chief-of-staff/references/classification.md` for routing rules.
 
 ---
 

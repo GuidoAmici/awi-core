@@ -1,7 +1,23 @@
-# Auto-commit vault changes after Write/Edit operations
+# Auto-commit vault changes after Write/Edit/Bash(mv) operations
 $InputText = [Console]::In.ReadToEnd()
 $data = $InputText | ConvertFrom-Json
+$ToolName = if ($data.tool_name) { $data.tool_name } else { "" }
 $FilePath = if ($data.tool_input.file_path) { $data.tool_input.file_path } elseif ($data.tool_input.filePath) { $data.tool_input.filePath } else { "" }
+$Command = if ($data.tool_input.command) { $data.tool_input.command } else { "" }
+
+# Handle Bash tool: only act on mv / git mv commands
+if ($ToolName -eq "Bash") {
+    if ($Command -match '(^|[;&|\s])(git\s+mv|mv)\s') {
+        $VaultRoot = (Get-Item $PSScriptRoot).Parent.Parent.FullName
+        Set-Location $VaultRoot
+        git diff --cached --quiet 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            $Summary = (git diff --cached --name-status | ForEach-Object { ($_ -split "\t")[-1] } | Split-Path -Leaf) -join ", "
+            git commit -m "cos: move/rename - $Summary"
+        }
+    }
+    exit 0
+}
 
 if (-not $FilePath) { exit 0 }
 
