@@ -27,10 +27,10 @@ REL_PATH="${FILE_PATH#$VAULT_ROOT/}"
 git check-ignore -q "$FILE_PATH" 2>/dev/null && exit 0
 
 # Derive type from path
-# Structure: _documentation/_agenda/<type>/  or  _documentation/_context/  or  _documentation/system/
+# Structure: _documentation/_agenda/<type>/  or  _documentation/_context/  or  system/  or  users/
 IFS='/' read -ra PARTS <<< "$REL_PATH"
 if [ "${PARTS[0]}" = "_documentation" ]; then
-  LAYER="${PARTS[1]}"   # _agenda, _context, system, ...
+  LAYER="${PARTS[1]}"   # _agenda, _context, ...
   SUBFOLDER="${PARTS[2]}" # tasks, projects, people, ...
   if [ "$LAYER" = "_agenda" ]; then
     case "$SUBFOLDER" in
@@ -48,11 +48,13 @@ if [ "${PARTS[0]}" = "_documentation" ]; then
     esac
   elif [ "$LAYER" = "_context" ]; then
     TYPE="context"
-  elif [ "$LAYER" = "system" ]; then
-    TYPE="system"
   else
     TYPE="${LAYER:-_documentation}"
   fi
+elif [ "${PARTS[0]}" = "system" ]; then
+  TYPE="system"
+elif [ "${PARTS[0]}" = "users" ]; then
+  TYPE="user"
 else
   TYPE="${PARTS[0]}"
 fi
