@@ -1,8 +1,8 @@
 # Agentic Workflow Integrator (AWI) — Gemini CLI
 
-**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](system/INSTRUCTIONS.md).** Read it before any vault operation.
+**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/INSTRUCTIONS.md).** Read it before any vault operation.
 
-> **Do NOT modify this file for vault rules.** Update `system/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
+> **Do NOT modify this file for vault rules.** Update `_system/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
 
 ## Gemini CLI-specific
 
