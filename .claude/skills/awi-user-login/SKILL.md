@@ -11,7 +11,7 @@ Usage: `/awi-user-login <username>`
 
 ## User file format
 
-User files live in `_documentation/_context/users/<username>.md`. The **filename is the username**. The file must contain a `person` field linking to a file in `_documentation/_agenda/people/`:
+User files live in `users/<username>.md`. The **filename is the username**. The file must contain a `person` field linking to a file in `_documentation/_agenda/people/`:
 
 ```markdown
 ---
