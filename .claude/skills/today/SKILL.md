@@ -1,84 +1,126 @@
-﻿---
+---
 name: today
-description: Generate daily plan from due tasks and active projects. Part of chief-of-staff vault system.
-model: haiku
-subagent_type: Sprint Prioritizer
+description: Generate daily plan from due tasks and active projects, bounded by the morning check-in. Re-runnable throughout the day.
 ---
 
-# /today - Daily Planning
+# /today - Daily Plan
 
-Generate today's plan from vault contents.
+Generate or refresh today's plan. Reads the morning check-in from the daily file and builds a time-bounded, energy-gated task list.
 
-## Steps
+**Prerequisite:** `/today-start` must have been run first. If the daily file has no `## Morning Check-in` section, tell the operator to run `/today-start` and stop.
 
-1. Check if `info/organization/daily/YYYY-MM-DD.md` exists - if so, read it first
-2. **Mental model enforcement** (do this every day):
-   a. Determine the current ISO week number, then read `info/organization/weekly/YYYY-WNN.md`
-   b. Find the mental model of the week from the `## Mental Model of the Week` section
-   c. If today is **Monday**: add `- [ ] Read [[mental-models/<slug>]]` to the **Due Today** section
-   d. Any day (including Monday): grep this week's daily notes for `#mental-model` to check if an application has been logged:
-      ```bash
-      grep -rl "#mental-model" info/organization/daily/
-      ```
-      - If **no application logged yet** and today is not Sunday: add a reminder to the **Due Today** section:
-        `- [ ] Apply [[mental-models/<slug>]] to something real today and log it with #mental-model`
-      - If **already logged**: include a short confirmation line at the bottom of the plan:
-        `✓ Mental model applied this week ([[mental-models/<slug>]])`
-      - If today is **Sunday** and still no log: mark it overdue:
-        `- [ ] ⚠ Log a #mental-model application for [[mental-models/<slug>]] before end of day`
-3. **Find tasks by due date using grep** (never glob all tasks):
-   - Grep for `due: YYYY-MM-DD` (today's date) → Due Today
-   - Grep for dates before today → Overdue
-   - If no tasks found for today/overdue, grep for dates through end of week
-   - If still none, grep to find the next earliest due date
-3. Read only the matching task files
-4. Grep `info/organization/projects/*.md` for `status: active`, read those files
-5. Run `git log --since="midnight" --grep="cos:" --oneline` for today's activity
-6. Create or update `info/organization/daily/YYYY-MM-DD.md`
+---
 
-## Task Discovery (grep-first approach)
-
-All tasks have `due: YYYY-MM-DD` in frontmatter. Use grep to find relevant tasks efficiently:
+## Step 1 — Read daily file and check-in
 
 ```bash
-# Today's tasks (replace with actual date)
-grep -l "due: 2026-01-23" info/organization/tasks/*.md
-
-# Overdue: grep for each date before today, or use date range pattern
-grep -l "due: 2026-01-2[0-2]" info/organization/tasks/*.md  # dates 20-22 if today is 23rd
-
-# This week: grep for dates through end of week
-grep -l "due: 2026-01-2[3-9]" info/organization/tasks/*.md  # adjust pattern for week
+bash .claude/hooks/get-datetime.sh full
 ```
 
-Only read files returned by grep. Never glob and read all task files.
+Read `_documentation/_agenda/daily/YYYY-MM-DD.md`.
 
-## Update Behavior
+Extract from it:
+- `energy-ceiling` from frontmatter
+- Scheduled blocks and their durations from `## Morning Check-in`
+- Anchored tasks (commitments) from `## Morning Check-in`
+- Available time from `## Time Budget`
 
-When the daily file already exists:
-- Keep any `[x]` completed items as-is
-- Keep any manually added items (not from vault tasks)
-- Add new tasks from vault that aren't already present
-- Refresh the Recent Activity section with latest git log
-- Preserve any custom sections added by user
+If the file doesn't exist or has no check-in, respond:
 
-## Output Format
+> No morning check-in found. Run `/today-start` first.
+
+And stop.
+
+---
+
+## Step 2 — Gather tasks
+
+1. **Find tasks by due date using grep** (never glob all tasks):
+   ```bash
+   # Today's tasks (pending or in-progress only)
+   grep -rl "due: YYYY-MM-DD" _documentation/_agenda/tasks/ 2>/dev/null
+   
+   # All pending/in-progress tasks for overdue check
+   grep -rl "status: pending\|status: in-progress" _documentation/_agenda/tasks/ 2>/dev/null
+   ```
+   Then filter overdue by comparing due dates against today.
+
+2. Read only the matching task files. Extract: `priority`, `energy`, `duration`.
+
+3. Grep `_documentation/_agenda/projects/*.md` for `status: active`, read those files for next actions.
+
+4. Check what's been done today:
+   ```bash
+   git log --since="midnight" --grep="cos:" --oneline
+   ```
+
+---
+
+## Step 3 — Build the plan
+
+### Ordering rules
+
+1. **Anchored tasks first** — the 1–3 commitments from the check-in. These get the first slots.
+2. **Due today** — remaining tasks due today, sorted by priority within energy tier.
+3. **Overdue** — carried forward, flagged with days overdue.
+4. **Active projects** — next action from each active project (only if time remains).
+
+### Energy gating
+
+Apply the energy ceiling from the check-in:
+
+- **Ceiling: low** → move all `energy: high` and `energy: medium` tasks to `## Deferred (energy)`.
+- **Ceiling: medium** → allow `energy: high` tasks only before midday; any that would land after midday go to `## Deferred (energy)`.
+- **Ceiling: high** → no gating.
+
+### Time gating
+
+Sum all task durations (anchored + due + overdue). Compare against available time.
+
+If total exceeds available time, show clearly:
+
+```
+⚠ Overloaded: Planned Xh Ym | Available Xh Ym | Over by Xh Ym
+```
+
+Do NOT silently drop tasks. Present the full list and ask:
+
+> This day is overloaded by [amount]. What should we defer or move to tomorrow?
+
+Wait for the operator to decide before writing.
+
+---
+
+## Step 4 — Update daily file
+
+Write or update the following sections in `_documentation/_agenda/daily/YYYY-MM-DD.md`.
+
+**Preserve existing sections** — `## Morning Check-in`, `## Time Budget`, `## Session Log`, `## Breaks` must not be overwritten.
+
+Update or create these sections:
 
 ```markdown
----
-type: daily
-date: YYYY-MM-DD
----
-
 ## Due Today
-- [ ] Task items from info/organization/tasks/ with today's due date
+- [ ] [task name] — `energy:` `duration:` `priority:` — [[tasks/slug]]
 
 ## Overdue
-- [ ] Tasks past due (X days overdue)
+- [ ] [task name] — X days overdue — `energy:` `duration:` — [[tasks/slug]]
+
+## Deferred (energy)
+- [task name] — deferred: energy ceiling is [level] — [[tasks/slug]]
 
 ## Active Projects
-- Project Name (next: next action from file)
+- [Project Name] — next: [next action from file]
 
-## Recent Activity
-- Items from git log
+## Today So Far
+- [items from git log since midnight]
 ```
+
+### On re-run (refreshing mid-day)
+
+When `/today` is run again later in the day:
+- Recalculate remaining time: available time minus durations of completed tasks
+- Keep `[x]` completed items in place
+- Update `## Today So Far` with latest git log
+- If new tasks were added to the vault since last run, include them
+- Show updated budget: `Remaining: Xh Ym of Xh Ym`
