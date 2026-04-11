@@ -203,7 +203,7 @@ Filter: `git log --grep="cos:"`
 | `/daily-review` | End of day - planned vs actual |
 | `/history` | Recent git activity |
 | `/delegate <task>` | Autonomous task completion |
-| `/sb-user-login <username>` | Load user profile for session |
+| `/awi-user-login <username>` | Load user profile for session |
 | `/wrap-session` | End-of-session ritual |
 
 ## Gemini Delegation — Frontend Changes
