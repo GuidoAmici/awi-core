@@ -33,7 +33,7 @@ git log --grep="cos:"
    "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
    ```
 2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
-3. Confirm file is under `_documents/`
+3. Confirm file is under `_workspace/` or `_system/`
 
 ---
 
