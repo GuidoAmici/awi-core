@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A git-tracked Obsidian vault and AI executive assistant. Contains personal action layer (tasks, projects, plans) and shared company context (wiki, products, people).
+A system factory and personal OS. AWI is the engine — it runs the operator's personal agenda and scaffolds `<name>-workspace` repos for companies and clients. Each workspace follows the same `_agenda/` + `_context/` + `_codebase/` structure and is operated by the same skills.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
