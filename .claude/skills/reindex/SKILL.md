@@ -82,21 +82,21 @@ Only for folders that benefit from structural explanation (typically 3+ subfolde
 
 ### 5. Wiki submodule root — skip
 
-`_documentation/context/newhaze-wiki` is a git submodule root. Do NOT write `.abstract.md` or `.overview.md` inside it — its own `CLAUDE.md` and `_index.md` are authoritative. The parent folder `_documentation/context/` should mention it in its `.overview.md` folder map.
+`_documentation/_context/newhaze-wiki` is a git submodule root. Do NOT write `.abstract.md` or `.overview.md` inside it — its own `CLAUDE.md` and `_index.md` are authoritative. The parent folder `_documentation/_context/` should mention it in its `.overview.md` folder map.
 
 ### 6. Codebase app pointer stubs
 
-Each app submodule in `_codebase/` must have `.abstract.md` **and** `.overview.md` as pointer stubs — one line each, redirecting to the real context file in `_documentation/context/codebase/`.
+Each app submodule in `_codebase/` must have `.abstract.md` **and** `.overview.md` as pointer stubs — one line each, redirecting to the real context file in `_documentation/_context/codebase/`.
 
 **Stub format** (same for both files):
 ```
-Context: _documentation/context/codebase/<app>.md
+Context: _documentation/_context/codebase/<app>.md
 ```
 
 **How to match a `_codebase/<folder>` to its context file:**
 
-1. Try exact name match: `_documentation/context/codebase/<folder>.md`
-2. If no match, read the `app:` frontmatter field from each `.md` file in `_documentation/context/codebase/` and match against the folder name
+1. Try exact name match: `_documentation/_context/codebase/<folder>.md`
+2. If no match, read the `app:` frontmatter field from each `.md` file in `_documentation/_context/codebase/` and match against the folder name
 3. If still no match, skip with a warning — do not create a stub pointing to a non-existent file
 
 Known name mismatches (verify at runtime — may change):
@@ -135,32 +135,32 @@ Folders that must have `.abstract.md`:
 
 ```
 _documentation/
-_documentation/context/
-_documentation/context/codebase/
-_documentation/context/users/
-_documentation/schedule/
-_documentation/schedule/daily/
-_documentation/schedule/ideas/
-_documentation/schedule/ideas/mental-models/
-_documentation/schedule/outputs/
-_documentation/schedule/people/
-_documentation/schedule/planning/
-_documentation/schedule/products/
-_documentation/schedule/projects/
-_documentation/schedule/tasks/
-_documentation/schedule/user-profile-inference/
-_documentation/schedule/weekly/
-_documentation/second-brain-core/
-_documentation/second-brain-core/references/
+_documentation/_context/
+_documentation/_context/codebase/
+_documentation/_context/users/
+_documentation/_agenda/
+_documentation/_agenda/daily/
+_documentation/_agenda/ideas/
+_documentation/_agenda/ideas/mental-models/
+_documentation/_agenda/outputs/
+_documentation/_agenda/people/
+_documentation/_agenda/planning/
+_documentation/_agenda/products/
+_documentation/_agenda/projects/
+_documentation/_agenda/tasks/
+_documentation/_agenda/user-profile-inference/
+_documentation/_agenda/weekly/
+_documentation/system/chief-of-staff/
+_documentation/system/chief-of-staff/references/
 ```
 
 Folders that should also have `.overview.md`:
 
 ```
 _documentation/
-_documentation/context/
-_documentation/schedule/
-_documentation/second-brain-core/
+_documentation/_context/
+_documentation/_agenda/
+_documentation/system/chief-of-staff/
 ```
 
 > Re-run `find _documentation -mindepth 1 -type d` at the start of each execution — the list above may be stale.
