@@ -10,7 +10,7 @@
    ```bash
    chmod +x .claude/hooks/auto-commit.sh
    ```
-3. Confirm file is under `_documents/` (hook ignores other paths)
+3. Confirm file is under `_workspace/` or `_system/` (hook ignores other paths)
 
 ---
 
