@@ -35,7 +35,7 @@ Tell this to the user out loud before moving on.
 
 ## Step 2 — Daily file update
 
-Read today's daily file at `_documentation/_agenda/daily/YYYY-MM-DD.md`.
+Read today's daily file at `_workspace/<login>/agenda/daily/YYYY-MM-DD.md` (using the GitHub login resolved in Step 3).
 
 If it doesn't exist yet, skip this step and note it in the output.
 
