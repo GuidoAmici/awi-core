@@ -196,7 +196,7 @@ Filter: `git log --grep="cos:"`
 | `/delegate <task>` | Autonomous task completion |
 | `/awi-user-login <username>` | Load user profile for session |
 | `/wrap-session` | End-of-session ritual |
-| `/initialize <name>` | Scaffold new `_workspace/<name>/` repo and register as submodule |
+| `/awi-initialize <name>` | Scaffold new `_workspace/<name>/` repo and register as submodule |
 
 ## Gemini Delegation — Frontend Changes
 
