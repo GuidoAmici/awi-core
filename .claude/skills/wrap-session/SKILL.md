@@ -44,6 +44,7 @@ If it doesn't exist yet, create it with minimal structure (`checked-in: false` â
 type: daily
 date: YYYY-MM-DD
 checked-in: false
+checked-out: false
 ---
 
 # DayOfWeek, Month DD
