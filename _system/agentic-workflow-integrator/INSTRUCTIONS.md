@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs, users) and scaffolds `_workspace/<name>/` entries for personal and company contexts. Each workspace follows the same `agenda/` + `documentation/` + `codebase/` structure.
+A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs, users) and scaffolds `_clients/<name>/` entries for personal and company contexts. Each workspace follows the same `agenda/` + `documentation/` + `codebase/` structure.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
@@ -19,7 +19,7 @@ awi/
     awi/                       - AWI integrator docs (custom decisions, conventions)
     cbo/                       - Codebase Orchestrator docs
     gtd/                       - GTD methodology adaptations
-  _workspace/                  - One submodule per company/person
+  _clients/                  - One submodule per company/person
     guido-amici/               - Guido's personal workspace
       agenda/                  - Tasks, projects, people, daily, outputs, etc.
       documentation/           - Writing style, business profile, personal wiki
@@ -34,13 +34,13 @@ awi/
       codebase/
 ```
 
-Each `_workspace/<name>/` is a **separate git repo** registered as a submodule of AWI.
+Each `_clients/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
 Use `/awi-initialize <name>` to scaffold a new workspace repo and register it.
 
 ## Taxonomy
 
-- **Workspace** — a company or personal context (maps to `_workspace/<name>/`)
+- **Workspace** — a company or personal context (maps to `_clients/<name>/`)
 - **Product** — user-facing offering, may span multiple apps
 - **App** — deployable codebase with its own repo (`codebase/`)
 - **Project** — time-bound initiative with scope and tasks
@@ -70,11 +70,11 @@ Two separate files track information about the operator — use the right one:
 | File | What goes here |
 |------|----------------|
 | `_system/users/<username>.md` | Full name, roles, **preferences** (replaces local session memory files), and **long-term patterns** graduated from user-profile-inference |
-| `_workspace/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
+| `_clients/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` | Session-level observations Claude *noticed* — things the user likely doesn't consciously track. Raw material; may graduate to the user profile over time. |
 
 **Routing rules:**
 - Self-stated preference or working style → `_system/users/<username>.md` § Preferences
-- Claude-observed pattern, first time → `_workspace/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
+- Claude-observed pattern, first time → `_clients/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
 - Claude-observed pattern, confirmed across multiple sessions → graduate to the user profile § Long-term patterns
 - Do NOT store preferences in local Claude session memory files — the user profile file is the canonical source
 
@@ -83,9 +83,9 @@ Two separate files track information about the operator — use the right one:
 **Never use the AI agent's local memory system** (e.g. Claude's `~/.claude/` memory files). AWI is the memory system. All context, observations, preferences, and decisions belong in vault files:
 
 - User preferences → `_system/users/<username>.md`
-- Session observations → `_workspace/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
+- Session observations → `_clients/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md`
 - Project context → project files or workspace wiki pages
-- Decisions → `_workspace/guido-amici/agenda/outputs/`
+- Decisions → `_clients/guido-amici/agenda/outputs/`
 
 ## Obsidian Links
 
@@ -120,7 +120,7 @@ When navigating any folder: read `.abstract.md` → `.overview.md` → then cont
 
 ## Documenting Decisions
 
-Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_workspace/guido-amici/agenda/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
+Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `_clients/guido-amici/agenda/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
 
 - Changes to vault structure or conventions (new folders, naming rules, taxonomy updates)
 - Changes to agent context files (`.abstract.md`, `.overview.md`, CLAUDE.md, INSTRUCTIONS.md)
@@ -196,7 +196,7 @@ Filter: `git log --grep="cos:"`
 | `/delegate <task>` | Autonomous task completion |
 | `/awi-user-login <username>` | Load user profile for session |
 | `/wrap-session` | End-of-session ritual |
-| `/awi-initialize <name>` | Scaffold new `_workspace/<name>/` repo and register as submodule |
+| `/awi-initialize <name>` | Scaffold new `_clients/<name>/` repo and register as submodule |
 
 ## Gemini Delegation — Frontend Changes
 
@@ -209,7 +209,7 @@ Every action = a commit.
 ```bash
 git log --since="8am" --grep="cos:" --oneline  # Today's activity
 git diff HEAD~1                                 # What changed
-git log -p _workspace/guido-amici/agenda/tasks/ # Task history
+git log -p _clients/guido-amici/agenda/tasks/ # Task history
 ```
 
 ## End of Session
