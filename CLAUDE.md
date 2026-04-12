@@ -1,13 +1,13 @@
 # Agentic Workflow Integrator (AWI) — Claude Code
 
-**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/INSTRUCTIONS.md).** Read it before any vault operation.
+**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/agentic-workflow-integrator/INSTRUCTIONS.md).** Read it before any vault operation.
 
-> **Do NOT modify this file for vault rules.** Update `_system/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
+> **Do NOT modify this file for vault rules.** Update `_system/agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
 
 ## Claude Code-specific
 
 - PostToolUse hook auto-commits after Write/Edit operations on `_workspace/` and `_system/` — do NOT commit manually unless asked.
-- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user-create`, `/awi-user-login`, `/initialize`.
+- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user-create`, `/awi-user-login`, `/awi-initialize`.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 
