@@ -68,8 +68,8 @@ Should I create a GitHub repo for <name>? (y/n)
 - **Yes** →
   ```bash
   gh repo create GuidoAmici/<name> --private --description "<name> workspace"
-  git -C ../<name> remote add origin https://github.com/GuidoAmici/<name>.git
-  git -C ../<name> push -u origin main
+  git -C _clients/<name> remote add origin https://github.com/GuidoAmici/<name>.git
+  git -C _clients/<name> push -u origin main
   ```
 - **No** → skip. Can be done later.
 
@@ -80,7 +80,7 @@ Should I create a GitHub repo for <name>? (y/n)
 Only if GitHub repo was created:
 
 ```bash
-git submodule add https://github.com/GuidoAmici/<name>.git _clients/<name>
+git submodule add --force https://github.com/GuidoAmici/<name>.git _clients/<name>
 git commit -m "cos: add client submodule - <name>"
 ```
 
