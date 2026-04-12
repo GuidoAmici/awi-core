@@ -36,7 +36,7 @@ awi/
 
 Each `_workspace/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
-Use `/initialize <name>` to scaffold a new workspace repo and register it.
+Use `/awi-initialize <name>` to scaffold a new workspace repo and register it.
 
 ## Taxonomy
 
