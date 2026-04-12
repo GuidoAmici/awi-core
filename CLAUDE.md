@@ -6,8 +6,8 @@
 
 ## Claude Code-specific
 
-- PostToolUse hook auto-commits after Write/Edit operations on `_workspace/` and `_system/` — do NOT commit manually unless asked.
-- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user-create`, `/awi-user-login`, `/awi-initialize`.
+- PostToolUse hook auto-commits after Write/Edit operations on `_clients/` and `_system/` — do NOT commit manually unless asked.
+- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user-create`, `/awi-user-login`, `/awi-introduction`, `/awi-initialize`, `/new-client`.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 
