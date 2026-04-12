@@ -110,6 +110,7 @@ Create or update the file. The `## Morning Check-in` and `## Time Budget` sectio
 ---
 type: daily
 date: YYYY-MM-DD
+checked-in: true
 energy-ceiling: high | medium | low
 ---
 
