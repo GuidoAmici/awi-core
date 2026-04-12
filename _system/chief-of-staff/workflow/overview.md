@@ -33,7 +33,7 @@ awi/                            ← AWI engine (this repo)
       agenda/                   ← tasks, projects, daily, outputs, people, ideas
       documentation/            ← writing-style, business-profile
       codebase/                 ← personal code repos
-    <name>/                     ← company/client instance (created by /initialize)
+    <name>/                     ← company/client instance (created by /awi-initialize)
       agenda/                   ← company tasks, projects, outputs
       documentation/
         wiki/                   ← company wiki submodule
