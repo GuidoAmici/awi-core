@@ -94,6 +94,8 @@ Based on what didn't get done today and the week's remaining selected tasks, ide
 
 Append a `## Day Review` section to `_documentation/_agenda/daily/YYYY-MM-DD.md`. Preserve all existing sections.
 
+Also update `checked-out: false` → `checked-out: true` in the frontmatter.
+
 ```markdown
 ## Day Review
 
