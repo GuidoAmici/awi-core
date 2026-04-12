@@ -80,7 +80,7 @@ def collect_core_files(core_root: Path) -> dict[str, Path]:
 
 
 def main():
-    awi_root = Path(__file__).resolve().parents[3]  # awi/
+    awi_root = Path(__file__).resolve().parents[4]  # awi/
     core_root = awi_root.parent / "awi-core"
     whitelist_path = awi_root / ".claude" / "config" / "public-whitelist"
 
