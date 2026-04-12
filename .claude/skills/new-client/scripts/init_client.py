@@ -117,7 +117,7 @@ def init_client(name: str, parent_path: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scaffold an AWI client repo")
     parser.add_argument("name", help="Client name slug (e.g. newhaze, afin, acme-corp)")
-    parser.add_argument("path", nargs="?", default="..", help="Parent directory (default: ../)")
+    parser.add_argument("path", nargs="?", default="_clients", help="Parent directory (default: _clients/)")
     args = parser.parse_args()
 
     init_client(args.name, Path(args.path))
