@@ -200,7 +200,7 @@ Examples: `Wiki personal GuidoAmici — agenda structure`, `Fix auth middleware 
 - ...
 
 ## Daily file
-[confirmation that it was updated, or "No daily file for today — skipped."]
+[confirmation that it was updated, or "Created (checked-in: false) — day was not formally started."]
 
 ## Session observations
 [observations, told out loud]
