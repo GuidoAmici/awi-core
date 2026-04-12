@@ -1,15 +1,15 @@
 ---
 name: reindex
-description: Re-index the _system/ tree and all _workspace/ folders by creating or updating .abstract.md (L0) and .overview.md (L1) files, following the OpenViking context navigation convention.
+description: Re-index the _system/ tree and all _clients/ folders by creating or updating .abstract.md (L0) and .overview.md (L1) files, following the OpenViking context navigation convention.
 ---
 
 # /reindex — Context Navigation Re-index
 
-Walks `_system/` and all `_workspace/<name>/` subtrees, ensuring all folders have accurate `.abstract.md` and `.overview.md` files per the OpenViking L0/L1 convention.
+Walks `_system/` and all `_clients/<name>/` subtrees, ensuring all folders have accurate `.abstract.md` and `.overview.md` files per the OpenViking L0/L1 convention.
 
 ## When to run
 
-- After renaming, moving, or restructuring folders inside `_system/` or `_workspace/`
+- After renaming, moving, or restructuring folders inside `_system/` or `_clients/`
 - After adding new workspace submodules or app submodules
 - When context files feel stale or out of sync with actual contents
 
@@ -30,10 +30,10 @@ Walks `_system/` and all `_workspace/<name>/` subtrees, ensuring all folders hav
 ### 1. Discover all folders
 
 ```bash
-find _system _workspace -mindepth 1 -type d | sort
+find _system _clients -mindepth 1 -type d | sort
 ```
 
-Also check the root `_system/` and `_workspace/` folders themselves.
+Also check the root `_system/` and `_clients/` folders themselves.
 
 ### 2. For each folder — decide what's needed
 
@@ -82,22 +82,22 @@ Only for folders that benefit from structural explanation (typically 3+ subfolde
 
 ### 5. Workspace submodule roots — skip internals
 
-Each `_workspace/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If the submodule is initialized (content present), you may index it. If it's a bare pointer, skip.
+Each `_clients/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If the submodule is initialized (content present), you may index it. If it's a bare pointer, skip.
 
-Wiki and codebase app submodules inside `_workspace/<name>/documentation/` or `_workspace/<name>/codebase/` are also git submodule roots — skip writing context files inside them. The parent folder's `.overview.md` should mention them in its folder map.
+Wiki and codebase app submodules inside `_clients/<name>/documentation/` or `_clients/<name>/codebase/` are also git submodule roots — skip writing context files inside them. The parent folder's `.overview.md` should mention them in its folder map.
 
 ### 6. Codebase app pointer stubs
 
-Each app submodule in `_workspace/<name>/codebase/` must have `.abstract.md` as a pointer stub redirecting to the context file in `_workspace/<name>/documentation/`.
+Each app submodule in `_clients/<name>/codebase/` must have `.abstract.md` as a pointer stub redirecting to the context file in `_clients/<name>/documentation/`.
 
 **Stub format:**
 ```
-Context: _workspace/<name>/documentation/<app>.md
+Context: _clients/<name>/documentation/<app>.md
 ```
 
 **Discover app submodule folders at runtime:**
 ```bash
-git submodule status | awk '{print $2}' | grep "^_workspace/"
+git submodule status | awk '{print $2}' | grep "^_clients/"
 ```
 
 ### 7. After writing all files
@@ -111,11 +111,11 @@ Report a summary table:
 | Tree | Created | Updated | Skipped |
 |------|---------|---------|---------|
 | `_system/` | N | N | N |
-| `_workspace/` | N | N | N |
+| `_clients/` | N | N | N |
 
 ## Folder coverage
 
-Folders that must have `.abstract.md` (re-run `find _system _workspace -mindepth 1 -type d` at runtime — this list may be stale):
+Folders that must have `.abstract.md` (re-run `find _system _clients -mindepth 1 -type d` at runtime — this list may be stale):
 
 ```
 _system/
@@ -124,20 +124,20 @@ _system/chief-of-staff/
 _system/chief-of-staff/references/
 _system/awi/
 _system/gtd/
-_workspace/
-_workspace/<name>/
-_workspace/<name>/agenda/
-_workspace/<name>/agenda/tasks/
-_workspace/<name>/agenda/projects/
-_workspace/<name>/agenda/people/
-_workspace/<name>/agenda/daily/
-_workspace/<name>/agenda/weekly/
-_workspace/<name>/agenda/outputs/
-_workspace/<name>/agenda/planning/
-_workspace/<name>/agenda/ideas/
-_workspace/<name>/agenda/user-profile-inference/
-_workspace/<name>/documentation/
-_workspace/<name>/codebase/
+_clients/
+_clients/<name>/
+_clients/<name>/agenda/
+_clients/<name>/agenda/tasks/
+_clients/<name>/agenda/projects/
+_clients/<name>/agenda/people/
+_clients/<name>/agenda/daily/
+_clients/<name>/agenda/weekly/
+_clients/<name>/agenda/outputs/
+_clients/<name>/agenda/planning/
+_clients/<name>/agenda/ideas/
+_clients/<name>/agenda/user-profile-inference/
+_clients/<name>/documentation/
+_clients/<name>/codebase/
 ```
 
 Folders that should also have `.overview.md`:
@@ -146,10 +146,10 @@ Folders that should also have `.overview.md`:
 _system/
 _system/users/
 _system/chief-of-staff/
-_workspace/
-_workspace/<name>/
-_workspace/<name>/agenda/
-_workspace/<name>/documentation/
+_clients/
+_clients/<name>/
+_clients/<name>/agenda/
+_clients/<name>/documentation/
 ```
 
-> Re-run `find _system _workspace -mindepth 1 -type d` at the start of each execution — the list above may be stale.
+> Re-run `find _system _clients -mindepth 1 -type d` at the start of each execution — the list above may be stale.

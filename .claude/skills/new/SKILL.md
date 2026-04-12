@@ -70,15 +70,15 @@ Use Obsidian wiki-style links `[[slug]]` in the markdown body to connect entitie
 
 When creating a task linked to a project, update the project file to include `[[task-slug]]`. Same for project → person links.
 
-Check if person/project already exists before creating (use Glob on `_workspace/guido-amici/agenda/` subfolders). Use Read before editing existing files.
+Check if person/project already exists before creating (use Glob on `_clients/guido-amici/agenda/` subfolders). Use Read before editing existing files.
 
 ## File Paths
 
-All files go under `_workspace/guido-amici/agenda/`:
-- Tasks → `_workspace/guido-amici/agenda/tasks/<slug>.md`
-- Projects → `_workspace/guido-amici/agenda/projects/<slug>.md`
-- People → `_workspace/guido-amici/agenda/people/<slug>.md`
-- Ideas → `_workspace/guido-amici/agenda/ideas/<slug>.md`
+All files go under `_clients/guido-amici/agenda/`:
+- Tasks → `_clients/guido-amici/agenda/tasks/<slug>.md`
+- Projects → `_clients/guido-amici/agenda/projects/<slug>.md`
+- People → `_clients/guido-amici/agenda/people/<slug>.md`
+- Ideas → `_clients/guido-amici/agenda/ideas/<slug>.md`
 
 ## Product/App/Feature References
 

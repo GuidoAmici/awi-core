@@ -25,15 +25,15 @@ Parses natural language, classifies entities, creates linked files.
 **Input:** "New project with John Smith for marketing outbound, need landing page"
 
 **Creates:**
-- `_workspace/guido-amici/agenda/people/john-smith.md` (if doesn't exist)
-- `_workspace/guido-amici/agenda/projects/marketing-outbound.md` (linked to John Smith)
-- `_workspace/guido-amici/agenda/tasks/create-landing-page.md` (linked to project)
+- `_clients/guido-amici/agenda/people/john-smith.md` (if doesn't exist)
+- `_clients/guido-amici/agenda/projects/marketing-outbound.md` (linked to John Smith)
+- `_clients/guido-amici/agenda/tasks/create-landing-page.md` (linked to project)
 
 ---
 
 ## `/today` — Daily Planning
 
-Generates `_workspace/guido-amici/agenda/daily/YYYY-MM-DD.md` with:
+Generates `_clients/guido-amici/agenda/daily/YYYY-MM-DD.md` with:
 
 - **Due Today** — Tasks with today's due date
 - **Overdue** — Past-due tasks with days overdue

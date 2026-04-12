@@ -252,7 +252,7 @@ Triggers after every `Write` or `Edit` operation on vault content:
 .claude/hooks/auto-commit.sh
 ```
 
-- Only commits files in `_workspace/` and `_system/` folders
+- Only commits files in `_clients/` and `_system/` folders
 - Generates commit messages: `cos: new task - task-name`
 - Filter all activity: `git log --grep="cos:"`
 
@@ -278,7 +278,7 @@ awi/
 │   ├── awi/                            # AWI architecture docs
 │   └── gtd/                            # GTD methodology adaptations
 │
-├── _workspace/                         # One submodule per company/person
+├── _clients/                         # One submodule per company/person
 │   ├── guido-amici/                    # Personal workspace (separate git repo)
 │   │   ├── agenda/                     # tasks/ projects/ people/ daily/ outputs/ …
 │   │   ├── documentation/              # writing-style, business-profile, wiki
@@ -331,7 +331,7 @@ git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
 git diff HEAD~1
 
 # File history
-git log -p _workspace/guido-amici/agenda/tasks/my-task.md
+git log -p _clients/guido-amici/agenda/tasks/my-task.md
 ```
 
 ---
@@ -345,18 +345,18 @@ git log -p _workspace/guido-amici/agenda/tasks/my-task.md
    "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
    ```
 2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
-3. Confirm file is under `_workspace/` or `_system/`
+3. Confirm file is under `_clients/` or `_system/`
 
 ### Tasks not appearing in /today
 
 1. Ensure task has `due: YYYY-MM-DD` in frontmatter
 2. Check date format (ISO, no extra spaces)
-3. Verify task is in `_workspace/guido-amici/agenda/tasks/`
+3. Verify task is in `_clients/guido-amici/agenda/tasks/`
 
 ### User login not working
 
 1. Confirm user file exists: `ls _system/users/`
-2. Verify `person:` field in the user file links to a file in `_workspace/guido-amici/agenda/people/`
+2. Verify `person:` field in the user file links to a file in `_clients/guido-amici/agenda/people/`
 3. Re-run `/awi-user-create <username>` if the profile is missing
 
 ---

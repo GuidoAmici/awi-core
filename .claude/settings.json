@@ -53,5 +53,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "caveman@caveman": true
   }
 }

@@ -8,7 +8,7 @@ When you use `/new`, the system:
 2. **Classifies** each as task, project, person, idea, or output
 3. **Extracts** due dates, tags, names, structured data
 4. **Links** entities via `[[wiki-style]]` links
-5. **Writes** files to appropriate folders under `_workspace/guido-amici/agenda/`
+5. **Writes** files to appropriate folders under `_clients/guido-amici/agenda/`
 6. **Auto-commits** via PostToolUse hook
 
 ## Classification Rules
@@ -47,13 +47,13 @@ When you use `/new`, the system:
 
 | Type | Path |
 |------|------|
-| Task | `_workspace/guido-amici/agenda/tasks/` |
-| Project | `_workspace/guido-amici/agenda/projects/` |
-| Product | `_workspace/guido-amici/agenda/products/` |
-| Person | `_workspace/guido-amici/agenda/people/` |
-| Idea | `_workspace/guido-amici/agenda/ideas/` |
-| Output | `_workspace/guido-amici/agenda/outputs/` |
-| Daily | `_workspace/guido-amici/agenda/daily/` |
-| Weekly | `_workspace/guido-amici/agenda/weekly/` |
-| Planning | `_workspace/guido-amici/agenda/planning/` |
-| User observations | `_workspace/guido-amici/agenda/user-profile-inference/` |
+| Task | `_clients/guido-amici/agenda/tasks/` |
+| Project | `_clients/guido-amici/agenda/projects/` |
+| Product | `_clients/guido-amici/agenda/products/` |
+| Person | `_clients/guido-amici/agenda/people/` |
+| Idea | `_clients/guido-amici/agenda/ideas/` |
+| Output | `_clients/guido-amici/agenda/outputs/` |
+| Daily | `_clients/guido-amici/agenda/daily/` |
+| Weekly | `_clients/guido-amici/agenda/weekly/` |
+| Planning | `_clients/guido-amici/agenda/planning/` |
+| User observations | `_clients/guido-amici/agenda/user-profile-inference/` |
