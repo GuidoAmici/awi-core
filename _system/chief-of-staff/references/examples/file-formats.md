@@ -172,6 +172,7 @@ affects:
 ---
 type: daily
 date: YYYY-MM-DD
+checked-in: true | false   # true = /today-start was run; false = file created through work (wrap-session, etc.)
 ---
 
 # Day, Month DD
