@@ -68,16 +68,27 @@ Example:
 
 ---
 
-## Step 3 — Observations and profile updates
+## Step 3 — Resolve GitHub user + observations and profile updates
+
+### 3-pre — Resolve the GitHub user
+
+Run the following before anything else in this step:
+
+```bash
+gh api user --jq '{id: .id, login: .login, name: .name}'
+```
+
+This gives three values used throughout the rest of Step 3:
+- `<github-id>` — the **numeric user ID** (stable, never changes even if the login is renamed)
+- `<login>` — the current GitHub username (used for workspace path and inference filenames)
+- `<name>` — the display name (used as H1 heading in inference files)
 
 Two distinct files serve different purposes — use the right one:
 
-Use the logged-in user's username (from `/awi-user-login`) as `<Username>` throughout this step.
-
 | File | What goes here |
 |------|----------------|
-| `user-profile-inference/YYYY-MM-DD - <Username>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
-| `people/<Username>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries |
+| `_workspace/<login>/agenda/user-profile-inference/YYYY-MM-DD - <login>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
+| `_workspace/<login>/agenda/people/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
 
 ### 3a — Unaware patterns → user-profile-inference
 
@@ -91,18 +102,17 @@ Write 1–3 observations. Each must be:
 - **Specific to this session** — grounded in what actually happened
 - **Non-judgmental** — framed as observation, not evaluation
 - About something they likely don't consciously track
-
-Each observation must include a **pros/cons split**: what this pattern enables or serves the user well, and where it may create friction or blind spots.
+- **Must include explicit Pros and Cons** — this is mandatory, not optional
 
 **Before writing**, read existing entries so you don't repeat:
 ```bash
-ls _documentation/_agenda/user-profile-inference/ | sort -r | head -3
+ls _workspace/<login>/agenda/user-profile-inference/ | sort -r | head -3
 ```
 Then read the most recent 1–2 files.
 
-Save to `_documentation/_agenda/user-profile-inference/YYYY-MM-DD - <Username>.md`:
+Save to `_workspace/<login>/agenda/user-profile-inference/YYYY-MM-DD - <login>.md`:
 - If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
-- If new: create with `# <Username>` as H1, `## YYYY-MM-DD` as section heading
+- If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
 
 ```markdown
 <details><summary><strong>Short label</strong></summary>
@@ -115,13 +125,31 @@ One short paragraph. Specific, grounded in what happened this session.
 </details>
 ```
 
-### 3b — Self-stated facts → people/<Username>.md § Preferences
+**Pros and Cons are required for every observation.** Do not write an observation without both. Tell the user all observations — including the pros/cons — out loud before writing to the file.
 
-If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_documentation/_agenda/people/<Username>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+### 3b — Self-stated facts → people/<github-id>.md § Preferences
+
+If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_workspace/<login>/agenda/people/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+
+If the file doesn't exist yet, create it with this frontmatter so the login is also recorded:
+
+```markdown
+---
+github-id: <github-id>
+login: <login>
+name: <name>
+---
+
+# <name>
+
+## Preferences
+
+## Long-term patterns
+```
 
 ### 3c — Pattern graduation
 
-If a pattern from `user-profile-inference/` has now appeared across multiple sessions and can be considered stable, move it to `_documentation/_agenda/people/<Username>.md` under `## Long-term patterns`.
+If a pattern from `user-profile-inference/` has now appeared across multiple sessions and can be considered stable, move it to `_workspace/<login>/agenda/people/<github-id>.md` under `## Long-term patterns`.
 
 **Tell the user all observations and any graduations out loud** — don't just silently write them.
 
