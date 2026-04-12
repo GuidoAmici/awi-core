@@ -36,11 +36,11 @@ awi/
 
 Each `_clients/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
-Use `/awi-initialize <name>` to scaffold a new workspace repo and register it.
+Use `/new-client <name>` to scaffold a new client repo and register it.
 
 ## Taxonomy
 
-- **Workspace** — a company or personal context (maps to `_clients/<name>/`)
+- **Client** — a company or personal context (maps to `_clients/<name>/`)
 - **Product** — user-facing offering, may span multiple apps
 - **App** — deployable codebase with its own repo (`codebase/`)
 - **Project** — time-bound initiative with scope and tasks
