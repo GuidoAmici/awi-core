@@ -65,7 +65,7 @@ kind: context    # Never sync this file even if its path is whitelisted
 
 1. Fork `awi-core` on GitHub
 2. Clone the fork locally
-3. Run `/initialize` — it scaffolds the vault, creates the wiki submodule, and writes the public sync path
+3. Run `/awi-initialize` — it scaffolds the vault, creates the wiki submodule, and writes the public sync path
 4. Set the public repo clone path in `.claude/config/public-repo-path` (gitignored)
 5. Start working — the sync runs automatically
 
