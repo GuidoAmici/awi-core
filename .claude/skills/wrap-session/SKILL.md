@@ -80,17 +80,17 @@ gh api user --jq '{id: .id, login: .login, name: .name}'
 
 This gives three values used throughout the rest of Step 3:
 - `<github-id>` — the **numeric user ID** (stable, never changes even if the login is renamed)
-- `<login>` — the current GitHub username (used for workspace path and inference filenames)
+- `<login>` — the current GitHub username (used for inference filenames)
 - `<name>` — the display name (used as H1 heading in inference files)
 
-Two distinct files serve different purposes — use the right one:
+Two distinct files serve different purposes — use the right one. Both live under `_system/users/`:
 
 | File | What goes here |
 |------|----------------|
-| `_workspace/<login>/agenda/user-profile-inference/YYYY-MM-DD - <login>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
-| `_workspace/<login>/agenda/people/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
+| `_system/users/<github-id>/inference/YYYY-MM-DD.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
+| `_system/users/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
 
-### 3a — Unaware patterns → user-profile-inference
+### 3a — Unaware patterns → inference
 
 Review the conversation for behavioral patterns the user may not be consciously aware of:
 - How they communicate (verbosity, delegation style, trust)
@@ -106,11 +106,11 @@ Write 1–3 observations. Each must be:
 
 **Before writing**, read existing entries so you don't repeat:
 ```bash
-ls _workspace/<login>/agenda/user-profile-inference/ | sort -r | head -3
+ls _system/users/<github-id>/inference/ | sort -r | head -3
 ```
 Then read the most recent 1–2 files.
 
-Save to `_workspace/<login>/agenda/user-profile-inference/YYYY-MM-DD - <login>.md`:
+Save to `_system/users/<github-id>/inference/YYYY-MM-DD.md`:
 - If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
 - If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
 
@@ -127,9 +127,9 @@ One short paragraph. Specific, grounded in what happened this session.
 
 **Pros and Cons are required for every observation.** Do not write an observation without both. Tell the user all observations — including the pros/cons — out loud before writing to the file.
 
-### 3b — Self-stated facts → people/<github-id>.md § Preferences
+### 3b — Self-stated facts → _system/users/<github-id>.md § Preferences
 
-If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_workspace/<login>/agenda/people/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_system/users/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
 
 If the file doesn't exist yet, create it with this frontmatter so the login is also recorded:
 
@@ -149,7 +149,7 @@ name: <name>
 
 ### 3c — Pattern graduation
 
-If a pattern from `user-profile-inference/` has now appeared across multiple sessions and can be considered stable, move it to `_workspace/<login>/agenda/people/<github-id>.md` under `## Long-term patterns`.
+If a pattern from `inference/` has now appeared across multiple sessions and can be considered stable, move it to `_system/users/<github-id>.md` under `## Long-term patterns`.
 
 **Tell the user all observations and any graduations out loud** — don't just silently write them.
 
