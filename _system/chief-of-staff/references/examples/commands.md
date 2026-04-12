@@ -14,7 +14,7 @@
 | `/history` | Recent git activity | `/history` |
 | `/delegate <task>` | Fork terminal for autonomous work | `/delegate write the quarterly report` |
 | `/wrap-session` | End-of-session ritual | `/wrap-session` |
-| `/initialize <name>` | Scaffold new workspace submodule | `/initialize newhaze` |
+| `/awi-initialize <name>` | Scaffold new workspace submodule | `/awi-initialize newhaze` |
 
 ---
 
