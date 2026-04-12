@@ -172,9 +172,11 @@ If nothing unsaved: say so in one line.
 
 ---
 
-## Step 5 — Rename session
+## Step 5 — Rename session (if nameless)
 
-Use `/rename` to give the conversation a short, descriptive title based on what was done. The title should reflect the main work of the session — not generic phrases like "wrap session" or today's date.
+Check if session has a descriptive title. If still default/untitled, advise user to run `/rename` with a suggested title based on what was done. If already named, skip silently.
+
+Suggested title should reflect main work — not generic phrases like "wrap session" or today's date.
 
 Examples: `Wiki personal GuidoAmici — agenda structure`, `Fix auth middleware — compliance rewrite`, `Newhaze learn audit v2`.
 
