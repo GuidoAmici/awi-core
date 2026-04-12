@@ -1,5 +1,5 @@
 ---
-name: initialize
+name: awi-initialize
 description: Scaffold a new workspace repo for a company or client. Creates a separate git repo with agenda/, documentation/, and codebase/ structure, then registers it as a submodule under _workspace/<name>/. Usage: /awi-initialize <name>
 ---
 
