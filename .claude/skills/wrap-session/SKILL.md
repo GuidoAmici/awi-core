@@ -37,9 +37,19 @@ Tell this to the user out loud before moving on.
 
 Read today's daily file at `_workspace/<login>/agenda/daily/YYYY-MM-DD.md` (using the GitHub `<login>` resolved in Step 3).
 
-If it doesn't exist yet, skip this step and note it in the output.
+If it doesn't exist yet, create it with minimal structure (`checked-in: false` — day was not formally started):
 
-Append a `## Session Log` section (or add to an existing one) with two subsections:
+```markdown
+---
+type: daily
+date: YYYY-MM-DD
+checked-in: false
+---
+
+# DayOfWeek, Month DD
+```
+
+Then append a `## Session Log` section (or add to an existing one) with two subsections:
 
 ### Completed this session
 List everything that was done, whether or not it was on the plan. Mark each with `[x]` and link the task file if one exists. Include unscheduled work — that's the point.
