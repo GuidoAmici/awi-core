@@ -32,23 +32,10 @@ Check ARGUMENTS.
 
 ---
 
-### Step 2 — Determine target path
-
-Default target: `../<name>` (sibling of current AWI root).
-
-Ask:
-```
-Where should the <name> repo be created? (default: ../<name>)
-```
-
-Accept the default or use the provided path.
-
----
-
-### Step 3 — Run the scaffold script
+### Step 2 — Run the scaffold script
 
 ```bash
-python3 .claude/skills/new-client/scripts/init_client.py <name> [path]
+python3 .claude/skills/new-client/scripts/init_client.py <name>
 ```
 
 This creates:
