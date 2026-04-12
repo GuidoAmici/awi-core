@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs, users) and scaffolds `_clients/<name>/` entries for personal and company contexts. Each workspace follows the same `agenda/` + `documentation/` + `codebase/` structure.
+A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs, users) and scaffolds `_clients/<name>/` entries for personal and company contexts. Each client follows the same `agenda/` + `documentation/` + `codebase/` structure.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
