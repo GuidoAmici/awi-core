@@ -100,3 +100,15 @@ One-paragraph description of what success looks like by end of year.
 - Monthly: check quarterly progress against milestones
 - Quarterly: run /quarter, adjust yearly plan if needed
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py year <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

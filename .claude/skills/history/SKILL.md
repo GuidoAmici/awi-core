@@ -17,3 +17,15 @@ git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
 ```
 
 Group output by day and summarize actions.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py history <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

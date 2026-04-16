@@ -4,6 +4,31 @@ A system factory. AWI is the engine — it holds the operator's `_system/` (fram
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
+## Submodule Changes
+
+`_data/submodules.md` is the source of truth for the submodule graph and registry. Read it before any submodule operation. Update it after every operation.
+
+### Operations that require an update
+
+Add · remove · init · update · path change · URL change · branch change · toggle active/inactive
+
+### Safety protocol — before changing a path in `.gitmodules`
+
+**Always run this check first:**
+
+```bash
+git -C <current-local-path> status
+```
+
+If output shows uncommitted changes: commit or stash before touching `.gitmodules`. Changing `path =` moves where git looks — any uncommitted work at the old path is orphaned and unrecoverable.
+
+### After any submodule operation
+
+1. Run `git submodule status` (and nested if applicable)
+2. Update the Mermaid graph node style to reflect new state (`safe` / `warning` / `danger`)
+3. Update the Registry table: Clone status, Local path, Pinned SHA, Branch tracked
+4. Show the updated graph to the user
+
 ## Structure
 
 ```
@@ -183,6 +208,12 @@ cos: daily plan for 2026-01-23
 
 Filter: `git log --grep="cos:"`
 
+## Skills
+
+When the user types `/<command>`, read and execute the skill file at `.claude/skills/<command>/SKILL.md`.
+
+If the skill file does not exist, tell the user the command is not available.
+
 ## Commands
 
 | Command | Purpose |
@@ -199,6 +230,7 @@ Filter: `git log --grep="cos:"`
 | `/awi-introduction` | First-time onboarding — GitHub, language, preferences |
 | `/awi-initialize` | Bootstrap AWI repo file structure (run once after /awi-introduction) |
 | `/new-client <name>` | Scaffold new `_clients/<name>/` repo and register as submodule |
+| `/awi-sync` | Sync all submodules (direct + nested) to main, update `_data/submodules.md` |
 
 ## Gemini Delegation — Frontend Changes
 

@@ -121,3 +121,15 @@ Show the operator the weekly plan and ask:
 > This is next week. Realistic? Anything to adjust?
 
 Only write after confirmation.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py week-review <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

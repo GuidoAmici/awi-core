@@ -11,13 +11,25 @@ Generate or refresh today's plan. Reads the morning check-in from the daily file
 
 ---
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_system/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_clients/guido-amici/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Step 1 — Read daily file and check-in
 
 ```bash
 bash .claude/hooks/get-datetime.sh full
 ```
 
-Read `_documentation/_agenda/daily/YYYY-MM-DD.md`.
+Read `<agenda-base>daily/YYYY-MM-DD.md`.
 
 Extract from it:
 - `energy-ceiling` from frontmatter
@@ -38,16 +50,16 @@ And stop.
 1. **Find tasks by due date using grep** (never glob all tasks):
    ```bash
    # Today's tasks (pending or in-progress only)
-   grep -rl "due: YYYY-MM-DD" _documentation/_agenda/tasks/ 2>/dev/null
+   grep -rl "due: YYYY-MM-DD" <agenda-base>tasks/ 2>/dev/null
    
    # All pending/in-progress tasks for overdue check
-   grep -rl "status: pending\|status: in-progress" _documentation/_agenda/tasks/ 2>/dev/null
+   grep -rl "status: pending\|status: in-progress" <agenda-base>tasks/ 2>/dev/null
    ```
    Then filter overdue by comparing due dates against today.
 
 2. Read only the matching task files. Extract: `priority`, `energy`, `duration`.
 
-3. Grep `_documentation/_agenda/projects/*.md` for `status: active`, read those files for next actions.
+3. Grep `<agenda-base>projects/*.md` for `status: active`, read those files for next actions.
 
 4. Check what's been done today:
    ```bash
@@ -93,7 +105,7 @@ Wait for the operator to decide before writing.
 
 ## Step 4 — Update daily file
 
-Write or update the following sections in `_documentation/_agenda/daily/YYYY-MM-DD.md`.
+Write or update the following sections in `<agenda-base>daily/YYYY-MM-DD.md`.
 
 **Preserve existing sections** — `## Morning Check-in`, `## Time Budget`, `## Session Log`, `## Breaks` must not be overwritten.
 
@@ -124,3 +136,15 @@ When `/today` is run again later in the day:
 - Update `## Today So Far` with latest git log
 - If new tasks were added to the vault since last run, include them
 - Show updated budget: `Remaining: Xh Ym of Xh Ym`
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py today <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

@@ -70,15 +70,23 @@ Use Obsidian wiki-style links `[[slug]]` in the markdown body to connect entitie
 
 When creating a task linked to a project, update the project file to include `[[task-slug]]`. Same for project → person links.
 
-Check if person/project already exists before creating (use Glob on `_clients/guido-amici/agenda/` subfolders). Use Read before editing existing files.
+Check if person/project already exists before creating (use Glob on `<agenda-base>` subfolders, resolved from `current-user.md`). Use Read before editing existing files.
 
 ## File Paths
 
-All files go under `_clients/guido-amici/agenda/`:
-- Tasks → `_clients/guido-amici/agenda/tasks/<slug>.md`
-- Projects → `_clients/guido-amici/agenda/projects/<slug>.md`
-- People → `_clients/guido-amici/agenda/people/<slug>.md`
-- Ideas → `_clients/guido-amici/agenda/ideas/<slug>.md`
+Resolve the agenda base path before writing any file:
+
+1. Read `_system/users/current-user.md`
+2. Extract the `user:` field (e.g. `_clients/guido-amici/` or `_system/users/42481462/`)
+3. Append `agenda/` — this is `<agenda-base>`
+
+Then file under `<agenda-base>`:
+- Tasks → `<agenda-base>tasks/<slug>.md`
+- Projects → `<agenda-base>projects/<slug>.md`
+- People → `<agenda-base>people/<slug>.md`
+- Ideas → `<agenda-base>ideas/<slug>.md`
+
+If `current-user.md` does not exist, stop and tell the operator to run `/awi-user-login`.
 
 ## Product/App/Feature References
 
@@ -143,3 +151,15 @@ tags: []
 ---
 Description of the idea.
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py new <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

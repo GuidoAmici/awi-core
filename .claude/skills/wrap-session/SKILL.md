@@ -35,7 +35,12 @@ Tell this to the user out loud before moving on.
 
 ## Step 2 — Daily file update
 
-Read today's daily file at `_clients/<login>/agenda/daily/YYYY-MM-DD.md` (using the GitHub `<login>` resolved in Step 3).
+Resolve `<agenda-base>` first:
+1. Read `_system/users/current-user.md`
+2. Extract `user:` field — this is `<user-root>`
+3. `<agenda-base>` = `<user-root>agenda/`
+
+Read today's daily file at `<agenda-base>daily/YYYY-MM-DD.md`.
 
 If it doesn't exist yet, create it with minimal structure (`checked-in: false` — day was not formally started):
 
@@ -173,7 +178,7 @@ Scan the conversation for anything **mentioned but not filed**:
 - Ideas or decisions that belong in the vault
 - Project status changes not yet reflected in files
 - People or meetings mentioned in passing
-- Outputs (plans, designs, decisions) that should be in `_documentation/_agenda/outputs/`
+- Outputs (plans, designs, decisions) that should be in `<agenda-base>outputs/`
 
 For each item found: name it and ask whether to file it now or skip.
 
@@ -209,3 +214,15 @@ Examples: `Wiki personal GuidoAmici — agenda structure`, `Fix auth middleware 
 ## Unsaved info
 [list of items, or "Nothing detected."]
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py wrap-session <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

@@ -88,3 +88,15 @@ To close the session, run `/wrap-session`.
 ```
 
 Do not ask for confirmation — just load and greet. If anything in the profile seems outdated, mention it briefly.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py awi-user-login <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

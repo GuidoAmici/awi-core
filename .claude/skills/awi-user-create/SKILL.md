@@ -128,3 +128,15 @@ Files created:
 
 Run /awi-user-login <username> to start a session.
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py awi-user-create <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

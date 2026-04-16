@@ -11,13 +11,25 @@ Run once at the end of the day. This is a day-level retrospective — not a sess
 
 ---
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_system/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_clients/guido-amici/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Step 1 — Get the full picture
 
 ```bash
 bash .claude/hooks/get-datetime.sh full
 ```
 
-Read today's daily file at `_documentation/_agenda/daily/YYYY-MM-DD.md`. Extract:
+Read today's daily file at `<agenda-base>daily/YYYY-MM-DD.md`. Extract:
 - `energy-ceiling` from frontmatter
 - Morning commitments from `## Morning Check-in`
 - Time budget from `## Time Budget`
@@ -28,7 +40,29 @@ Also read the current week file:
 ```bash
 date '+%G-W%V'
 ```
-Read `_documentation/_agenda/weekly/YYYY-WNN.md` for what was selected this week.
+Read `<agenda-base>weekly/YYYY-WNN.md` for what was selected this week.
+
+If the weekly file does not exist, create it with minimal structure before continuing:
+
+```markdown
+---
+type: weekly
+week: YYYY-WNN
+status: no-review
+---
+
+# Week NN — Month D–D, YYYY
+
+> No `/week-review` was run this week. File created retroactively by `/today-end` on YYYY-MM-DD.
+
+## Selected for This Week
+
+*(No tasks formally selected — week-review not run.)*
+
+## Week Pulse
+```
+
+Then populate `## Week Pulse` with what you can infer from the daily session logs.
 
 ---
 
@@ -92,7 +126,7 @@ Based on what didn't get done today and the week's remaining selected tasks, ide
 
 ## Step 5 — Append to daily file
 
-Append a `## Day Review` section to `_documentation/_agenda/daily/YYYY-MM-DD.md`. Preserve all existing sections.
+Append a `## Day Review` section to `<agenda-base>daily/YYYY-MM-DD.md`. Preserve all existing sections.
 
 Also update `checked-out: false` → `checked-out: true` in the frontmatter.
 
@@ -123,3 +157,15 @@ Also update `checked-out: false` → `checked-out: true` in the frontmatter.
 ## Output format
 
 Tell the user the full retrospective out loud before writing to the file. Keep it concise — the goal is a clear read, not a long report.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py today-end <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

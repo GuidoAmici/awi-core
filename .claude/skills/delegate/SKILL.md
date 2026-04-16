@@ -142,3 +142,15 @@ User: "check my delegates"
 
 User: "kill the research-x delegate, it's stuck"
 → `delegate_kill.py research-x`
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py delegate <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

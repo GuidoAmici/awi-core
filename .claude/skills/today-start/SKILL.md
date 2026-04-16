@@ -11,6 +11,18 @@ Captures the operator's state and constraints before the day begins. Run once in
 
 ---
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_system/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_clients/guido-amici/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Step 0 — Enforcement gates
 
 Before starting the intake, check for overdue rituals.
@@ -23,7 +35,7 @@ bash .claude/hooks/get-datetime.sh full
 
 If today is **Friday** (or Saturday/Sunday and no review was done):
 
-1. Check if this week's weekly file exists: `_documentation/_agenda/weekly/YYYY-WNN.md`
+1. Check if this week's weekly file exists: `<agenda-base>weekly/YYYY-WNN.md`
 2. If it doesn't exist, or it has no `## Selected for This Week` section:
 
 > ⚠ Weekly review hasn't been done yet. Run `/week-review` before planning today — it sets next week's priorities.
@@ -34,7 +46,7 @@ If today is **Friday** (or Saturday/Sunday and no review was done):
 
 If today is **Monday**:
 
-1. Read this week's weekly file: `_documentation/_agenda/weekly/YYYY-WNN.md`
+1. Read this week's weekly file: `<agenda-base>weekly/YYYY-WNN.md`
 2. Find the `## Mental Model of the Week` entry
 3. If present, remind the operator:
 
@@ -56,15 +68,27 @@ Ask **one at a time**, waiting for each answer before proceeding to the next.
 
 ### Q1: How are you feeling?
 
-> How are you feeling right now? (great / good / okay / tired / low)
+Use the `AskUserQuestion` tool with these options (do NOT ask as plain text):
+
+```
+question: "How are you feeling right now?"
+header: "Energy"
+options:
+  - label: "Great!"
+    description: "High energy — all task types available"
+  - label: "Okay"
+    description: "Medium energy — high-energy tasks flagged, avoid in afternoon"
+  - label: "Low"
+    description: "Low energy — only low/medium tasks; high-energy deferred"
+```
 
 Map to energy ceiling:
 
 | Answer | Energy ceiling | Effect on plan |
 |---|---|---|
-| great / good | high | All task types available |
-| okay | medium | High-energy tasks flagged, not scheduled in afternoon |
-| tired / low | low | Only low/medium-energy tasks; high-energy deferred |
+| Great! | high | All task types available |
+| Okay | medium | High-energy tasks flagged, not scheduled in afternoon |
+| Low | low | Only low/medium-energy tasks; high-energy deferred |
 
 ### Q2: What's already scheduled today?
 
@@ -102,7 +126,7 @@ Show the budget to the operator:
 
 ## Step 4 — Write to daily file
 
-Read `_documentation/_agenda/daily/YYYY-MM-DD.md` if it exists.
+Read `<agenda-base>daily/YYYY-MM-DD.md` if it exists.
 
 Create or update the file. The `## Morning Check-in` and `## Time Budget` sections go at the top, after the H1. Preserve any existing sections (`## Session Log`, `## Breaks`, etc.).
 
@@ -140,3 +164,15 @@ energy-ceiling: high | medium | low
 After writing, tell the operator:
 
 > Check-in saved. Run `/today` to generate your plan.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py today-start <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

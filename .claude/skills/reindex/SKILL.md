@@ -153,3 +153,15 @@ _clients/<name>/documentation/
 ```
 
 > Re-run `find _system _clients -mindepth 1 -type d` at the start of each execution — the list above may be stale.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py reindex <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

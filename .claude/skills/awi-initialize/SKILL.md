@@ -74,3 +74,15 @@ Next steps:
   1. /new-client <name>   — add your first client
   2. /awi-user-create <username>   — create a user profile if not done yet
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py awi-initialize <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

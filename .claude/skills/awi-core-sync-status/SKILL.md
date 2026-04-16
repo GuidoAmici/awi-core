@@ -44,3 +44,15 @@ Found <N> file(s) out of sync. Run /awi-core-push to mirror them now?
 ```
 
 Do not push automatically. Wait for confirmation.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py awi-core-sync-status <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

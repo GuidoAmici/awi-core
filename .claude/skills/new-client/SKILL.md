@@ -118,3 +118,15 @@ Next steps:
   1. Add codebase app repos: git submodule add <url> _clients/<name>/codebase/<app>
   2. /awi-user-login <username>
 ```
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py new-client <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

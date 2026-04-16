@@ -54,3 +54,15 @@ Then print counts:
 - OK: N
 
 If everything is present, say so clearly.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py check-index <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`

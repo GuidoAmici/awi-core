@@ -9,6 +9,18 @@ Logs break time to today's daily file. Used to track actual working time vs plan
 
 ---
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_system/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_clients/guido-amici/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Usage
 
 - `/break <motive>` — start a break (logs current time + reason)
@@ -23,7 +35,7 @@ Get the current time:
 bash .claude/hooks/get-datetime.sh time
 ```
 
-Read `_documentation/_agenda/daily/YYYY-MM-DD.md`.
+Read `<agenda-base>daily/YYYY-MM-DD.md`.
 
 If the file doesn't exist, say:
 
@@ -68,3 +80,15 @@ Remaining work time: Xh Ym
 ```
 
 Read the `## Time Budget` section to calculate remaining work time = available - breaks taken.
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py break <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`
