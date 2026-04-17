@@ -232,6 +232,20 @@ If the skill file does not exist, tell the user the command is not available.
 | `/new-client <name>` | Scaffold new `_clients/<name>/` repo and register as submodule |
 | `/awi-sync` | Sync all submodules (direct + nested) to main, update `_data/submodules.md` |
 
+## Script Directory Paths
+
+All AWI directory paths are defined in `.claude/skills/shared/scripts/paths.py` — the single source of truth.
+
+**Rule:** never hardcode a directory string in a script. Add it to `paths.py` first, then import the constant. When a dir moves, update `paths.py` only.
+
+```python
+# In any .claude/skills/*/scripts/*.py
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
+from paths import USERS_DIR, CURRENT_USER  # import what you need
+```
+
 ## Gemini Delegation — Frontend Changes
 
 Frontend file changes are **always delegated to Gemini CLI employees** via `/delegate`. Claude handles architecture (tokens, API, schemas), Gemini handles mechanical frontend edits (CSS, fonts, components). See `.claude/skills/delegate/SKILL.md` and `.claude/reference/employees.json`.
