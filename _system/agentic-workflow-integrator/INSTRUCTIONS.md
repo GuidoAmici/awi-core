@@ -210,41 +210,11 @@ Filter: `git log --grep="cos:"`
 
 ## Skills
 
-When the user types `/<command>`, read and execute the skill file at `.claude/skills/<command>/SKILL.md`.
-
-If the skill file does not exist, tell the user the command is not available.
-
-## Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/today` | Daily plan from due tasks and active projects |
-| `/week` | Weekly plan with task scheduling |
-| `/quarter` | Quarterly goals and milestones |
-| `/year` | Annual strategic plan |
-| `/new <text>` | Quick capture - classify and file |
-| `/history` | Recent git activity |
-| `/delegate <task>` | Autonomous task completion |
-| `/awi-user-login <username>` | Load user profile for session |
-| `/wrap-session` | End-of-session ritual |
-| `/awi-introduction` | First-time onboarding — GitHub, language, preferences |
-| `/awi-initialize` | Bootstrap AWI repo file structure (run once after /awi-introduction) |
-| `/new-client <name>` | Scaffold new `_clients/<name>/` repo and register as submodule |
-| `/awi-sync` | Sync all submodules (direct + nested) to main, update `_data/submodules.md` |
+See [tables/skills.md](tables/skills.md) for the full command list.
 
 ## Script Directory Paths
 
-All AWI directory paths are defined in `.claude/skills/shared/scripts/paths.py` — the single source of truth.
-
-**Rule:** never hardcode a directory string in a script. Add it to `paths.py` first, then import the constant. When a dir moves, update `paths.py` only.
-
-```python
-# In any .claude/skills/*/scripts/*.py
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
-from paths import USERS_DIR, CURRENT_USER  # import what you need
-```
+See [tables/dirs.md](tables/dirs.md) for the full directory map and import pattern.
 
 ## Gemini Delegation — Frontend Changes
 

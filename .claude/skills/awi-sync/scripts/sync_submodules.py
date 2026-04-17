@@ -24,7 +24,6 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
 from paths import AWI_ROOT, SUBMODULES_MD
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "awi-core-sync-status" / "scripts"))
 from sync_status import collect_core_files, collect_local_files, md5, parse_whitelist, read_kind
 
 REGISTRY_PATH = SUBMODULES_MD
