@@ -1,0 +1,47 @@
+name: Guard — dev-gemini protected paths
+
+on:
+  push:
+    branches: [dev-gemini]
+
+jobs:
+  check-protected-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for protected path modifications
+        run: |
+          BASE=$(git merge-base origin/dev-claude HEAD)
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+
+          PROTECTED=(
+            "_system/"
+            ".claude/"
+            "CLAUDE.md"
+            "AGENTS.md"
+            "README.md"
+            "LICENSE"
+          )
+
+          VIOLATIONS=""
+          for path in $CHANGED; do
+            for protected in "${PROTECTED[@]}"; do
+              if [[ "$path" == "$protected"* || "$path" == "$protected" ]]; then
+                VIOLATIONS="$VIOLATIONS\n  - $path"
+              fi
+            done
+          done
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ Protected paths modified on dev-gemini:"
+            echo -e "$VIOLATIONS"
+            echo ""
+            echo "These paths are owned by Claude (AWI system). Whyto should only"
+            echo "modify Gemini-specific files (GEMINI.md, .gemini/, etc.)."
+            exit 1
+          fi
+
+          echo "✅ No protected paths touched."

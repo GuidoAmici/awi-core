@@ -1,0 +1,11 @@
+# AWI system — owned by GuidoAmici (Claude side)
+_system/       @GuidoAmici
+.claude/       @GuidoAmici
+CLAUDE.md      @GuidoAmici
+AGENTS.md      @GuidoAmici
+README.md      @GuidoAmici
+LICENSE        @GuidoAmici
+
+# Gemini-specific — Whyto's territory
+GEMINI.md      @ChristianSRgit
+.gemini/       @ChristianSRgit
