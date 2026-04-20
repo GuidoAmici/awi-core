@@ -24,7 +24,7 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
 from paths import AWI_ROOT, SUBMODULES_MD
 
-from sync_status import collect_core_files, collect_local_files, md5, parse_whitelist, read_kind
+from sync_status import collect_core_files, collect_instance_files, md5
 
 REGISTRY_PATH = SUBMODULES_MD
 
@@ -351,7 +351,6 @@ def sync_awi_core() -> dict:
 
     public_repo_path = AWI_ROOT / ".claude" / "config" / "public-repo-path"
     core_root = AWI_ROOT / public_repo_path.read_text().strip()
-    whitelist_path = AWI_ROOT / ".claude" / "config" / "public-whitelist"
 
     if not core_root.is_dir():
         result["status"] = "failed"
@@ -364,13 +363,10 @@ def sync_awi_core() -> dict:
         result["error"] = f"Cannot checkout dev-claude: {res.stderr.strip()}"
         return result
 
-    entries = parse_whitelist(whitelist_path)
-    local_files = collect_local_files(AWI_ROOT, entries)
+    local_files = collect_instance_files(AWI_ROOT)
     core_files = collect_core_files(core_root)
 
     for rel, local_path in sorted(local_files.items()):
-        if read_kind(local_path) == "context":
-            continue
         if rel in core_files:
             if md5(local_path) != md5(core_files[rel]):
                 result["drift"].append(rel)
