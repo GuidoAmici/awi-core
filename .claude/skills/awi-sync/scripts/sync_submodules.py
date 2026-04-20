@@ -443,17 +443,20 @@ def _write_table_row(r: SubmoduleResult) -> None:
     lines = REGISTRY_PATH.read_text().splitlines()
     local_path = str(r.abs_path.relative_to(AWI_ROOT))
     anchor = f"`{local_path}`"
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
     branch_cell = f" `{r.branch or r.tracked_branch}` "
     sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
     status_cell = f" {clone_status_label(r)} "
+    sync_cell = f" {now} "
     new_lines: list[str] = []
     for line in lines:
         if anchor in line and line.strip().startswith("|"):
             parts = line.split("|")
-            if len(parts) >= 7:
-                parts[-4] = branch_cell
-                parts[-3] = sha_cell
-                parts[-2] = status_cell
+            if len(parts) >= 8:
+                parts[-5] = branch_cell
+                parts[-4] = sha_cell
+                parts[-3] = status_cell
+                parts[-2] = sync_cell
                 line = "|".join(parts)
         new_lines.append(line)
     REGISTRY_PATH.write_text("\n".join(new_lines))
@@ -501,15 +504,7 @@ def update_registry(results: list[SubmoduleResult], root: Optional[dict] = None)
         else:
             updated.append(line)
 
-    # ── Update Last sync timestamp ───────────────────────────────────────────
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    final: list[str] = []
-    for line in updated:
-        if line.startswith("**Last sync:**"):
-            line = f"**Last sync:** {now}"
-        final.append(line)
-
-    REGISTRY_PATH.write_text("\n".join(final))
+    REGISTRY_PATH.write_text("\n".join(updated))
 
 
 # ── Report ────────────────────────────────────────────────────────────────────
