@@ -1,0 +1,7 @@
+Fixed. Here's what happened:
+
+**Root cause:** Commit `5d97907` replaced the inline FOUC script with `import { FOUC_SCRIPT } from "newhaze-ui"`, but `newhaze-ui` doesn't actually export `FOUC_SCRIPT`. This made it `undefined`, causing `dangerouslySetInnerHTML={{ __html: undefined }}` to crash during static page generation (`/_not-found`).
+
+**Fix:** Removed the non-existent `FOUC_SCRIPT` import and restored an inline FOUC prevention script that reads `nh_theme` from localStorage and applies the correct theme class + `colorScheme` before paint. The script covers all 7 current themes from `newhaze-ui`.
+
+Build now completes successfully on `dev`.

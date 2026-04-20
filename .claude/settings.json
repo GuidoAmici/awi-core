@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -Command \"(New-Object Media.SoundPlayer '$(wslpath -w $CLAUDE_PROJECT_DIR/.claude/hooks/notify-sound.wav)').PlaySync()\""
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/permission-sound.sh"
           }
         ]
       }
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/stop-sound.sh || powershell.exe -Command \"(New-Object Media.SoundPlayer '$(wslpath -w $CLAUDE_PROJECT_DIR/.claude/hooks/stop-sound.wav)').PlaySync()\""
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/victory-sound.sh"
           }
         ]
       }

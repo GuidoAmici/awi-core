@@ -76,8 +76,8 @@ Check if person/project already exists before creating (use Glob on `<agenda-bas
 
 Resolve the agenda base path before writing any file:
 
-1. Read `_system/users/current-user.md`
-2. Extract the `user:` field (e.g. `_clients/guido-amici/` or `_system/users/42481462/`)
+1. Read `_data/users/current-user.md`
+2. Extract the `user:` field (e.g. `_data/users/42481462/`)
 3. Append `agenda/` — this is `<agenda-base>`
 
 Then file under `<agenda-base>`:

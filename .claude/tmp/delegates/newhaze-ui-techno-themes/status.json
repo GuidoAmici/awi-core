@@ -1,0 +1,13 @@
+{
+  "slug": "newhaze-ui-techno-themes",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "D:/GitHub/GuidoAmici/second-brain/apps/newhaze-ui",
+  "budget_usd": 0.5,
+  "prompt_preview": "You are a UI Designer. Add 2 new themes to newhaze-ui inspired by 3 design reference images.\n\nFirst read these files:\n- src/themes.ts (theme token structure + existing themes)\n- src/ThemeProvider.tsx (how tokens map to the theme object used by components)\n\nDESIGN REFERENCES (described from images at",
+  "started_at": "2026-03-20T05:31:37.311494",
+  "finished_at": "2026-03-20T05:33:51.525694",
+  "exit_code": 0,
+  "pid": 37024,
+  "duration": "2m 14s"
+}

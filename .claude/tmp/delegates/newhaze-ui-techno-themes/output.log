@@ -1,0 +1,14 @@
+Done. Here's a summary of what was added:
+
+**`themes.ts`**
+- `ThemeName` union extended with `'techno-violet' | 'techno-green'`
+- `THEME_HTML_CONFIG` entries: both `dark` color-scheme, with `techno-violet`/`techno-green` HTML classes
+- Two full theme objects covering all 28 `ThemeColors` tokens:
+  - **Techno — Violeta**: `oklch` surfaces in deep navy-purple (0.07–0.17 L), electric `#7b2fff` accent, hot-pink `#ff0090` secondary, purple-tinted glow shadows
+  - **Techno — Verde**: `oklch` surfaces in near-black green (0.06–0.16 L), neon `#00e87a` accent, warm amber `#ff8c00` secondary, green-tinted glow shadows
+
+**`ThemeProvider.tsx`**
+- `classList.remove(...)` updated to also strip `techno-violet` and `techno-green` on theme switches
+
+**`ThemePicker.tsx`**
+- Added `🟣` and `🟢` icons to keep the `Record<ThemeName, string>` exhaustive (was a TS error)

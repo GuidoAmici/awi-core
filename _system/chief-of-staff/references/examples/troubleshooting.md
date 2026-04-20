@@ -10,7 +10,7 @@
    ```bash
    chmod +x .claude/hooks/auto-commit.sh
    ```
-3. Confirm file is under `_clients/` or `_system/` (hook ignores other paths)
+3. Confirm file is under `_data/organizations/`, `_data/users/`, or `_system/` (hook ignores other paths)
 
 ---
 
@@ -18,7 +18,7 @@
 
 1. Ensure task has `due: YYYY-MM-DD` in frontmatter
 2. Check date format matches exactly (no spaces, ISO format)
-3. Verify task is in `_clients/guido-amici/agenda/tasks/`
+3. Verify task is in `<user-root>agenda/tasks/` (resolved from `_data/users/current-user.md`)
 
 ---
 

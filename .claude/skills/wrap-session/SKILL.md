@@ -36,7 +36,7 @@ Tell this to the user out loud before moving on.
 ## Step 2 — Daily file update
 
 Resolve `<agenda-base>` first:
-1. Read `_system/users/current-user.md`
+1. Read `_data/users/current-user.md`
 2. Extract `user:` field — this is `<user-root>`
 3. `<agenda-base>` = `<user-root>agenda/`
 
@@ -99,12 +99,12 @@ This gives three values used throughout the rest of Step 3:
 - `<login>` — the current GitHub username (used for inference filenames)
 - `<name>` — the display name (used as H1 heading in inference files)
 
-Two distinct files serve different purposes — use the right one. Both live under `_system/users/`:
+Two distinct files serve different purposes — use the right one. Both live under `_data/users/`:
 
 | File | What goes here |
 |------|----------------|
-| `_system/users/<github-id>/inference/YYYY-MM-DD.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
-| `_system/users/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
+| `USERS_RELDIR/<github-id>/USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
+| `_data/users/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
 
 ### 3a — Unaware patterns → inference
 
@@ -122,11 +122,11 @@ Write 1–3 observations. Each must be:
 
 **Before writing**, read existing entries so you don't repeat:
 ```bash
-ls _system/users/<github-id>/inference/ | sort -r | head -3
+ls $USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/ | sort -r | head -3
 ```
 Then read the most recent 1–2 files.
 
-Save to `_system/users/<github-id>/inference/YYYY-MM-DD.md`:
+Save to `$USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md`:
 - If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
 - If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
 
@@ -143,9 +143,9 @@ One short paragraph. Specific, grounded in what happened this session.
 
 **Pros and Cons are required for every observation.** Do not write an observation without both. Tell the user all observations — including the pros/cons — out loud before writing to the file.
 
-### 3b — Self-stated facts → _system/users/<github-id>.md § Preferences
+### 3b — Self-stated facts → _data/users/<github-id>.md § Preferences
 
-If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_system/users/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_data/users/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
 
 If the file doesn't exist yet, create it with this frontmatter so the login is also recorded:
 
@@ -165,7 +165,7 @@ name: <name>
 
 ### 3c — Pattern graduation
 
-If a pattern from `inference/` has now appeared across multiple sessions and can be considered stable, move it to `_system/users/<github-id>.md` under `## Long-term patterns`.
+If a pattern from `inference/` has now appeared across multiple sessions and can be considered stable, move it to `_data/users/<github-id>.md` under `## Long-term patterns`.
 
 **Tell the user all observations and any graduations out loud** — don't just silently write them.
 

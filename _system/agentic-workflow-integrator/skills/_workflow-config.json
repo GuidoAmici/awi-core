@@ -1,0 +1,57 @@
+{
+  "groups": [
+    {
+      "id": "SETUP",
+      "label": "🔧 One-Time Setup",
+      "summary_label": "Setup",
+      "cadence": "Once",
+      "auto_connect": true
+    },
+    {
+      "id": "IDENTITY",
+      "label": "👤 Identity",
+      "summary_label": "Identity",
+      "cadence": "As needed",
+      "auto_connect": false
+    },
+    {
+      "id": "DAY",
+      "label": "📅 Daily Rhythm",
+      "summary_label": "Daily",
+      "cadence": "Every day",
+      "auto_connect": true
+    },
+    {
+      "id": "PLANNING",
+      "label": "🗓️ Planning Cadence",
+      "summary_label": "Planning",
+      "cadence": "Fri / monthly",
+      "auto_connect": true
+    },
+    {
+      "id": "WORK",
+      "label": "⚙️ Work Execution",
+      "summary_label": "Work",
+      "cadence": "Continuous",
+      "auto_connect": true
+    },
+    {
+      "id": "MAINTENANCE",
+      "label": "🔄 Maintenance",
+      "summary_label": "Maintenance",
+      "cadence": "Periodic",
+      "auto_connect": false
+    }
+  ],
+  "cross_group_flows": [
+    {"from": "SETUP", "to": "DAY"},
+    {"from": "IDENTITY", "to": "DAY", "label": "switch user", "dotted": true},
+    {"from": "DAY", "to": "PLANNING", "label": "plan work"},
+    {"from": "PLANNING", "to": "WORK", "label": "select tasks"},
+    {"from": "WORK", "to_node": "wrap_session", "label": "end of day"},
+    {"from": "MAINTENANCE", "to": "DAY", "label": "periodic", "dotted": true}
+  ],
+  "special_edges": [
+    {"from": "break", "to": "today"}
+  ]
+}

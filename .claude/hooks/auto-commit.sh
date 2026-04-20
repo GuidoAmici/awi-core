@@ -28,16 +28,16 @@ git check-ignore -q "$FILE_PATH" 2>/dev/null && exit 0
 
 # Derive type from path
 # Structure:
-#   _clients/<name>/agenda/<type>/  — operational content
-#   _clients/<name>/documentation/  — context/wiki
-#   _clients/<name>/codebase/       — code
-#   _system/                          — framework docs
-#   _system/users/                    — vault users
+#   _data/organizations/<name>/agenda/<type>/  — operational content
+#   _data/organizations/<name>/documentation/  — context/wiki
+#   _data/organizations/<name>/codebase/       — code
+#   _system/                               — framework docs
+#   _system/users/                         — vault users
 IFS='/' read -ra PARTS <<< "$REL_PATH"
-if [ "${PARTS[0]}" = "_clients" ]; then
-  # PARTS[1] = workspace name, PARTS[2] = agenda|documentation|codebase, PARTS[3] = subfolder
-  LAYER="${PARTS[2]}"
-  SUBFOLDER="${PARTS[3]}"
+if [ "${PARTS[0]}" = "_data" ] && [ "${PARTS[1]}" = "organizations" ]; then
+  # PARTS[2] = workspace name, PARTS[3] = agenda|documentation|codebase, PARTS[4] = subfolder
+  LAYER="${PARTS[3]}"
+  SUBFOLDER="${PARTS[4]}"
   if [ "$LAYER" = "agenda" ]; then
     case "$SUBFOLDER" in
       tasks) TYPE="task" ;;
@@ -57,7 +57,7 @@ if [ "${PARTS[0]}" = "_clients" ]; then
   elif [ "$LAYER" = "codebase" ]; then
     TYPE="codebase"
   else
-    TYPE="${LAYER:-_clients}"
+    TYPE="${LAYER:-organizations}"
   fi
 elif [ "${PARTS[0]}" = "_system" ]; then
   if [ "${PARTS[1]}" = "users" ]; then
@@ -73,13 +73,26 @@ FILENAME=$(basename "$FILE_PATH" .md)
 
 cd "$VAULT_ROOT" || exit 0
 
+# Regenerate workflow diagram when a skill file changes
+DIAGRAM_CHANGED=""
+if echo "$REL_PATH" | grep -qE "_system/agentic-workflow-integrator/skills/[^/]+\.md$" && \
+   [ "$(basename "$FILE_PATH")" != "workflow-diagram.md" ]; then
+  DIAGRAM="$VAULT_ROOT/_system/agentic-workflow-integrator/skills/workflow-diagram.md"
+  if python3 "$VAULT_ROOT/.claude/hooks/generate-workflow-diagram.py" \
+       "$VAULT_ROOT/_system/agentic-workflow-integrator/skills" 2>/dev/null; then
+    DIAGRAM_CHANGED="$DIAGRAM"
+  fi
+fi
+
 if git diff --quiet "$FILE_PATH" 2>/dev/null && git diff --cached --quiet "$FILE_PATH" 2>/dev/null; then
   if ! git ls-files --error-unmatch "$FILE_PATH" 2>/dev/null; then
     git add "$FILE_PATH"
+    [ -n "$DIAGRAM_CHANGED" ] && git add "$DIAGRAM_CHANGED"
     git commit -m "cos: new $TYPE - $FILENAME"
   fi
 else
   git add "$FILE_PATH"
+  [ -n "$DIAGRAM_CHANGED" ] && git add "$DIAGRAM_CHANGED"
   git commit -m "cos: update $TYPE - $FILENAME"
 fi
 

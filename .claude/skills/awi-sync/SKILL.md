@@ -1,6 +1,6 @@
 ---
 name: awi-sync
-description: Sync all AWI submodules (direct + nested). Checks clone status, switches to main, pulls, skips dirty repos, and updates _data/submodules.md. Usage: /awi-sync
+description: Sync all AWI submodules (direct + nested). Commits local changes, pulls, and pushes each repo. Updates _data/submodules.md. Usage: /awi-sync
 ---
 
 # /awi-sync — Submodule Sync
@@ -25,8 +25,7 @@ python3 .claude/skills/awi-sync/scripts/sync_submodules.py
 
 The script handles everything:
 - Discovers all submodules (AWI-level + nested inside each client)
-- For each: checks clone status → checks for uncommitted changes → checks out `main` → pulls
-- Skips repos with uncommitted changes and reports them clearly
+- For each: checks clone status → removes `.gitkeep` from populated folders → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
 
 ### Step 2 — Present the report to the user
@@ -34,7 +33,6 @@ The script handles everything:
 Show the script output verbatim. Then add a one-line summary:
 
 - If all synced: `All submodules are up to date.`
-- If skipped: `N repo(s) skipped — uncommitted changes must be committed or stashed first.`
 - If failed: `N repo(s) could not be synced. See errors above.`
 
 ### Step 3 — Show the updated graph
@@ -48,7 +46,7 @@ After the report, display the updated Mermaid graph from `_data/submodules.md` s
 | Code | Meaning |
 |---|---|
 | `0` | All submodules synced successfully |
-| `1` | One or more submodules skipped or failed |
+| `1` | One or more submodules failed |
 
 ---
 

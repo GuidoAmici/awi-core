@@ -9,18 +9,30 @@ subagent_type: Product Manager
 
 Generate a plan for the current quarter from vault contents.
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_data/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Steps
 
 1. Get current date and determine the quarter (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
-2. Check if `_clients/guido-amici/agenda/planning/YYYY-QN.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
-3. **Gather all active/paused projects** — grep `_clients/guido-amici/agenda/projects/*.md` for `status: active` and `status: paused`, read them
-4. **Gather all pending/in-progress tasks** — grep `_clients/guido-amici/agenda/tasks/*.md` for `status: pending` or `status: in-progress`, read them
+2. Check if `<agenda-base>planning/YYYY-QN.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
+3. **Gather all active/paused projects** — grep `<agenda-base>projects/*.md` for `status: active` and `status: paused`, read them
+4. **Gather all pending/in-progress tasks** — grep `<agenda-base>tasks/*.md` for `status: pending` or `status: in-progress`, read them
 5. **Group tasks by due month** — tasks due within the quarter grouped by month; tasks due before quarter start → Overdue
 6. **Map projects to monthly milestones** — based on project next actions and linked tasks, suggest which month each project should hit its next milestone
 7. **Identify undated tasks** — distribute across months by priority (same priority order as /week)
 8. **Derive quarter goals** — synthesize 3-5 high-level goals from the projects and tasks. Goals should be outcome-oriented ("Launch auth across all apps") not activity-oriented ("Work on auth")
 9. Run `git log --since="<quarter start>" --grep="cos:" --format="%ad %s" --date=short` for quarter activity so far
-10. Create `_clients/guido-amici/agenda/planning/YYYY-QN.md`
+10. Create `<agenda-base>planning/YYYY-QN.md`
 
 ## Goal Derivation
 
