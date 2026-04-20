@@ -103,7 +103,7 @@ Two distinct files serve different purposes — use the right one. Both live und
 
 | File | What goes here |
 |------|----------------|
-| `_data/users/<github-id>/inference/YYYY-MM-DD.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
+| `USERS_RELDIR/<github-id>/USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
 | `_data/users/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
 
 ### 3a — Unaware patterns → inference
@@ -122,11 +122,11 @@ Write 1–3 observations. Each must be:
 
 **Before writing**, read existing entries so you don't repeat:
 ```bash
-ls _data/users/<github-id>/inference/ | sort -r | head -3
+ls $USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/ | sort -r | head -3
 ```
 Then read the most recent 1–2 files.
 
-Save to `_data/users/<github-id>/inference/YYYY-MM-DD.md`:
+Save to `$USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md`:
 - If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
 - If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
 

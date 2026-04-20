@@ -1,11 +1,11 @@
 ---
 name: awi-client
-description: Add a client to AWI — create from scratch or import an existing GitHub repo. Scaffolds agenda/, documentation/, codebase/ structure and registers as submodule under _data/entities/<name>/. Usage: /awi-client <name>
+description: Add a client to AWI — create from scratch or import an existing GitHub repo. Scaffolds agenda/, documentation/, codebase/ structure and registers as submodule under _data/organizations/<name>/. Usage: /awi-client <name>
 ---
 
 # /awi-client — Add a Client
 
-Adds a client workspace under `_data/entities/<name>/` — either scaffolded fresh or imported from an existing GitHub repo.
+Adds a client workspace under `_data/organizations/<name>/` — either scaffolded fresh or imported from an existing GitHub repo.
 
 ## Usage
 
@@ -52,7 +52,7 @@ Wait for reply (`1` or `2`).
 python3 .claude/skills/awi-client/scripts/init_client.py <name>
 ```
 
-Creates under `_data/entities/<name>/`:
+Creates under `_data/organizations/<name>/`:
 ```
 agenda/
   tasks/   projects/  people/   ideas/
@@ -78,8 +78,8 @@ Create a GitHub repo for <name>? (y/n)
 - **Yes** →
   ```bash
   gh repo create GuidoAmici/<name> --private --description "<name> workspace"
-  git -C _data/entities/<name> remote add origin https://github.com/GuidoAmici/<name>.git
-  git -C _data/entities/<name> push -u origin main
+  git -C _data/organizations/<name> remote add origin https://github.com/GuidoAmici/<name>.git
+  git -C _data/organizations/<name> push -u origin main
   ```
 - **No** → skip. Submodule registration will be skipped too (needs remote URL).
 
@@ -88,7 +88,7 @@ Create a GitHub repo for <name>? (y/n)
 Only if GitHub repo was created:
 
 ```bash
-git submodule add --force https://github.com/GuidoAmici/<name>.git _data/entities/<name>
+git submodule add --force https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
 git commit -m "cos: add client submodule - <name>"
 ```
 
@@ -113,8 +113,8 @@ Use "<name>" as the local folder name? (y / enter different name)
 ### B2 — Add as submodule
 
 ```bash
-git submodule add <url> _data/entities/<name>
-git submodule update --init _data/entities/<name>
+git submodule add <url> _data/organizations/<name>
+git submodule update --init _data/organizations/<name>
 ```
 
 ### B3 — Scaffold missing AWI structure
@@ -123,7 +123,7 @@ git submodule update --init _data/entities/<name>
 python3 .claude/skills/awi-client/scripts/import_client.py <name>
 ```
 
-Checks for missing AWI folders/files under `_data/entities/<name>/` and creates only what's absent — never overwrites existing content. Commits additions if anything was created.
+Checks for missing AWI folders/files under `_data/organizations/<name>/` and creates only what's absent — never overwrites existing content. Commits additions if anything was created.
 
 ---
 
@@ -134,12 +134,12 @@ Output:
 ```
 <name> client ready.
 
-  _data/entities/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
-  _data/entities/<name>/documentation/  ← context files, topic folders
-  _data/entities/<name>/codebase/       ← app submodules go here
+  _data/organizations/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
+  _data/organizations/<name>/documentation/  ← context files, topic folders
+  _data/organizations/<name>/codebase/       ← app submodules go here
 
 Next steps:
-  - Add codebase repos: git submodule add <url> _data/entities/<name>/codebase/<app>
+  - Add codebase repos: git submodule add <url> _data/organizations/<name>/codebase/<app>
   - /awi-user-login <username>
 ```
 

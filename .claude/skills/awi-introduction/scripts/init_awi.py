@@ -31,7 +31,7 @@ def init_data(path: Path = Path(".")):
     path = path.resolve()
 
     # Create _data/ subdirs
-    (path / "_data" / "clients").mkdir(parents=True, exist_ok=True)
+    (path / "_data" / "organizations").mkdir(parents=True, exist_ok=True)
     (path / "_data" / "users").mkdir(parents=True, exist_ok=True)
 
     # Create submodules registry
@@ -40,7 +40,7 @@ def init_data(path: Path = Path(".")):
         submodules_path.write_text(SUBMODULES_MD)
 
     print("_data/ initialized.")
-    print("  _data/entities/   — client submodules go here")
+    print("  _data/organizations/   — organization submodules go here")
     print("  _data/users/     — user submodules go here")
     print("  _data/submodules.md — submodule registry")
 

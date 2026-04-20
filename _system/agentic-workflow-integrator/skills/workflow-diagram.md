@@ -6,8 +6,8 @@
 flowchart TD
     subgraph SETUP["🔧 One-Time Setup"]
         awi_introduction["awi-introduction<br/>Explain AWI, link GitHub, set prefs"]
-        new_client["new-client<br/>Add client submodule"]
-        awi_introduction --> new_client
+        awi_client["awi-client<br/>Add or import client submodule"]
+        awi_introduction --> awi_client
     end
 
     subgraph IDENTITY["👤 Identity"]
@@ -63,7 +63,7 @@ flowchart TD
 
 | Phase | Skills | Cadence |
 |---|---|---|
-| Setup | awi-introduction → new-client | Once |
+| Setup | awi-introduction → awi-client | Once |
 | Identity | awi-user-login, awi-user-create | As needed |
 | Daily | today-start → today → break → today-end → wrap-session | Every day |
 | Planning | week → week-review → quarter → year | Fri / monthly |

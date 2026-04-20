@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, submodules) and scaffolds `_data/entities/<name>/` entries for personal and company contexts. Each entity follows the same `agenda/` + `documentation/` + `codebase/` structure.
+A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, submodules) and scaffolds `_data/organizations/<name>/` entries for personal and company contexts. Each entity follows the same `agenda/` + `documentation/` + `codebase/` structure.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
@@ -62,7 +62,7 @@ awi/
       workflow/                     - COS workflow documentation
 ```
 
-Each `_data/entities/<name>/` is a **separate git repo** registered as a submodule of AWI.
+Each `_data/organizations/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
 Use `/new-client <name>` to scaffold a new client repo and register it.
 
@@ -89,7 +89,18 @@ All files use YAML frontmatter with markdown body. See `_system/chief-of-staff/r
 
 **`<agenda-base>`** = `<user-root>agenda/`
 
-**Active client** — for operations targeting a company workspace (`_data/entities/<name>/`): infer from conversation context, or ask if ambiguous. Multiple clients may be active simultaneously.
+**Active client** — for operations targeting a company workspace (`_data/organizations/<name>/`): infer from conversation context, or ask if ambiguous. Multiple clients may be active simultaneously.
+
+### Directory Path Constants
+
+**Single source of truth: `.claude/skills/shared/scripts/paths.py`**
+
+All AWI directory paths are declared there. When a directory moves, update `paths.py` only — nothing else.
+
+**Rules:**
+
+- **Python scripts** — must import from `paths.py`, never hardcode path strings. Add `sys.path.insert` to reach `shared/scripts/` from any location.
+- **Markdown skill files** — must reference the constant name from `paths.py` (e.g. `ORGANIZATIONS_RELDIR`) when describing a path, never write the raw string. This ensures that if a path moves, the instruction stays semantically correct and the reader knows where to look for the real value.
 
 ## Memory & Routing
 
@@ -157,7 +168,7 @@ See [tables/skills.md](tables/skills.md) for the full command list.
 
 ## Script Directory Paths
 
-See [tables/dirs.md](tables/dirs.md) for the full directory map and import pattern.
+See [Path Resolution → Directory Path Constants](#directory-path-constants) above and `.claude/skills/shared/scripts/paths.py` for the full directory map and import pattern.
 
 ## Git as Audit Trail
 

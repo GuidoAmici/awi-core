@@ -15,8 +15,9 @@ from pathlib import Path
 AWI_ROOT = Path(__file__).resolve().parents[4]
 
 # ── Relative dir strings (for scaffolding) ────────────────────────────────────
-USERS_RELDIR           = "_data/users"
-ENTITIES_RELDIR        = "_data/entities"
+USERS_RELDIR                  = "_data/users"
+USER_PROFILE_INFERENCE_SUBDIR = "agenda/user-profile-inference"  # relative to user root (_data/users/<github-id>/), not AWI root
+ORGANIZATIONS_RELDIR   = "_data/organizations"
 SUBMODULES_MD_RELPATH  = "_data/submodules.md"
 
 SYSTEM_AWI_RELDIR      = "_system/agentic-workflow-integrator"
@@ -27,7 +28,7 @@ SYSTEM_GTD_RELDIR      = "_system/getting-things-done"
 USERS_DIR        = AWI_ROOT / USERS_RELDIR
 CURRENT_USER     = USERS_DIR / "current-user.md"
 
-ENTITIES_DIR     = AWI_ROOT / ENTITIES_RELDIR
+ORGANIZATIONS_DIR = AWI_ROOT / ORGANIZATIONS_RELDIR
 SUBMODULES_MD    = AWI_ROOT / SUBMODULES_MD_RELPATH
 
 SYSTEM_AWI_DIR      = AWI_ROOT / SYSTEM_AWI_RELDIR

@@ -17,6 +17,10 @@ import os
 import sys
 import json
 from collections import defaultdict
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "shared" / "scripts"))
+from paths import SYSTEM_AWI_RELDIR
 
 SKIP_FILES = {
     "workflow-diagram.md",
@@ -64,7 +68,7 @@ def node_id(skill_name):
 
 
 def main():
-    skills_dir = sys.argv[1] if len(sys.argv) > 1 else "_system/agentic-workflow-integrator/skills"
+    skills_dir = sys.argv[1] if len(sys.argv) > 1 else f"{SYSTEM_AWI_RELDIR}/skills"
     output_file = os.path.join(skills_dir, "workflow-diagram.md")
     config_file = os.path.join(skills_dir, "_workflow-config.json")
 

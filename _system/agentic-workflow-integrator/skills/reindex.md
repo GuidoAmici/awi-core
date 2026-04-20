@@ -7,7 +7,7 @@ hidden: true
 
 # reindex
 
-Create or update .abstract.md (L0) and .overview.md (L1) files across _system/ and _data/entities/.
+Create or update .abstract.md (L0) and .overview.md (L1) files across _system/ and _data/organizations/.
 
 **Tools:** Read, Write, Edit, Bash
 
