@@ -1,6 +1,13 @@
+---
+group: MAINTENANCE
+description: Create/update L0/L1 files
+order: 5
+hidden: true
+---
+
 # reindex
 
-Create or update .abstract.md (L0) and .overview.md (L1) files across _system/ and _clients/.
+Create or update .abstract.md (L0) and .overview.md (L1) files across _system/ and _data/entities/.
 
 **Tools:** Read, Write, Edit, Bash
 

@@ -1,3 +1,10 @@
+---
+group: SETUP
+description: Bootstrap repo structure
+order: 3
+hidden: true
+---
+
 # awi-initialize
 
 Bootstrap AWI repo file structure from scratch. Run once after /awi-introduction.
@@ -10,10 +17,10 @@ Bootstrap AWI repo file structure from scratch. Run once after /awi-introduction
 
 ```mermaid
 graph TD
-    A(["/awi-initialize"]) --> B[["ls _system/ _clients/"]]
+    A(["/awi-initialize"]) --> B[["ls _system/ _data/entities/"]]
     B -->|exists| C["STOP — already initialized"]
     B -->|missing| D[[python3 init_awi.py]]
-    D --> E[["Creates _system/ _clients/ CLAUDE.md .gitignore"]]
+    D --> E[["Creates _system/ _data/entities/ CLAUDE.md .gitignore"]]
     E --> F[[git init + initial commit]]
     F --> G[/"Confirm + handoff: /new-client"/]
     G --> H((log_command.py awi-initialize))

@@ -1,6 +1,12 @@
+---
+group: SETUP
+description: Add client submodule
+order: 2
+---
+
 # new-client
 
-Scaffold a new client repo and register as submodule under _clients/<name>/.
+Scaffold a new client repo and register as submodule under _data/entities/<name>/.
 
 **Tools:** Bash, Write
 

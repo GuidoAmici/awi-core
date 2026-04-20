@@ -1,3 +1,9 @@
+---
+group: SETUP
+description: Explain AWI, link GitHub, set prefs
+order: 1
+---
+
 # awi-introduction
 
 First-time AWI onboarding. Links GitHub account, sets language, response style, and session learning. Creates user profile.

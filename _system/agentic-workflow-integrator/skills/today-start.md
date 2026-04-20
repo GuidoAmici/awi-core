@@ -1,3 +1,9 @@
+---
+group: DAY
+description: Morning intake
+order: 1
+---
+
 # today-start
 
 Morning intake ritual. Captures energy, schedule, and commitments — writes check-in to daily file.

@@ -40,7 +40,7 @@ def init_data(path: Path = Path(".")):
         submodules_path.write_text(SUBMODULES_MD)
 
     print("_data/ initialized.")
-    print("  _data/clients/   — client submodules go here")
+    print("  _data/entities/   — client submodules go here")
     print("  _data/users/     — user submodules go here")
     print("  _data/submodules.md — submodule registry")
 

@@ -16,8 +16,7 @@ AWI_ROOT = Path(__file__).resolve().parents[4]
 
 # ── Relative dir strings (for scaffolding) ────────────────────────────────────
 USERS_RELDIR           = "_data/users"
-CLIENTS_RELDIR         = "_clients"
-DATA_CLIENTS_RELDIR    = "_data/clients"
+ENTITIES_RELDIR        = "_data/entities"
 SUBMODULES_MD_RELPATH  = "_data/submodules.md"
 
 SYSTEM_AWI_RELDIR      = "_system/agentic-workflow-integrator"
@@ -28,8 +27,7 @@ SYSTEM_GTD_RELDIR      = "_system/getting-things-done"
 USERS_DIR        = AWI_ROOT / USERS_RELDIR
 CURRENT_USER     = USERS_DIR / "current-user.md"
 
-CLIENTS_DIR      = AWI_ROOT / CLIENTS_RELDIR
-DATA_CLIENTS_DIR = AWI_ROOT / DATA_CLIENTS_RELDIR
+ENTITIES_DIR     = AWI_ROOT / ENTITIES_RELDIR
 SUBMODULES_MD    = AWI_ROOT / SUBMODULES_MD_RELPATH
 
 SYSTEM_AWI_DIR      = AWI_ROOT / SYSTEM_AWI_RELDIR

@@ -1,3 +1,9 @@
+---
+group: WORK
+description: Capture task
+order: 1
+---
+
 # new
 
 Quick capture — classify and file natural language input into the vault as task, project, person, or idea.

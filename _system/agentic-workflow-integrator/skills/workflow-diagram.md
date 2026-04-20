@@ -1,37 +1,53 @@
 # AWI Skills — Workflow Diagram
 
+<!-- AUTO-GENERATED — edit `_workflow-config.json` and skill frontmatter, not this file -->
+
 ```mermaid
 flowchart TD
     subgraph SETUP["🔧 One-Time Setup"]
-        A["awi-introduction<br/>Explain AWI, link GitHub,<br/>set prefs, scaffold repo"] --> C["new-client<br/>Add client submodule"]
+        awi_introduction["awi-introduction<br/>Explain AWI, link GitHub, set prefs"]
+        new_client["new-client<br/>Add client submodule"]
+        awi_introduction --> new_client
     end
 
     subgraph IDENTITY["👤 Identity"]
-        D["awi-user<br/>switch, login, create"]
+        awi_user_login["awi-user-login<br/>Load session user"]
+        awi_user_create["awi-user-create<br/>Create new vault user"]
     end
 
     subgraph DAY["📅 Daily Rhythm"]
-        E["today-start<br/>Morning intake"] --> F["today<br/>Hub, view, refresh plan"]
-        F --> G["break<br/>Log pause + motive"]
-        G --> F
-        F --> H["today-end<br/>Close day"]
-        H --> I["wrap-session<br/>Observations, save profile"]
+        today_start["today-start<br/>Morning intake"]
+        today["today<br/>Hub, view, refresh plan"]
+        break["break<br/>Log pause + motive"]
+        today_end["today-end<br/>Close day"]
+        wrap_session["wrap-session<br/>Observations, save profile"]
+        today_start --> today
+        today --> break
+        break --> today_end
+        today_end --> wrap_session
+        break --> today
     end
 
     subgraph PLANNING["🗓️ Planning Cadence"]
-        J["week<br/>Current batch"] --> K["week-review<br/>Friday re-rank"]
-        K --> L["quarter<br/>Quarter view"]
-        L --> M["year<br/>Year view"]
+        week["week<br/>Current batch"]
+        week_review["week-review<br/>Friday re-rank"]
+        quarter["quarter<br/>Quarter view"]
+        year["year<br/>Year view"]
+        week --> week_review
+        week_review --> quarter
+        quarter --> year
     end
 
     subgraph WORK["⚙️ Work Execution"]
-        N["new<br/>Capture task"] --> O["delegate<br/>Background agent"]
-        O --> P["history<br/>Audit git activity"]
+        new["new<br/>Capture task"]
+        delegate["delegate<br/>Background agent"]
+        history["history<br/>Audit git activity"]
+        new --> delegate
+        delegate --> history
     end
 
     subgraph MAINTENANCE["🔄 Maintenance"]
-        Q["awi-sync<br/>Sync all submodules"]
-        R["awi-layer-index<br/>Audit L0/L1 context files"]
+        awi_sync["awi-sync<br/>Sync all submodules"]
     end
 
     %% Cross-group flows
@@ -39,7 +55,7 @@ flowchart TD
     IDENTITY -.->|switch user| DAY
     DAY -->|plan work| PLANNING
     PLANNING -->|select tasks| WORK
-    WORK -->|end of day| I
+    WORK -->|end of day| wrap_session
     MAINTENANCE -.->|periodic| DAY
 ```
 
@@ -48,8 +64,8 @@ flowchart TD
 | Phase | Skills | Cadence |
 |---|---|---|
 | Setup | awi-introduction → new-client | Once |
-| Identity | awi-user | As needed |
+| Identity | awi-user-login, awi-user-create | As needed |
 | Daily | today-start → today → break → today-end → wrap-session | Every day |
 | Planning | week → week-review → quarter → year | Fri / monthly |
 | Work | new → delegate → history | Continuous |
-| Maintenance | awi-sync, awi-layer-index | Periodic |
+| Maintenance | awi-sync | Periodic |

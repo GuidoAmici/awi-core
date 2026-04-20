@@ -1,19 +1,19 @@
-# ─── Clients ─────────────────────────────────────────────────────────────────
+# ─── Entities ────────────────────────────────────────────────────────────────
 # One repo per company or person. Each contains agenda/, documentation/,
 # and codebase/ (with their own nested submodules). Operated via /awi-user-login.
 
-[submodule "_data/clients/newhaze"]
-	path = _data/clients/newhaze
+[submodule "_data/entities/newhaze"]
+	path = _data/entities/newhaze
 	url = https://github.com/GuidoAmici/newhaze-client.git
 	branch = only
 
-[submodule "_data/clients/rabbitek"]
-	path = _data/clients/rabbitek
+[submodule "_data/entities/rabbitek"]
+	path = _data/entities/rabbitek
 	url = https://github.com/GuidoAmici/rabbitek-client.git
 	branch = only
 
-[submodule "_data/clients/afin"]
-	path = _data/clients/afin
+[submodule "_data/entities/afin"]
+	path = _data/entities/afin
 	url = https://github.com/GuidoAmici/afin-client.git
 	branch = only
 

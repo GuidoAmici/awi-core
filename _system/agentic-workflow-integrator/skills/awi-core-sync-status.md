@@ -1,3 +1,10 @@
+---
+group: MAINTENANCE
+description: AWI/awi-core sync status
+order: 3
+hidden: true
+---
+
 # awi-core-sync-status
 
 Report sync status between AWI (private) and awi-core (public forkable repo).

@@ -1,6 +1,6 @@
 # AWI Taxonomy
 
-- **Client** — a company or personal context (maps to `_data/clients/<name>/`)
+- **Entity** — a company or personal context (maps to `_data/entities/<name>/`)
 - **Product** — user-facing offering, may span multiple apps
 - **App** — deployable codebase with its own repo (`codebase/`)
 - **Project** — time-bound initiative with scope and tasks

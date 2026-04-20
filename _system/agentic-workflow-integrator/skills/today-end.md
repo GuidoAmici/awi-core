@@ -1,3 +1,9 @@
+---
+group: DAY
+description: Close day
+order: 4
+---
+
 # today-end
 
 End-of-day retrospective. Reviews planned vs actual, energy, week pulse, and tomorrow's handoff.

@@ -10,7 +10,7 @@
    ```bash
    chmod +x .claude/hooks/auto-commit.sh
    ```
-3. Confirm file is under `_data/clients/`, `_data/users/`, or `_system/` (hook ignores other paths)
+3. Confirm file is under `_data/entities/`, `_data/users/`, or `_system/` (hook ignores other paths)
 
 ---
 

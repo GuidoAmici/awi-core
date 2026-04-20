@@ -6,7 +6,7 @@
 
 ## Codex CLI-specific
 
-- Codex has no post-tool hook. You MUST commit explicitly after every write to `_clients/` or `_system/` folders:
+- Codex has no post-tool hook. You MUST commit explicitly after every write to `_data/entities/` or `_system/` folders:
   ```bash
   git add <file> && git commit -m "cos: <action> - <description>"
   ```
