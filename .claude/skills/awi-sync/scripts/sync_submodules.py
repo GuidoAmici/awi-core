@@ -458,7 +458,7 @@ def _write_table_row(r: SubmoduleResult) -> None:
     REGISTRY_PATH.write_text("\n".join(new_lines))
 
 
-def update_registry(results: list[SubmoduleResult]) -> None:
+def update_registry(results: list[SubmoduleResult], root: Optional[dict] = None) -> None:
     """Rebuild Mermaid class lines from all results. Called once after all syncs."""
     if not REGISTRY_PATH.exists():
         return
@@ -467,6 +467,16 @@ def update_registry(results: list[SubmoduleResult]) -> None:
 
     # ── Rebuild Mermaid class lines ──────────────────────────────────────────
     by_class: dict[str, list[str]] = {"safe": [], "warning": [], "danger": []}
+
+    # AWI root node
+    if root is not None:
+        if root.get("status") == "failed":
+            by_class["danger"].append("AWI")
+        elif not root.get("pushed"):
+            by_class["warning"].append("AWI")
+        else:
+            by_class["safe"].append("AWI")
+
     for r in results:
         by_class[mermaid_class(r)].append(r.node_id)
 
@@ -583,10 +593,11 @@ def main() -> None:
     # 1. Sync submodules first
     results = scan()
     results = sync_all(results)
-    update_registry(results)
 
     # 2. Sync AWI root (captures any submodule pointer updates)
     root = sync_root()
+
+    update_registry(results, root=root)
 
     # 3. Mirror to awi-core dev-claude
     core = sync_awi_core()
