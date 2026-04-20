@@ -1,0 +1,5 @@
+Error: Exceeded USD budget (0.5)Slug: `research-competitor-pricing`.
+
+Will search MercadoLibre Argentina, brand sites, and international sources. When done, auto-reports via inbox and saves to `_data/users/42481462/agenda/outputs/2026-04-18-research-competitor-pricing.md`.
+
+Monitor: `python3 .claude/skills/delegate/scripts/delegate_monitor.py research-competitor-pricing`

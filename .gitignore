@@ -1,0 +1,24 @@
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/plugins/
+.obsidian/core-plugins-migration.json
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+
+# Local submodule status — machine-specific, not committed
+_data/submodules.md
+
+# Apps workspace
+apps/scripts/__pycache__/
+apps/package-lock.json
+
+# Public sync — local machine path, never committed
+.claude/config/public-repo-path
+
+# Supabase CLI temp files (contain project ref and connection URLs)
+supabase/

@@ -1,0 +1,33 @@
+Audit complete. Here's the summary:
+
+---
+
+## Verdict: NEEDS WORK
+
+**Fixes verified: 9/10 correct, 1 incomplete**
+
+| Fix | Status |
+|-----|--------|
+| 1. TopicModal onComplete id bug | ✅ Correct |
+| 2. TopicNode pulse prop | ✅ Correct |
+| 3. Token restore → guest user | ✅ Correct |
+| 4. Hardcoded URL removed | ✅ Correct |
+| 5. Race condition (functional update) | ⚠️ **Incomplete** — `setCompletedIds` fixed but lines 53-54 still compute `newCompleted`/`oldTopics` from stale closure |
+| 6. setTimeout cleanup | ✅ Correct |
+| 7. Empty Sugeridos message | ✅ Correct |
+| 8. opacity 0.6 for locked | ✅ Correct |
+| 9. CSS ellipsis | ✅ Correct (Sugeridos only) |
+| 10. Vite polling | ✅ Correct |
+
+**Remaining unresolved (from v1):**
+- **CRITICAL**: Chatbot still calls `api.anthropic.com` directly — no key, always 401, feature is dead
+- **HIGH**: API contract mismatch (snake_case docs vs camelCase code) — auth/badges may be broken in production
+- **HIGH**: Badge shape inconsistency — page-load badges won't render
+- **MEDIUM**: useEffect re-fetches on every completion, chatbot no context reset, no keyboard accessibility
+
+**3 new issues found:**
+- Derived-state race in `completeTopic` still present (partial fix)
+- `Chatbot.jsx:73` still uses naive `.slice(0,22)` truncation
+- `PostContentModal.onComplete` has no `requireAuth` guard — guests can trigger unauthenticated API calls silently
+
+**Final count: 1C / 2H / 4M / 3L = 10 issues** (down from 26, but the #1 critical remains untouched).

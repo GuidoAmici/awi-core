@@ -1,0 +1,13 @@
+{
+  "slug": "learn-ux-improvements",
+  "status": "completed",
+  "model": "opus",
+  "repo": "D:/GitHub/GuidoAmici/second-brain/apps/newhaze-learn",
+  "budget_usd": 2.0,
+  "prompt_preview": "You are a frontend developer implementing UX improvements to newhaze-learn, a cannabis education React app.\n\nTECH STACK: React 18, Vite, dark purple theme (bg #0b0810, accent #9b6fd4), font Rubik. No test suite \u2014 validate visually. All API calls go through apiFetch in src/api/client.js. No direct fe",
+  "started_at": "2026-03-20T02:45:25.325132",
+  "finished_at": "2026-03-20T02:49:22.744593",
+  "exit_code": 0,
+  "pid": 33764,
+  "duration": "3m 57s"
+}

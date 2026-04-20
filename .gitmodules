@@ -1,0 +1,35 @@
+# ─── Clients ─────────────────────────────────────────────────────────────────
+# One repo per company or person. Each contains agenda/, documentation/,
+# and codebase/ (with their own nested submodules). Operated via /awi-user-login.
+
+[submodule "_data/clients/newhaze"]
+	path = _data/clients/newhaze
+	url = https://github.com/GuidoAmici/newhaze-client.git
+	branch = only
+
+[submodule "_data/clients/rabbitek"]
+	path = _data/clients/rabbitek
+	url = https://github.com/GuidoAmici/rabbitek-client.git
+	branch = only
+
+[submodule "_data/clients/afin"]
+	path = _data/clients/afin
+	url = https://github.com/GuidoAmici/afin-client.git
+	branch = only
+
+# ─── Workframe ───────────────────────────────────────────────────────────────
+# Structural framework repos — shared scaffolding or engine dependencies.
+
+[submodule "_system/agency-agents"]
+	path = _system/agency-agents
+	url = https://github.com/msitarzewski/agency-agents.git
+	branch = main
+	upstream = true
+
+# ─── Workflow ─────────────────────────────────────────────────────────────────
+# Automation and tooling repos — delegation targets, AI employees, scripts.
+
+[submodule "_data/users/42481462"]
+	path = _data/users/42481462
+	url = https://github.com/GuidoAmici/my-awi-user.git
+	branch = only

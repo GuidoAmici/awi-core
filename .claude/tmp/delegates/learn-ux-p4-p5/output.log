@@ -1,0 +1,15 @@
+Both P4 and P5 are **already fully implemented and committed**:
+
+**P4** — committed at `0ea68df` with message `feat: P4 - dynamic next-level progress banner`. The dynamic logic is at lines 63–74 of App.jsx (`lv1Topics`, `lv2Topics`, `lv1Done`, `lv2Done`, `nextLevelMsg`) and used in the banner at line 247.
+
+**P5** — code is present in the same file (committed as part of P4 or earlier):
+- `guestCompletedCount` state (line 33-35) initialized from `newhaze_guest_progress` localStorage
+- `trackGuestCompletion` function (lines 46-57) updates localStorage on completion
+- Auth modal shows the context toast when `guestCompletedCount > 0` (lines 290-293)
+
+However, P5 **doesn't have its own dedicated commit**. The code was included in the P4 commit. If you want a proper P5 commit entry in the history, I'd need to separate it — but since the code is already live and working, there's nothing left to implement.
+
+Do you want me to:
+1. Leave it as-is (both features work, P4 has its commit, P5 code is there)
+2. Create an empty/documentation commit for P5 tracking purposes
+3. Something else?

@@ -1,0 +1,26 @@
+The output file has been updated with corrections from reading the actual source. Here's a summary of what the analysis covers:
+
+---
+
+## Analysis Summary — newhaze-learn UX Journey
+
+### Current Journey (verified against source)
+The app hard-blocks new users with a full-screen `AuthScreen` before showing any content. After auth, users land on the Study Map with 15 topics across 2 levels. The fatal flow break: after reading content in `PostContentModal`, the only CTA is "Hablar con tutor" — the completion button is back in `TopicModal`, creating a broken loop.
+
+### 7 Friction Points Found
+| | Issue | Severity |
+|--|--|--|
+| F1 | Auth wall before value delivery | High |
+| F2 | No onboarding / "start here" affordance | High |
+| F3 | Completion CTA in wrong modal (TopicModal, not PostContentModal) | High |
+| F4 | No celebration on completion (XP updates silently) | Medium |
+| F5 | Guest → auth conversion is jarring / uncontextualized | Medium |
+| F6 | "Next level" banner is hardcoded, not progress-reactive | Low-Med |
+| F7 | Chatbot gated behind login (removes potential wow moment) | Low |
+
+### 5 Prioritized Improvements
+1. **P1 (High/Low)** — Add "Completé este tema +100 XP" button at the bottom of `PostContentModal` — single button, existing handler
+2. **P2 (High/Medium)** — Remove auth wall; show app first, auth as opt-in modal (infrastructure already exists: `enterAsGuest` + `showAuthModal`)
+3. **P3 (High/Medium)** — Completion celebration: XP counter animation + badge toast (API already returns `newBadges` + `totalXp`, UI just ignores them)
+4. **P4 (Medium/Low)** — Make the "Próximo desbloqueo" banner dynamic based on `completedIds`
+5. **P5 (Medium/Medium)** — Context-aware AuthModal for guests ("Completaste tu primer tema 🎉 — guardá tu progreso")
