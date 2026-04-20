@@ -1,6 +1,6 @@
 ---
 name: awi-layer-index
-description: Audit and fix OpenViking L0/L1 context files (.abstract.md, .overview.md) across _system/, _data/users/, and _data/clients/. Step 1 always audits; step 2 optionally fixes gaps.
+description: Audit and fix OpenViking L0/L1 context files (.abstract.md, .overview.md) across _system/, _data/users/, and _data/entities/. Step 1 always audits; step 2 optionally fixes gaps.
 allowed-tools: Read, Write, Bash, Glob
 model: sonnet
 ---
@@ -34,7 +34,7 @@ find _data/clients -mindepth 1 -maxdepth 3 -type d | sort
 ```
 
 **Skip rules — do NOT flag or write for:**
-- Git submodule roots inside `_data/clients/<name>/codebase/` or `_data/clients/<name>/documentation/` — they have their own indexes
+- Git submodule roots inside `_data/entities/<name>/codebase/` or `_data/entities/<name>/documentation/` — they have their own indexes
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders (check at runtime)
 - Uninitialized submodule paths (empty directories)
@@ -50,8 +50,8 @@ FOLDER                                          .abstract.md   .overview.md
 _system/                                        OK             OK
 _data/users/                                    OK             —
 _data/users/<github-id>/                        OK             OK
-_data/clients/                                  OK             —
-_data/clients/<name>/agenda/                    OK             OK
+_data/entities/                                  OK             —
+_data/entities/<name>/agenda/                    OK             OK
 ...
 ```
 
@@ -104,20 +104,20 @@ Only for folders with 3+ subfolders or non-obvious rules:
 
 ### Codebase app pointer stubs
 
-Each app submodule in `_data/clients/<name>/codebase/` gets `.abstract.md` as a pointer stub:
+Each app submodule in `_data/entities/<name>/codebase/` gets `.abstract.md` as a pointer stub:
 
 ```
-Context: _data/clients/<name>/documentation/<app>.md
+Context: _data/entities/<name>/documentation/<app>.md
 ```
 
 Discover app submodule folders at runtime:
 ```bash
-git submodule status | awk '{print $2}' | grep "^_data/clients/"
+git submodule status | awk '{print $2}' | grep "^_data/entities/"
 ```
 
 ### Workspace submodule roots
 
-Each `_data/clients/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If initialized (content present), index it. If bare pointer, skip.
+Each `_data/entities/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If initialized (content present), index it. If bare pointer, skip.
 
 ### After writing
 
@@ -131,7 +131,7 @@ Report summary:
 |------|---------|---------|---------|
 | `_system/` | N | N | N |
 | `_data/users/` | N | N | N |
-| `_data/clients/` | N | N | N |
+| `_data/entities/` | N | N | N |
 
 ---
 

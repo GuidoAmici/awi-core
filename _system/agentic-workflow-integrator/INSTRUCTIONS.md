@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, submodules) and scaffolds `_data/clients/<name>/` entries for personal and company contexts. Each client follows the same `agenda/` + `documentation/` + `codebase/` structure.
+A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, submodules) and scaffolds `_data/entities/<name>/` entries for personal and company contexts. Each entity follows the same `agenda/` + `documentation/` + `codebase/` structure.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
@@ -39,7 +39,7 @@ awi/
   _data/                            - Runtime data (not framework docs)
     users/                          - One submodule per user (<github-id>/)
       current-user.md               - Points to active user's folder
-    clients/                        - One submodule per company/person
+    entities/                       - One submodule per company/person
       <name>/
         agenda/                     - Tasks, projects, people, daily, outputs, etc.
         documentation/              - Writing style, business profile, personal wiki
@@ -62,7 +62,7 @@ awi/
       workflow/                     - COS workflow documentation
 ```
 
-Each `_data/clients/<name>/` is a **separate git repo** registered as a submodule of AWI.
+Each `_data/entities/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
 Use `/new-client <name>` to scaffold a new client repo and register it.
 
@@ -89,7 +89,7 @@ All files use YAML frontmatter with markdown body. See `_system/chief-of-staff/r
 
 **`<agenda-base>`** = `<user-root>agenda/`
 
-**Active client** — for operations targeting a company workspace (`_data/clients/<name>/`): infer from conversation context, or ask if ambiguous. Multiple clients may be active simultaneously.
+**Active client** — for operations targeting a company workspace (`_data/entities/<name>/`): infer from conversation context, or ask if ambiguous. Multiple clients may be active simultaneously.
 
 ## Memory & Routing
 

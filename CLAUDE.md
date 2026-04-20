@@ -7,11 +7,11 @@
 ## Claude Code-specific
 
 - **Always run Bash commands using relative paths** (e.g. `bash .claude/hooks/get-datetime.sh full`, not absolute paths). Working directory is the project root.
-- PostToolUse hook auto-commits after Write/Edit operations on `_clients/` and `_system/` — do NOT commit manually unless asked.
+- PostToolUse hook auto-commits after Write/Edit operations on `_data/entities/` and `_system/` — do NOT commit manually unless asked.
 - Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user`, `/awi-introduction`, `/new-client`.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 
 ## End of Session
 
-Before closing every session, tell the user one or more things you observed or learned about them during the conversation — ideally things they may not be consciously aware of about themselves. Then save those observations to `_clients/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` with the user's name as the H1 heading and the date in the filename.
+Before closing every session, tell the user one or more things you observed or learned about them during the conversation — ideally things they may not be consciously aware of about themselves. Then save those observations to `_data/entities/guido-amici/agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` with the user's name as the H1 heading and the date in the filename.

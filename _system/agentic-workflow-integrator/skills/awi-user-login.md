@@ -1,3 +1,9 @@
+---
+group: IDENTITY
+description: Load session user
+order: 1
+---
+
 # awi-user-login
 
 Load person profile for the session. Greets by name, primes context from preferences and patterns.

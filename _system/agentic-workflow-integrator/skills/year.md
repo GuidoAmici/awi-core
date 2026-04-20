@@ -1,3 +1,9 @@
+---
+group: PLANNING
+description: Year view
+order: 4
+---
+
 # year
 
 Generate yearly plan with strategic goals, quarterly targets, and project roadmap.

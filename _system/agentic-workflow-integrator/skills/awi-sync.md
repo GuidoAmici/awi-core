@@ -1,3 +1,9 @@
+---
+group: MAINTENANCE
+description: Sync all submodules
+order: 1
+---
+
 # awi-sync
 
 Sync all AWI submodules (direct + nested). Pulls main, skips dirty repos, updates _data/submodules.md.

@@ -1,3 +1,9 @@
+---
+group: PLANNING
+description: Quarter view
+order: 3
+---
+
 # quarter
 
 Generate quarterly plan with goals, project milestones, and task roadmap.

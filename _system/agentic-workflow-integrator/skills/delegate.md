@@ -1,3 +1,9 @@
+---
+group: WORK
+description: Background agent
+order: 2
+---
+
 # delegate
 
 Delegate a task to a background agent. Runs silently; reports back via inbox on next message.

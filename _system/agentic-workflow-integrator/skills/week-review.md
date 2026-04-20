@@ -1,3 +1,9 @@
+---
+group: PLANNING
+description: Friday re-rank
+order: 2
+---
+
 # week-review
 
 Friday ritual. Review full backlog, re-rank priorities, select next week's work batch.

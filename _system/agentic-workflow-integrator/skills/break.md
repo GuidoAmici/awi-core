@@ -1,3 +1,9 @@
+---
+group: DAY
+description: Log pause + motive
+order: 3
+---
+
 # break
 
 Log a break to today's daily file. Tracks start/end and motive for accurate work time calculation.

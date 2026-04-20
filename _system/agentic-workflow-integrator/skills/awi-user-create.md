@@ -1,3 +1,9 @@
+---
+group: IDENTITY
+description: Create new vault user
+order: 2
+---
+
 # awi-user-create
 
 Create new AWI vault user and linked person profile via interactive Q&A.

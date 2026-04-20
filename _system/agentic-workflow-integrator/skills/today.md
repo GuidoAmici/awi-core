@@ -1,3 +1,9 @@
+---
+group: DAY
+description: Hub, view, refresh plan
+order: 2
+---
+
 # today
 
 Generate or refresh daily plan from due tasks and active projects. Re-runnable throughout the day.

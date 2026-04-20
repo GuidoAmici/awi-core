@@ -1,3 +1,9 @@
+---
+group: DAY
+description: Observations, save profile
+order: 5
+---
+
 # wrap-session
 
 End-of-session ritual. Session summary, daily file update, behavioral observations, unsaved info sweep, rename suggestion.

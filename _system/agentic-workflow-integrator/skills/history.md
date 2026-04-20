@@ -1,3 +1,9 @@
+---
+group: WORK
+description: Audit git activity
+order: 3
+---
+
 # history
 
 Show recent git activity (last 7 days) in readable format, grouped by day.

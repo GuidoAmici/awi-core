@@ -1,3 +1,9 @@
+---
+group: PLANNING
+description: Current batch
+order: 1
+---
+
 # week
 
 Display current week's plan. Read-only view — use /week-review to create or update.
