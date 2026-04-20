@@ -1,6 +1,6 @@
 ---
 name: awi-layer-index
-description: Audit and fix OpenViking L0/L1 context files (.abstract.md, .overview.md) across _system/, _data/users/, and _data/entities/. Step 1 always audits; step 2 optionally fixes gaps.
+description: Audit and fix OpenViking L0/L1 context files (.abstract.md, .overview.md) across _system/, _data/users/, and _data/organizations/. Step 1 always audits; step 2 optionally fixes gaps.
 allowed-tools: Read, Write, Bash, Glob
 model: sonnet
 ---
@@ -30,11 +30,11 @@ Invocation modes:
 ```bash
 find _system -mindepth 1 -type d | sort
 find _data/users -mindepth 1 -maxdepth 3 -type d | sort
-find _data/clients -mindepth 1 -maxdepth 3 -type d | sort
+find _data/organizations -mindepth 1 -maxdepth 3 -type d | sort
 ```
 
 **Skip rules — do NOT flag or write for:**
-- Git submodule roots inside `_data/entities/<name>/codebase/` or `_data/entities/<name>/documentation/` — they have their own indexes
+- Git submodule roots inside `_data/organizations/<name>/codebase/` or `_data/organizations/<name>/documentation/` — they have their own indexes
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders (check at runtime)
 - Uninitialized submodule paths (empty directories)
@@ -50,8 +50,8 @@ FOLDER                                          .abstract.md   .overview.md
 _system/                                        OK             OK
 _data/users/                                    OK             —
 _data/users/<github-id>/                        OK             OK
-_data/entities/                                  OK             —
-_data/entities/<name>/agenda/                    OK             OK
+_data/organizations/                                  OK             —
+_data/organizations/<name>/agenda/                    OK             OK
 ...
 ```
 
@@ -104,20 +104,20 @@ Only for folders with 3+ subfolders or non-obvious rules:
 
 ### Codebase app pointer stubs
 
-Each app submodule in `_data/entities/<name>/codebase/` gets `.abstract.md` as a pointer stub:
+Each app submodule in `_data/organizations/<name>/codebase/` gets `.abstract.md` as a pointer stub:
 
 ```
-Context: _data/entities/<name>/documentation/<app>.md
+Context: _data/organizations/<name>/documentation/<app>.md
 ```
 
 Discover app submodule folders at runtime:
 ```bash
-git submodule status | awk '{print $2}' | grep "^_data/entities/"
+git submodule status | awk '{print $2}' | grep "^_data/organizations/"
 ```
 
 ### Workspace submodule roots
 
-Each `_data/entities/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If initialized (content present), index it. If bare pointer, skip.
+Each `_data/organizations/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If initialized (content present), index it. If bare pointer, skip.
 
 ### After writing
 
@@ -131,7 +131,7 @@ Report summary:
 |------|---------|---------|---------|
 | `_system/` | N | N | N |
 | `_data/users/` | N | N | N |
-| `_data/entities/` | N | N | N |
+| `_data/organizations/` | N | N | N |
 
 ---
 

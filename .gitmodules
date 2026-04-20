@@ -2,18 +2,18 @@
 # One repo per company or person. Each contains agenda/, documentation/,
 # and codebase/ (with their own nested submodules). Operated via /awi-user-login.
 
-[submodule "_data/entities/newhaze"]
-	path = _data/entities/newhaze
+[submodule "_data/organizations/newhaze"]
+	path = _data/organizations/newhaze
 	url = https://github.com/GuidoAmici/newhaze-client.git
 	branch = only
 
-[submodule "_data/entities/rabbitek"]
-	path = _data/entities/rabbitek
+[submodule "_data/organizations/rabbitek"]
+	path = _data/organizations/rabbitek
 	url = https://github.com/GuidoAmici/rabbitek-client.git
 	branch = only
 
-[submodule "_data/entities/afin"]
-	path = _data/entities/afin
+[submodule "_data/organizations/afin"]
+	path = _data/organizations/afin
 	url = https://github.com/GuidoAmici/afin-client.git
 	branch = only
 

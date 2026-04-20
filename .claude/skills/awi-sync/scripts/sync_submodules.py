@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
-from paths import AWI_ROOT, SUBMODULES_MD
+from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR
 
 from sync_status import collect_core_files, collect_instance_files, md5
 
@@ -55,7 +55,7 @@ def build_node_id_map() -> dict[tuple[str, str], str]:
     mapping: dict[tuple[str, str], str] = {}
     for m in parse_gitmodules(AWI_ROOT / ".gitmodules"):
         path = m.get("path", m["name"])
-        if path.startswith("_data/users/"):
+        if path.startswith(USERS_RELDIR + "/"):
             node_id = "user"
         else:
             node_id = path.split("/")[-1].replace("-", "")
@@ -443,11 +443,11 @@ def _write_table_row(r: SubmoduleResult) -> None:
     lines = REGISTRY_PATH.read_text().splitlines()
     local_path = str(r.abs_path.relative_to(AWI_ROOT))
     anchor = f"`{local_path}`"
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    synced = r.sync_status in ("ok", "already_up_to_date", "pulled")
     branch_cell = f" `{r.branch or r.tracked_branch}` "
     sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
     status_cell = f" {clone_status_label(r)} "
-    sync_cell = f" {now} "
+    sync_cell = f" {datetime.now().strftime('%Y-%m-%d %H:%M')} " if synced else None
     new_lines: list[str] = []
     for line in lines:
         if anchor in line and line.strip().startswith("|"):
@@ -456,7 +456,8 @@ def _write_table_row(r: SubmoduleResult) -> None:
                 parts[-5] = branch_cell
                 parts[-4] = sha_cell
                 parts[-3] = status_cell
-                parts[-2] = sync_cell
+                if sync_cell is not None:
+                    parts[-2] = sync_cell
                 line = "|".join(parts)
         new_lines.append(line)
     REGISTRY_PATH.write_text("\n".join(new_lines))

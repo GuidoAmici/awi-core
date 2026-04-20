@@ -28,13 +28,13 @@ git check-ignore -q "$FILE_PATH" 2>/dev/null && exit 0
 
 # Derive type from path
 # Structure:
-#   _data/entities/<name>/agenda/<type>/  — operational content
-#   _data/entities/<name>/documentation/  — context/wiki
-#   _data/entities/<name>/codebase/       — code
+#   _data/organizations/<name>/agenda/<type>/  — operational content
+#   _data/organizations/<name>/documentation/  — context/wiki
+#   _data/organizations/<name>/codebase/       — code
 #   _system/                               — framework docs
 #   _system/users/                         — vault users
 IFS='/' read -ra PARTS <<< "$REL_PATH"
-if [ "${PARTS[0]}" = "_data" ] && [ "${PARTS[1]}" = "entities" ]; then
+if [ "${PARTS[0]}" = "_data" ] && [ "${PARTS[1]}" = "organizations" ]; then
   # PARTS[2] = workspace name, PARTS[3] = agenda|documentation|codebase, PARTS[4] = subfolder
   LAYER="${PARTS[3]}"
   SUBFOLDER="${PARTS[4]}"
@@ -57,7 +57,7 @@ if [ "${PARTS[0]}" = "_data" ] && [ "${PARTS[1]}" = "entities" ]; then
   elif [ "$LAYER" = "codebase" ]; then
     TYPE="codebase"
   else
-    TYPE="${LAYER:-entities}"
+    TYPE="${LAYER:-organizations}"
   fi
 elif [ "${PARTS[0]}" = "_system" ]; then
   if [ "${PARTS[1]}" = "users" ]; then

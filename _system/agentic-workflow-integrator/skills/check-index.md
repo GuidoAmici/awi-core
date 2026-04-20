@@ -7,7 +7,7 @@ hidden: true
 
 # check-index
 
-Read-only audit of _system/ and _data/entities/ for missing .abstract.md and .overview.md files.
+Read-only audit of _system/ and _data/organizations/ for missing .abstract.md and .overview.md files.
 
 **Tools:** Bash
 

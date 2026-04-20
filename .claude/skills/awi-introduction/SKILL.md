@@ -22,7 +22,7 @@ One command. No prior knowledge needed. Covers everything from "what is this?" t
 Check if `_data/` is already populated:
 
 ```bash
-ls _data/users/ _data/entities/ 2>/dev/null
+ls _data/users/ _data/organizations/ 2>/dev/null
 ```
 
 If both exist and are non-empty, stop and say:
@@ -59,7 +59,7 @@ Wait for reply.
 ```
 AWI works by organizing everything into two folders:
 
-  _data/entities/   — one folder per client or project
+  _data/organizations/   — one folder per organization or project
   _system/    — your preferences and framework config
 
 Each client has:
