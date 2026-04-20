@@ -344,17 +344,32 @@ def sync_root() -> dict:
     return result
 
 
+def find_awi_core_path(awi_root: Path) -> Optional[Path]:
+    """Discover awi-core by scanning all .gitmodules files for GuidoAmici/awi-core."""
+    for gitmodules in sorted(awi_root.rglob(".gitmodules")):
+        if ".git" in gitmodules.parts:
+            continue
+        current_path = None
+        for line in gitmodules.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("path ="):
+                current_path = line.split("=", 1)[1].strip()
+            elif line.startswith("url =") and "GuidoAmici/awi-core" in line:
+                if current_path:
+                    return gitmodules.parent / current_path
+    return None
+
+
 def sync_awi_core() -> dict:
-    """Mirror drifted/missing whitelisted files from AWI to awi-core dev-claude."""
+    """Mirror instance source files to awi-core dev-claude."""
     result: dict = {"drift": [], "missing": [], "committed": False,
                     "pushed": False, "status": "ok", "error": None}
 
-    public_repo_path = AWI_ROOT / ".claude" / "config" / "public-repo-path"
-    core_root = AWI_ROOT / public_repo_path.read_text().strip()
+    core_root = find_awi_core_path(AWI_ROOT)
 
-    if not core_root.is_dir():
+    if not core_root or not core_root.is_dir():
         result["status"] = "failed"
-        result["error"] = f"awi-core not found at {core_root}"
+        result["error"] = "awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules"
         return result
 
     res = git(["checkout", "dev-claude"], cwd=core_root)
