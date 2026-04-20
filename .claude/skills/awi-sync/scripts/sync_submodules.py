@@ -40,6 +40,7 @@ _NESTED_NODE_IDS: dict[tuple[str, str], str] = {
     ("newhaze", "codebase/newhaze-ui"): "ui",
     ("newhaze", "codebase/newhaze-website"): "website",
     ("newhaze", "documentation/wiki"): "wiki",
+    ("rabbitek", "codebase/awi-core"): "awicore",
 }
 
 
@@ -56,7 +57,7 @@ def build_node_id_map() -> dict[tuple[str, str], str]:
         if path.startswith("_data/users/"):
             node_id = "user"
         else:
-            node_id = path.split("/")[-1]
+            node_id = path.split("/")[-1].replace("-", "")
         mapping[("AWI", path)] = node_id
     mapping.update(_NESTED_NODE_IDS)
     return mapping
