@@ -4,28 +4,35 @@
 
 For each submodule:
   1. Check if cloned locally
-  2. Check for uncommitted changes (skips sync if dirty)
-  3. Checkout main and pull
-  4. Report result
+  2. Remove .gitkeep from populated folders
+  3. Commit any uncommitted changes (git add -A)
+  4. Checkout tracked branch and pull
+  5. Push to remote
+
+After submodules: sync AWI root itself, then mirror drift to awi-core dev-claude.
 
 Outputs a human-readable report and updates _data/submodules.md.
 """
 
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-AWI_ROOT = Path(__file__).resolve().parents[4]
-REGISTRY_PATH = AWI_ROOT / "_data" / "submodules.md"
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
+from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR
 
-# Maps (parent_label, submodule_path) -> Mermaid node ID
-NODE_ID_MAP: dict[tuple[str, str], str] = {
-    ("AWI", "_data/clients/newhaze"): "newhaze",
-    ("AWI", "_data/clients/awi-core"): "awi-core",
-    ("AWI", "_data/clients/afin"): "afin",
-    ("AWI", "_data/users/42481462"): "user",
+from sync_status import collect_core_files, collect_instance_files, md5
+
+REGISTRY_PATH = SUBMODULES_MD
+
+# Nested display names (parent_label, relative_path) -> short Mermaid node ID.
+# AWI-level entries are built dynamically in build_node_id_map() — no hardcoding needed there.
+# Update this dict when adding repos inside a client submodule.
+_NESTED_NODE_IDS: dict[tuple[str, str], str] = {
     ("newhaze", "codebase/newhaze-api"): "api",
     ("newhaze", "codebase/newhaze-b2b-panel"): "b2b",
     ("newhaze", "codebase/newhaze-consumer-panel"): "consumer",
@@ -34,7 +41,27 @@ NODE_ID_MAP: dict[tuple[str, str], str] = {
     ("newhaze", "codebase/newhaze-ui"): "ui",
     ("newhaze", "codebase/newhaze-website"): "website",
     ("newhaze", "documentation/wiki"): "wiki",
+    ("rabbitek", "codebase/awi-core"): "awicore",
 }
+
+
+def build_node_id_map() -> dict[tuple[str, str], str]:
+    """Build the full node ID map dynamically.
+
+    AWI-level: derived from .gitmodules — basename of path, except _data/users/* → "user".
+    Nested: from _NESTED_NODE_IDS (configured manually per client).
+    Falls back to basename if not in map (see scan()).
+    """
+    mapping: dict[tuple[str, str], str] = {}
+    for m in parse_gitmodules(AWI_ROOT / ".gitmodules"):
+        path = m.get("path", m["name"])
+        if path.startswith(USERS_RELDIR + "/"):
+            node_id = "user"
+        else:
+            node_id = path.split("/")[-1].replace("-", "")
+        mapping[("AWI", path)] = node_id
+    mapping.update(_NESTED_NODE_IDS)
+    return mapping
 
 
 # ── Data model ────────────────────────────────────────────────────────────────
@@ -53,9 +80,12 @@ class SubmoduleResult:
     cloned: bool = False
     branch: Optional[str] = None
     pinned_sha: Optional[str] = None
+    upstream: bool = False
     dirty: bool = False
     dirty_files: list = field(default_factory=list)
-    # ok | already_up_to_date | pulled | skipped | failed | not_cloned
+    committed: bool = False
+    pushed: bool = False
+    # ok | already_up_to_date | pulled | failed | not_cloned
     sync_status: str = "not_cloned"
     error: Optional[str] = None
 
@@ -86,6 +116,34 @@ def is_valid_git_repo(path: Path) -> bool:
     return r.returncode == 0
 
 
+def in_nested_repo(file_path: Path, repo_root: Path) -> bool:
+    """True if file_path is inside a nested git repo (submodule boundary)."""
+    p = file_path.parent
+    while p != repo_root:
+        if (p / ".git").exists():
+            return True
+        p = p.parent
+    return False
+
+
+def clean_gitkeeps(repo_root: Path) -> None:
+    """Remove .gitkeep from populated folders; create .gitkeep in empty folders."""
+    for dirpath in repo_root.rglob("*"):
+        if not dirpath.is_dir():
+            continue
+        if in_nested_repo(dirpath, repo_root):
+            continue
+        contents = list(dirpath.iterdir())
+        non_gitkeep = [f for f in contents if f.name != ".gitkeep"]
+        gitkeep = dirpath / ".gitkeep"
+        if non_gitkeep:
+            if gitkeep.exists():
+                gitkeep.unlink()
+        else:
+            if not gitkeep.exists():
+                gitkeep.touch()
+
+
 # ── Submodule discovery ───────────────────────────────────────────────────────
 
 
@@ -114,6 +172,7 @@ def parse_gitmodules(path: Path) -> list[dict]:
 def scan() -> list[SubmoduleResult]:
     """Discover all submodules: AWI-level first, then nested inside each client."""
     results: list[SubmoduleResult] = []
+    node_id_map = build_node_id_map()
 
     # AWI direct submodules
     awi_modules = parse_gitmodules(AWI_ROOT / ".gitmodules")
@@ -121,7 +180,7 @@ def scan() -> list[SubmoduleResult]:
         sub_path = m.get("path", m["name"])
         abs_path = AWI_ROOT / sub_path
         name = sub_path.split("/")[-1]
-        node_id = NODE_ID_MAP.get(("AWI", sub_path), name)
+        node_id = node_id_map.get(("AWI", sub_path), name)
         results.append(SubmoduleResult(
             name=name,
             path=sub_path,
@@ -132,6 +191,7 @@ def scan() -> list[SubmoduleResult]:
             node_id=node_id,
             pinned_sha=get_pinned_sha(AWI_ROOT, sub_path),
             tracked_branch=m.get("branch", "main"),
+            upstream=m.get("upstream", "false").lower() == "true",
         ))
 
     # Nested submodules — scan each cloned client
@@ -143,7 +203,7 @@ def scan() -> list[SubmoduleResult]:
             sub_path = m.get("path", m["name"])
             abs_path = parent.abs_path / sub_path
             name = sub_path.split("/")[-1]
-            node_id = NODE_ID_MAP.get((parent.name, sub_path), name)
+            node_id = node_id_map.get((parent.name, sub_path), name)
             results.append(SubmoduleResult(
                 name=name,
                 path=sub_path,
@@ -184,19 +244,23 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     res = git(["branch", "--show-current"], cwd=path)
     r.branch = res.stdout.strip() or None  # None = detached HEAD
 
-    # Uncommitted changes
+    # Remove .gitkeep from populated folders (stays within this repo boundary)
+    clean_gitkeeps(path)
+
+    # Uncommitted changes — commit everything
     res = git(["status", "--porcelain"], cwd=path)
     dirty_lines = [l for l in res.stdout.splitlines() if l.strip()]
     r.dirty = bool(dirty_lines)
     r.dirty_files = dirty_lines[:5]
 
     if r.dirty:
-        r.sync_status = "skipped"
-        r.error = (
-            f"{len(dirty_lines)} uncommitted file(s). "
-            "Commit or stash before syncing."
-        )
-        return r
+        git(["add", "-A"], cwd=path)
+        res = git(["commit", "-m", "cos: sync - stage local changes"], cwd=path)
+        if res.returncode != 0:
+            r.sync_status = "failed"
+            r.error = f"Commit failed: {res.stderr.strip()}"
+            return r
+        r.committed = True
 
     # Checkout tracked branch
     target = r.tracked_branch
@@ -215,16 +279,142 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
         r.error = f"Pull failed: {res.stderr.strip()}"
         return r
 
-    r.sync_status = (
-        "already_up_to_date"
-        if "Already up to date" in res.stdout
-        else "pulled"
-    )
+    pulled = "Already up to date" not in res.stdout
+
+    # Push (skip for upstream-only repos)
+    if not r.upstream:
+        res = git(["push", "origin", target], cwd=path)
+        if res.returncode != 0:
+            r.sync_status = "failed"
+            r.error = f"Push failed: {res.stderr.strip()}"
+            return r
+        r.pushed = True
+
+    r.sync_status = "pulled" if pulled else "already_up_to_date"
     return r
 
 
 def sync_all(results: list[SubmoduleResult]) -> list[SubmoduleResult]:
-    return [sync_one(r) for r in results]
+    synced = []
+    for r in results:
+        r = sync_one(r)
+        synced.append(r)
+        _write_table_row(r)
+    return synced
+
+
+def sync_root() -> dict:
+    """Sync the AWI root repo (commit + pull + push on current branch).
+    Runs after submodules so updated submodule pointers are included.
+    """
+    path = AWI_ROOT
+    result: dict = {"branch": None, "committed": False, "pushed": False,
+                    "status": "already_up_to_date", "error": None}
+
+    res = git(["branch", "--show-current"], cwd=path)
+    branch = res.stdout.strip()
+    result["branch"] = branch
+
+    clean_gitkeeps(path)
+
+    res = git(["status", "--porcelain"], cwd=path)
+    dirty = [l for l in res.stdout.splitlines() if l.strip()]
+    if dirty:
+        git(["add", "-A"], cwd=path)
+        res = git(["commit", "-m", "cos: sync - stage local changes"], cwd=path)
+        if res.returncode != 0:
+            result["status"] = "failed"
+            result["error"] = f"Commit failed: {res.stderr.strip()}"
+            return result
+        result["committed"] = True
+
+    res = git(["pull", "origin", branch], cwd=path)
+    if res.returncode != 0:
+        result["status"] = "failed"
+        result["error"] = f"Pull failed: {res.stderr.strip()}"
+        return result
+    if "Already up to date" not in res.stdout:
+        result["status"] = "pulled"
+
+    res = git(["push", "origin", branch], cwd=path)
+    if res.returncode != 0:
+        result["status"] = "failed"
+        result["error"] = f"Push failed: {res.stderr.strip()}"
+        return result
+    result["pushed"] = True
+
+    return result
+
+
+def find_awi_core_path(awi_root: Path) -> Optional[Path]:
+    """Discover awi-core by scanning all .gitmodules files for GuidoAmici/awi-core."""
+    for gitmodules in sorted(awi_root.rglob(".gitmodules")):
+        if ".git" in gitmodules.parts:
+            continue
+        current_path = None
+        for line in gitmodules.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("path ="):
+                current_path = line.split("=", 1)[1].strip()
+            elif line.startswith("url =") and "GuidoAmici/awi-core" in line:
+                if current_path:
+                    return gitmodules.parent / current_path
+    return None
+
+
+def sync_awi_core() -> dict:
+    """Mirror instance source files to awi-core dev-claude."""
+    result: dict = {"drift": [], "missing": [], "committed": False,
+                    "pushed": False, "status": "ok", "error": None}
+
+    core_root = find_awi_core_path(AWI_ROOT)
+
+    if not core_root or not core_root.is_dir():
+        result["status"] = "failed"
+        result["error"] = "awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules"
+        return result
+
+    res = git(["checkout", "dev-claude"], cwd=core_root)
+    if res.returncode != 0:
+        result["status"] = "failed"
+        result["error"] = f"Cannot checkout dev-claude: {res.stderr.strip()}"
+        return result
+
+    local_files = collect_instance_files(AWI_ROOT)
+    core_files = collect_core_files(core_root)
+
+    for rel, local_path in sorted(local_files.items()):
+        if rel in core_files:
+            if md5(local_path) != md5(core_files[rel]):
+                result["drift"].append(rel)
+                shutil.copy2(local_path, core_root / rel)
+        else:
+            result["missing"].append(rel)
+            dest = core_root / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(local_path, dest)
+
+    if not result["drift"] and not result["missing"]:
+        return result
+
+    git(["add", "-A"], cwd=core_root)
+    n = len(result["drift"]) + len(result["missing"])
+    res = git(["commit", "-m", f"cos: sync - mirror {n} file(s) from AWI"], cwd=core_root)
+    if res.returncode != 0:
+        result["status"] = "failed"
+        result["error"] = f"awi-core commit failed: {res.stderr.strip()}"
+        return result
+    result["committed"] = True
+
+    res = git(["push", "origin", "dev-claude"], cwd=core_root)
+    if res.returncode != 0:
+        result["status"] = "failed"
+        result["error"] = f"awi-core push failed: {res.stderr.strip()}"
+        return result
+    result["pushed"] = True
+    result["status"] = "synced"
+
+    return result
 
 
 # ── Registry update ───────────────────────────────────────────────────────────
@@ -233,7 +423,7 @@ def sync_all(results: list[SubmoduleResult]) -> list[SubmoduleResult]:
 def mermaid_class(r: SubmoduleResult) -> str:
     if not r.cloned:
         return "danger"
-    if r.dirty or r.sync_status in ("failed", "skipped"):
+    if r.sync_status == "failed":
         return "warning"
     return "safe"
 
@@ -241,15 +431,40 @@ def mermaid_class(r: SubmoduleResult) -> str:
 def clone_status_label(r: SubmoduleResult) -> str:
     if not r.cloned:
         return "🔴 not cloned"
-    branch = r.branch or "detached"
-    if r.sync_status == "skipped":
-        return f"🟡 dirty · {branch}"
     if r.sync_status == "failed":
-        return f"🟡 sync failed · {branch}"
-    return f"🟢 cloned · {branch}"
+        return "🟡 sync failed"
+    return "🟢 cloned"
 
 
-def update_registry(results: list[SubmoduleResult]) -> None:
+def _write_table_row(r: SubmoduleResult) -> None:
+    """Update the registry table row for a single submodule. Called after each sync."""
+    if not REGISTRY_PATH.exists():
+        return
+    lines = REGISTRY_PATH.read_text().splitlines()
+    local_path = str(r.abs_path.relative_to(AWI_ROOT))
+    anchor = f"`{local_path}`"
+    synced = r.sync_status in ("ok", "already_up_to_date", "pulled")
+    branch_cell = f" `{r.branch or r.tracked_branch}` "
+    sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
+    status_cell = f" {clone_status_label(r)} "
+    sync_cell = f" {datetime.now().strftime('%Y-%m-%d %H:%M')} " if synced else None
+    new_lines: list[str] = []
+    for line in lines:
+        if anchor in line and line.strip().startswith("|"):
+            parts = line.split("|")
+            if len(parts) >= 8:
+                parts[-5] = branch_cell
+                parts[-4] = sha_cell
+                parts[-3] = status_cell
+                if sync_cell is not None:
+                    parts[-2] = sync_cell
+                line = "|".join(parts)
+        new_lines.append(line)
+    REGISTRY_PATH.write_text("\n".join(new_lines))
+
+
+def update_registry(results: list[SubmoduleResult], root: Optional[dict] = None) -> None:
+    """Rebuild Mermaid class lines from all results. Called once after all syncs."""
     if not REGISTRY_PATH.exists():
         return
 
@@ -257,6 +472,16 @@ def update_registry(results: list[SubmoduleResult]) -> None:
 
     # ── Rebuild Mermaid class lines ──────────────────────────────────────────
     by_class: dict[str, list[str]] = {"safe": [], "warning": [], "danger": []}
+
+    # AWI root node
+    if root is not None:
+        if root.get("status") == "failed":
+            by_class["danger"].append("AWI")
+        elif not root.get("pushed"):
+            by_class["warning"].append("AWI")
+        else:
+            by_class["safe"].append("AWI")
+
     for r in results:
         by_class[mermaid_class(r)].append(r.node_id)
 
@@ -280,27 +505,7 @@ def update_registry(results: list[SubmoduleResult]) -> None:
         else:
             updated.append(line)
 
-    lines = updated
-
-    # ── Update table rows (Pinned SHA + Clone status) ────────────────────────
-    for r in results:
-        local_path = str(r.abs_path.relative_to(AWI_ROOT))
-        anchor = f"`{local_path}`"
-        sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
-        status_cell = f" {clone_status_label(r)} "
-
-        new_lines: list[str] = []
-        for line in lines:
-            if anchor in line and line.strip().startswith("|"):
-                parts = line.split("|")
-                if len(parts) >= 8:
-                    parts[-3] = sha_cell
-                    parts[-2] = status_cell
-                    line = "|".join(parts)
-            new_lines.append(line)
-        lines = new_lines
-
-    REGISTRY_PATH.write_text("\n".join(lines))
+    REGISTRY_PATH.write_text("\n".join(updated))
 
 
 # ── Report ────────────────────────────────────────────────────────────────────
@@ -310,7 +515,6 @@ STATUS_ICON = {
     "ok": "✓",
     "already_up_to_date": "✓",
     "pulled": "↓",
-    "skipped": "⚠",
     "failed": "✗",
     "not_cloned": "✗",
 }
@@ -319,21 +523,32 @@ STATUS_LABEL = {
     "ok": "up to date",
     "already_up_to_date": "up to date",
     "pulled": "pulled",
-    "skipped": "skipped (dirty)",
     "failed": "failed",
     "not_cloned": "not cloned",
 }
 
 
-def print_report(results: list[SubmoduleResult]) -> int:
+def print_report(results: list[SubmoduleResult], root: dict, core: dict) -> int:
     ok = sum(1 for r in results if r.sync_status in ("ok", "already_up_to_date", "pulled"))
-    skipped = sum(1 for r in results if r.sync_status == "skipped")
     failed = sum(1 for r in results if r.sync_status in ("failed", "not_cloned"))
 
     print()
     print("AWI Submodule Sync")
     print("─" * 52)
 
+    # Root
+    print("\n  [AWI root]")
+    icon = STATUS_ICON.get(root["status"], "?")
+    label = STATUS_LABEL.get(root["status"], root["status"])
+    branch_str = f" · {root['branch']}" if root["branch"] else ""
+    tags = (" [committed]" if root["committed"] else "") + (" [pushed]" if root["pushed"] else "")
+    print(f"  {icon}  {'my-awi-instance':<36} {label}{branch_str}{tags}")
+    if root["error"]:
+        print(f"     → {root['error']}")
+    if root["status"] == "failed":
+        failed += 1
+
+    # Submodules
     current_parent = None
     for r in results:
         if r.parent != current_parent:
@@ -344,31 +559,55 @@ def print_report(results: list[SubmoduleResult]) -> int:
         label = STATUS_LABEL.get(r.sync_status, r.sync_status)
         indent = "    " if r.parent != "AWI" else "  "
         branch_str = f" · {r.branch}" if r.branch and r.cloned else ""
-        print(f"{indent}{icon}  {r.name:<36} {label}{branch_str}")
-
+        tags = (
+            (" [committed]" if r.committed else "")
+            + (" [upstream]" if r.upstream else (" [pushed]" if r.pushed else ""))
+        )
+        print(f"{indent}{icon}  {r.name:<36} {label}{branch_str}{tags}")
         if r.error:
             print(f"{indent}   → {r.error}")
-        for f in r.dirty_files:
-            print(f"{indent}     {f}")
+
+    # awi-core
+    print("\n  [awi-core → dev-claude]")
+    if core["status"] == "ok":
+        print(f"  ✓  {'awi-core':<36} up to date")
+    elif core["status"] == "synced":
+        n_drift = len(core["drift"])
+        n_missing = len(core["missing"])
+        tags = (" [committed]" if core["committed"] else "") + (" [pushed]" if core["pushed"] else "")
+        print(f"  ↓  {'awi-core':<36} {n_drift} drift, {n_missing} missing synced{tags}")
+    elif core["status"] == "failed":
+        print(f"  ✗  {'awi-core':<36} failed")
+        print(f"     → {core['error']}")
+        failed += 1
 
     print()
     print("─" * 52)
-    print(f"✓ {ok} synced   ⚠ {skipped} skipped   ✗ {failed} failed")
+    print(f"✓ {ok} submodules synced   ✗ {failed} failed")
     print()
     print("_data/submodules.md updated.")
     print()
 
-    return 1 if (failed > 0 or skipped > 0) else 0
+    return 1 if failed > 0 else 0
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 
 def main() -> None:
+    # 1. Sync submodules first
     results = scan()
     results = sync_all(results)
-    update_registry(results)
-    exit_code = print_report(results)
+
+    # 2. Sync AWI root (captures any submodule pointer updates)
+    root = sync_root()
+
+    update_registry(results, root=root)
+
+    # 3. Mirror to awi-core dev-claude
+    core = sync_awi_core()
+
+    exit_code = print_report(results, root, core)
     sys.exit(exit_code)
 
 

@@ -11,6 +11,18 @@ Run every Friday. Reviews the full backlog, re-ranks by priority, and selects ne
 
 ---
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_data/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user`.
+
+---
+
 ## Step 1 — Gather the full picture
 
 ```bash
@@ -19,13 +31,13 @@ bash .claude/hooks/get-datetime.sh full
 
 1. **All pending/in-progress tasks:**
    ```bash
-   grep -rl "status: pending\|status: in-progress" _documentation/_agenda/tasks/ 2>/dev/null
+   grep -rl "status: pending\|status: in-progress" <agenda-base>tasks/ 2>/dev/null
    ```
    Read each. Extract: `priority`, `energy`, `duration`, `due`, `product`, `feature`.
 
 2. **Active projects:**
    ```bash
-   grep -rl "status: active" _documentation/_agenda/projects/ 2>/dev/null
+   grep -rl "status: active" <agenda-base>projects/ 2>/dev/null
    ```
    Read each for next actions.
 
@@ -69,7 +81,7 @@ The operator picks. For each selected item, confirm or adjust:
 
 ## Step 4 — Write weekly file
 
-Create `_documentation/_agenda/weekly/YYYY-WNN.md`:
+Create `<agenda-base>weekly/YYYY-WNN.md`:
 
 ```markdown
 ---
@@ -104,10 +116,10 @@ week: YYYY-WNN
 
 ## Step 5 — Mental model selection
 
-Choose a mental model from `_documentation/_agenda/ideas/mental-models/` that is **relevant to this week's selected work**, not random.
+Choose a mental model from `<agenda-base>ideas/mental-models/` that is **relevant to this week's selected work**, not random.
 
 To choose:
-1. Read `_documentation/_agenda/ideas/mental-models/_index.md` for the full list
+1. Read `<agenda-base>ideas/mental-models/_index.md` for the full list
 2. Look at the selected tasks and active projects for the week
 3. Pick the model that best applies to the dominant theme (e.g., negotiation week → "incentives"; refactoring week → "first-principles"; overloaded week → "opportunity-cost")
 4. Write a one-line justification in the weekly file

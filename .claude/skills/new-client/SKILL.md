@@ -1,11 +1,11 @@
 ---
 name: new-client
-description: Scaffold a new client repo with agenda/, documentation/, and codebase/ structure, then register as a submodule under _clients/<name>/. Usage: /new-client <name>
+description: Scaffold a new client repo with agenda/, documentation/, and codebase/ structure, then register as a submodule under _data/entities/<name>/. Usage: /new-client <name>
 ---
 
 # /new-client — Add a Client
 
-Creates a new standalone git repo for a company or client and registers it as a submodule under `_clients/<name>/`.
+Creates a new standalone git repo for a company or client and registers it as a submodule under `_data/entities/<name>/`.
 
 ## Usage
 
@@ -68,8 +68,8 @@ Should I create a GitHub repo for <name>? (y/n)
 - **Yes** →
   ```bash
   gh repo create GuidoAmici/<name> --private --description "<name> workspace"
-  git -C _clients/<name> remote add origin https://github.com/GuidoAmici/<name>.git
-  git -C _clients/<name> push -u origin main
+  git -C _data/entities/<name> remote add origin https://github.com/GuidoAmici/<name>.git
+  git -C _data/entities/<name> push -u origin main
   ```
 - **No** → skip. Can be done later.
 
@@ -80,7 +80,7 @@ Should I create a GitHub repo for <name>? (y/n)
 Only if GitHub repo was created:
 
 ```bash
-git submodule add --force https://github.com/GuidoAmici/<name>.git _clients/<name>
+git submodule add --force https://github.com/GuidoAmici/<name>.git _data/entities/<name>
 git commit -m "cos: add client submodule - <name>"
 ```
 
@@ -96,8 +96,8 @@ Does <name> have a wiki or documentation repo? (y/n)
 
 - **Yes** → ask for the GitHub URL, then:
   ```bash
-  git -C _clients/<name> submodule add <url> documentation/wiki
-  git -C _clients/<name> commit -m "cos: add wiki submodule"
+  git -C _data/entities/<name> submodule add <url> documentation/wiki
+  git -C _data/entities/<name> commit -m "cos: add wiki submodule"
   ```
 - **No** → skip. Can be added later.
 
@@ -110,12 +110,12 @@ Output:
 <name> client created.
 
 Structure:
-  _clients/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
-  _clients/<name>/documentation/  ← wiki, context files
-  _clients/<name>/codebase/       ← app submodules go here
+  _data/entities/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
+  _data/entities/<name>/documentation/  ← wiki, context files
+  _data/entities/<name>/codebase/       ← app submodules go here
 
 Next steps:
-  1. Add codebase app repos: git submodule add <url> _clients/<name>/codebase/<app>
+  1. Add codebase app repos: git submodule add <url> _data/entities/<name>/codebase/<app>
   2. /awi-user-login <username>
 ```
 

@@ -9,8 +9,8 @@ Outcomes:
     skipped    — operator cancelled or a prerequisite gate stopped execution
     errored    — a step failed unexpectedly
 
-Resolves the user via _system/users/current-user.md.
-Log written to _system/users/<github-id>/command-log.jsonl.
+Resolves the user via _data/users/current-user.md.
+Log written to _data/users/<github-id>/command-log.jsonl.
 """
 
 import json
@@ -18,9 +18,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-AWI_ROOT = Path(__file__).resolve().parents[4]
-CURRENT_USER_FILE = AWI_ROOT / "_system" / "users" / "current-user.md"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paths import USERS_DIR, CURRENT_USER
 
+CURRENT_USER_FILE = CURRENT_USER
 VALID_OUTCOMES = {"completed", "skipped", "errored"}
 
 
@@ -43,7 +44,7 @@ def resolve_github_id() -> str:
 def log_command(command: str, outcome: str) -> None:
     github_id = resolve_github_id()
 
-    log_dir = AWI_ROOT / "_system" / "users" / github_id
+    log_dir = USERS_DIR / github_id
     log_dir.mkdir(parents=True, exist_ok=True)
 
     log_file = log_dir / "command-log.jsonl"

@@ -2,13 +2,22 @@
 """Bootstrap a fresh AWI repo structure."""
 
 import subprocess
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
+from paths import (
+    USERS_RELDIR,
+    SYSTEM_AWI_RELDIR,
+    SYSTEM_COS_REFS_RELDIR,
+    SYSTEM_GTD_RELDIR,
+)
+
 SYSTEM_DIRS = [
-    "_system/users",
-    "_system/chief-of-staff/references",
-    "_system/getting-things-done",
-    "_system/agentic-workflow-integrator",
+    USERS_RELDIR,
+    SYSTEM_COS_REFS_RELDIR,
+    SYSTEM_GTD_RELDIR,
+    SYSTEM_AWI_RELDIR,
 ]
 
 CLIENTS_ABSTRACT = """\

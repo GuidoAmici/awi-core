@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 AWI_ROOT = Path(__file__).resolve().parents[4]
-CLIENTS_DIR = AWI_ROOT / "_clients"
+ENTITIES_DIR = AWI_ROOT / "_data/entities"
 
 
 def get_registered_clients() -> list[str]:
@@ -34,14 +34,14 @@ def get_registered_clients() -> list[str]:
         parts = line.split()
         if len(parts) >= 2:
             path = parts[1]
-            if path.startswith("_clients/"):
-                clients.append(path.removeprefix("_clients/"))
+            if path.startswith("_data/entities/") and path.count("/") == 2:
+                clients.append(path.removeprefix("_data/entities/"))
     return clients
 
 
 def is_active(name: str) -> bool:
     """True if submodule working directory has content (is initialized)."""
-    client_path = CLIENTS_DIR / name
+    client_path = ENTITIES_DIR / name
     return client_path.exists() and any(client_path.iterdir())
 
 
@@ -59,7 +59,7 @@ def enable(name: str) -> int:
 
     print(f"Enabling '{name}'...")
     result = subprocess.run(
-        ["git", "submodule", "update", "--init", "--recursive", f"_clients/{name}"],
+        ["git", "submodule", "update", "--init", "--recursive", f"_data/entities/{name}"],
         cwd=AWI_ROOT,
     )
     if result.returncode == 0:
@@ -81,7 +81,7 @@ def disable(name: str) -> int:
 
     print(f"Disabling '{name}'...")
     result = subprocess.run(
-        ["git", "submodule", "deinit", "-f", f"_clients/{name}"],
+        ["git", "submodule", "deinit", "-f", f"_data/entities/{name}"],
         cwd=AWI_ROOT,
     )
     if result.returncode == 0:
@@ -99,7 +99,7 @@ def status() -> int:
     print("Client submodule status:\n")
     for name in registered:
         state = "active  " if is_active(name) else "inactive"
-        print(f"  {state}  _clients/{name}")
+        print(f"  {state}  _data/entities/{name}")
     return 0
 
 

@@ -11,8 +11,8 @@ Triggers after every `Write` or `Edit` operation on vault content.
 **Script:** `.claude/hooks/auto-commit.sh` (bash) / `.claude/hooks/auto-commit.ps1` (PowerShell fallback)
 
 **Behavior:**
-- Only commits files under `_clients/` or `_system/`
-- For `_clients/<name>/agenda/<subfolder>/`: derives type from subfolder (`tasks/` → `task`, `people/` → `person`, etc.)
+- Only commits files under `_data/organizations/` or `_system/`
+- For `_data/organizations/<name>/agenda/<subfolder>/`: derives type from subfolder (`tasks/` → `task`, `people/` → `person`, etc.)
 - For `_system/`: type `system`; `_system/users/` → type `user`
 
 **Commit format:**
@@ -33,7 +33,7 @@ git log --grep="cos:"
    "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
    ```
 2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
-3. Confirm file is under `_clients/` or `_system/`
+3. Confirm file is under `_data/organizations/` or `_system/`
 
 ---
 

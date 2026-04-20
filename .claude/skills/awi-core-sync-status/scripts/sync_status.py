@@ -81,7 +81,7 @@ def collect_core_files(core_root: Path) -> dict[str, Path]:
 
 def main():
     awi_root = Path(__file__).resolve().parents[4]  # awi/
-    core_root = awi_root / "_data" / "clients" / "awi-core" / "codebase" / "awi-core"
+    core_root = awi_root / "_data" / "clients" / "rabbitek" / "codebase" / "awi-core"
     whitelist_path = awi_root / ".claude" / "config" / "public-whitelist"
 
     if not core_root.is_dir():

@@ -15,7 +15,7 @@ HEAVY_MODEL: opus
 BASE_MODEL: sonnet
 FAST_MODEL: haiku
 
-DEFAULT_BUDGET: 0.50   (USD — prevents runaway spending)
+DEFAULT_BUDGET: 1.00   (USD — prevents runaway spending)
 HEAVY_BUDGET: 2.00
 FAST_BUDGET: 0.20
 
@@ -29,7 +29,7 @@ If user specifies "delegate to <name>", read `.claude/reference/employees.json` 
 
 | Task type        | Model  | Budget |
 |-----------------|--------|--------|
-| Research, analysis | sonnet | 0.50 |
+| Research, analysis | sonnet | 1.00 |
 | Complex coding   | opus   | 2.00 |
 | Quick lookup     | haiku  | 0.20 |
 | Frontend (Gemini)| —      | —     |

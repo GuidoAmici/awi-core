@@ -13,8 +13,8 @@ Logs break time to today's daily file. Used to track actual working time vs plan
 
 Before accessing any agenda files:
 
-1. Read `_system/users/current-user.md`
-2. Extract the `user:` field — this is `<user-root>` (e.g. `_clients/guido-amici/`)
+1. Read `_data/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
 3. `<agenda-base>` = `<user-root>agenda/`
 
 If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
