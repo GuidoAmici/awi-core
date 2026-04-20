@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -500,7 +501,15 @@ def update_registry(results: list[SubmoduleResult], root: Optional[dict] = None)
         else:
             updated.append(line)
 
-    REGISTRY_PATH.write_text("\n".join(updated))
+    # ── Update Last sync timestamp ───────────────────────────────────────────
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    final: list[str] = []
+    for line in updated:
+        if line.startswith("**Last sync:**"):
+            line = f"**Last sync:** {now}"
+        final.append(line)
+
+    REGISTRY_PATH.write_text("\n".join(final))
 
 
 # ── Report ────────────────────────────────────────────────────────────────────
