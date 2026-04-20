@@ -429,10 +429,9 @@ def mermaid_class(r: SubmoduleResult) -> str:
 def clone_status_label(r: SubmoduleResult) -> str:
     if not r.cloned:
         return "🔴 not cloned"
-    branch = r.branch or "detached"
     if r.sync_status == "failed":
-        return f"🟡 sync failed · {branch}"
-    return f"🟢 cloned · {branch}"
+        return "🟡 sync failed"
+    return "🟢 cloned"
 
 
 def _write_table_row(r: SubmoduleResult) -> None:
@@ -442,13 +441,15 @@ def _write_table_row(r: SubmoduleResult) -> None:
     lines = REGISTRY_PATH.read_text().splitlines()
     local_path = str(r.abs_path.relative_to(AWI_ROOT))
     anchor = f"`{local_path}`"
+    branch_cell = f" `{r.branch or r.tracked_branch}` "
     sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
     status_cell = f" {clone_status_label(r)} "
     new_lines: list[str] = []
     for line in lines:
         if anchor in line and line.strip().startswith("|"):
             parts = line.split("|")
-            if len(parts) >= 6:
+            if len(parts) >= 7:
+                parts[-4] = branch_cell
                 parts[-3] = sha_cell
                 parts[-2] = status_cell
                 line = "|".join(parts)
