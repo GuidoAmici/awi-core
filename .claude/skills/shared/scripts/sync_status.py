@@ -42,13 +42,28 @@ def collect_core_files(core_root: Path) -> dict[str, Path]:
     return files
 
 
+def find_awi_core_path(awi_root: Path) -> Path | None:
+    """Discover awi-core by scanning all .gitmodules files for GuidoAmici/awi-core."""
+    for gitmodules in sorted(awi_root.rglob(".gitmodules")):
+        if ".git" in gitmodules.parts:
+            continue
+        current_path = None
+        for line in gitmodules.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("path ="):
+                current_path = line.split("=", 1)[1].strip()
+            elif line.startswith("url =") and "GuidoAmici/awi-core" in line:
+                if current_path:
+                    return gitmodules.parent / current_path
+    return None
+
+
 def main():
     awi_root = Path(__file__).resolve().parents[4]  # awi/
-    public_repo_path = awi_root / ".claude" / "config" / "public-repo-path"
-    core_root = awi_root / public_repo_path.read_text().strip()
+    core_root = find_awi_core_path(awi_root)
 
-    if not core_root.is_dir():
-        print(f"Error: awi-core not found at {core_root}")
+    if not core_root or not core_root.is_dir():
+        print("Error: awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules")
         sys.exit(1)
 
     instance_files = collect_instance_files(awi_root)
