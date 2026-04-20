@@ -1,11 +1,11 @@
 ---
 name: awi-introduction
-description: Beginner-friendly first-time AWI onboarding. Links GitHub account, sets language, response style, and session learning preferences. Creates user profile. Recommends /awi-initialize next. Usage: /awi-introduction
+description: First-time AWI onboarding. Explains what AWI is, links GitHub account, sets preferences, scaffolds the repo, and lands the user in /today. Single command — no follow-up required. Usage: /awi-introduction
 ---
 
-# /awi-introduction — Welcome to AWI
+# /awi-introduction — Get Started with AWI
 
-First-time setup. No prior knowledge needed.
+One command. No prior knowledge needed. Covers everything from "what is this?" to a working setup.
 
 ## Usage
 
@@ -17,58 +17,73 @@ First-time setup. No prior knowledge needed.
 
 ## Steps
 
-### Step 1 — Welcome screen
+### Step 1 — Cold-start check
 
-Display:
+Check if `_data/` is already populated:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Welcome to AWI
-  Your personal command center for
-  managing clients, tasks, and projects
-  through conversation.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  [1] Quick setup    — sensible defaults, done in 60 seconds
-  [2] Configure      — I'll explain each setting before you choose
-  [3] What is AWI?   — plain English overview
+```bash
+ls _data/users/ _data/clients/ 2>/dev/null
 ```
 
-Wait for reply.
+If both exist and are non-empty, stop and say:
+```
+AWI is already set up. Nothing to do.
+Run /today to get started, or /new-client <name> to add a client.
+```
 
 ---
 
-### [3] What is AWI?
+### Step 2 — What is AWI?
 
-If user picks 3, display:
+Always show this first — do not skip, do not make it an option:
 
 ```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  AWI — Agentic Workflow Integrator
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 AWI is a personal operating system you run through Claude.
 It keeps your clients, tasks, projects, and notes organized
 in plain text files you own and control.
 You talk to it like a person — it files, tracks, and reminds.
 
-Ready to get started?
+Setup takes about 60 seconds.
 
-  [1] Quick setup
-  [2] Configure
+  [1] Let's go
+  [2] Tell me more first
 ```
 
-Wait for reply, then continue.
+Wait for reply.
+
+**If [2]:** show this, then re-show the menu:
+```
+AWI works by organizing everything into two folders:
+
+  _clients/   — one folder per client or project
+  _system/    — your preferences and framework config
+
+Each client has:
+  agenda/         tasks, projects, daily plans
+  documentation/  notes, wiki, writing style
+  codebase/       app repos (as submodules)
+
+You interact through slash commands like /today, /week, /new-client.
+Claude handles the filing. You handle the thinking.
+```
 
 ---
 
-### Step 2 — GitHub account
+### Step 3 — GitHub account
 
 Run:
 ```bash
 gh auth status 2>&1
 ```
 
-**If authenticated:** extract the GitHub username and show:
+**If authenticated:** extract username and show:
 ```
 GitHub account detected: <username>
-Is this the account you want to use with AWI? (y/n)
+Use this account? (y/n)
 ```
 - Yes → use detected username
 - No → ask: "What GitHub username should AWI use?"
@@ -77,7 +92,7 @@ Is this the account you want to use with AWI? (y/n)
 ```
 AWI uses GitHub to store and sync your data.
 
-To link your account, run this command in your terminal:
+Run this in your terminal:
   gh auth login
 
 Then run /awi-introduction again.
@@ -86,86 +101,82 @@ Stop here.
 
 ---
 
-### Step 3 — Your name
+### Step 4 — Your name
 
-Ask:
 ```
 What's your name? (first name is fine)
 ```
 
-Use the reply as `<display_name>`. Derive `<username>` as the GitHub username from Step 2.
+Use reply as `<display_name>`. Derive `<username>` from Step 3.
 
 ---
 
-### [1] Quick setup
+### Step 5 — Quick or custom setup
 
-Skip Steps 4–6. Use defaults:
-- Language: detect from `$LANG` env var; default to English
+```
+Hi <display_name>! Two ways to continue:
+
+  [1] Quick setup    — sensible defaults, done in 30 seconds
+  [2] Configure      — I'll walk you through each preference
+```
+
+**[1] Quick setup defaults:**
+- Language: detect from `$LANG`; fallback English
 - Response style: normal
 - Session learning: on
 
 Show summary:
 ```
-Here's your setup, <display_name>:
+Your setup:
 
   GitHub:           <github_username>
   Language:         <language>
   Response style:   Normal
-  Session learning: On (I'll notice patterns to help you better)
+  Session learning: On
 
-Looks good? (y/n)
+Good to go? (y/n)
 ```
-
-- Yes → proceed to Step 7
-- No → switch to [2] Configure flow
+- No → switch to [2] Configure
 
 ---
 
-### [2] Configure — Step 4: Response style
+### [2] Configure — Response style
 
 ```
 STEP 1 OF 3 — Response style
 
-By default I write full sentences. Caveman mode cuts that
-down to compressed fragments — same information, fewer words.
-
   Normal:   "I've updated the task and linked it to the project."
   Compact:  "Task updated. Linked to project."
 
-Which do you prefer?
   [1] Normal (recommended)
-  [2] Compact (caveman mode)
+  [2] Compact
 ```
 
-Store choice as `response_style`: `normal` or `caveman`.
+Store as `response_style`: `normal` or `caveman`.
 
 ---
 
-### [2] Configure — Step 5: Session learning
+### [2] Configure — Session learning
 
 ```
 STEP 2 OF 3 — Session learning
 
-As we work together, I notice patterns — what you prefer,
-how you like to structure things, what helps you focus.
-
-With learning ON, I log these observations so future sessions
-feel more tailored to you. You can review or delete them anytime.
+As we work together, I notice patterns about how you think and work.
+With learning ON, I log these so future sessions feel more tailored.
+You can review or delete them anytime.
 
   [1] On (recommended)
-  [2] Off — don't record anything about me
+  [2] Off
 ```
 
-Store choice as `profile_inference`: `on` or `off`.
+Store as `profile_inference`: `on` or `off`.
 
 ---
 
-### [2] Configure — Step 6: Language
+### [2] Configure — Language
 
 ```
 STEP 3 OF 3 — Language
-
-What language should I use for plans, tasks, and notes?
 
   [1] English
   [2] Spanish
@@ -176,9 +187,9 @@ Store as `language`.
 
 ---
 
-### Step 7 — Save profile
+### Step 6 — Save profile
 
-Create `_system/users/<username>.md`:
+Create `_data/users/<username>.md`:
 
 ```markdown
 ---
@@ -204,23 +215,44 @@ profile-inference: <on|off>
 
 ---
 
+### Step 7 — Create GitHub repo + scaffold _data/
+
+Create the user's personal AWI instance repo on GitHub from the source template:
+
+```bash
+gh repo create <github_username>/my-awi-instance --template GuidoAmici/awi-core --private --clone
+cd my-awi-instance
+```
+
+Then initialize `_data/` (the user's private layer — clients, users):
+
+```bash
+python3 .claude/skills/awi-introduction/scripts/init_awi.py
+```
+
+`_system/` and `.claude/` already exist — they ship with the source. Do not recreate them.
+
+Do not narrate this step — it should feel instant and invisible.
+
+---
+
 ### Step 8 — Handoff
 
 ```
-Setup complete. Welcome, <display_name>.
+You're all set, <display_name>.
 
-Next steps:
-  1. /awi-initialize   — build the AWI file structure
-  2. /new-client <name>   — add your first client
-
-Type /help anytime.
+  /today          — start your day
+  /new-client <name>   — add your first client
+  /help           — see all commands
 ```
+
+Then immediately run `/today` so the user lands in a working context.
 
 ---
 
 ## Logging
 
-At the end of this skill — regardless of outcome — log the invocation:
+At the end — regardless of outcome — log the invocation:
 
 ```bash
 python3 .claude/skills/shared/scripts/log_command.py awi-introduction <outcome>

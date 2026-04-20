@@ -25,15 +25,15 @@ Parses natural language, classifies entities, creates linked files.
 **Input:** "New project with John Smith for marketing outbound, need landing page"
 
 **Creates:**
-- `_clients/guido-amici/agenda/people/john-smith.md` (if doesn't exist)
-- `_clients/guido-amici/agenda/projects/marketing-outbound.md` (linked to John Smith)
-- `_clients/guido-amici/agenda/tasks/create-landing-page.md` (linked to project)
+- `<user-root>agenda/people/john-smith.md` (if doesn't exist)
+- `<user-root>agenda/projects/marketing-outbound.md` (linked to John Smith)
+- `<user-root>agenda/tasks/create-landing-page.md` (linked to project)
 
 ---
 
 ## `/today` — Daily Planning
 
-Generates `_clients/guido-amici/agenda/daily/YYYY-MM-DD.md` with:
+Generates `<user-root>agenda/daily/YYYY-MM-DD.md` with:
 
 - **Due Today** — Tasks with today's due date
 - **Overdue** — Past-due tasks with days overdue
@@ -77,7 +77,7 @@ Forks terminal for autonomous work. See `delegation.md` for full setup.
 
 ## `/awi-user-login` — Load User Profile
 
-Loads user file from `_system/users/`. Reads linked person profile from the active workspace's `agenda/people/`. See `_system/chief-of-staff/references/classification.md` for routing rules.
+Loads user file from `_data/users/`. Reads linked person profile from the active workspace's `agenda/people/`. See `_system/chief-of-staff/references/classification.md` for routing rules.
 
 ---
 

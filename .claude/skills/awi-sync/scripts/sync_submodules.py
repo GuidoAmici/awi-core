@@ -28,12 +28,10 @@ from sync_status import collect_core_files, collect_local_files, md5, parse_whit
 
 REGISTRY_PATH = SUBMODULES_MD
 
-# Maps (parent_label, submodule_path) -> Mermaid node ID
-NODE_ID_MAP: dict[tuple[str, str], str] = {
-    ("AWI", "_data/clients/newhaze"): "newhaze",
-    ("AWI", "_data/clients/awi-core"): "awi-core",
-    ("AWI", "_data/clients/afin"): "afin",
-    ("AWI", "_data/users/42481462"): "user",
+# Nested display names (parent_label, relative_path) -> short Mermaid node ID.
+# AWI-level entries are built dynamically in build_node_id_map() — no hardcoding needed there.
+# Update this dict when adding repos inside a client submodule.
+_NESTED_NODE_IDS: dict[tuple[str, str], str] = {
     ("newhaze", "codebase/newhaze-api"): "api",
     ("newhaze", "codebase/newhaze-b2b-panel"): "b2b",
     ("newhaze", "codebase/newhaze-consumer-panel"): "consumer",
@@ -43,6 +41,25 @@ NODE_ID_MAP: dict[tuple[str, str], str] = {
     ("newhaze", "codebase/newhaze-website"): "website",
     ("newhaze", "documentation/wiki"): "wiki",
 }
+
+
+def build_node_id_map() -> dict[tuple[str, str], str]:
+    """Build the full node ID map dynamically.
+
+    AWI-level: derived from .gitmodules — basename of path, except _data/users/* → "user".
+    Nested: from _NESTED_NODE_IDS (configured manually per client).
+    Falls back to basename if not in map (see scan()).
+    """
+    mapping: dict[tuple[str, str], str] = {}
+    for m in parse_gitmodules(AWI_ROOT / ".gitmodules"):
+        path = m.get("path", m["name"])
+        if path.startswith("_data/users/"):
+            node_id = "user"
+        else:
+            node_id = path.split("/")[-1]
+        mapping[("AWI", path)] = node_id
+    mapping.update(_NESTED_NODE_IDS)
+    return mapping
 
 
 # ── Data model ────────────────────────────────────────────────────────────────
@@ -61,6 +78,7 @@ class SubmoduleResult:
     cloned: bool = False
     branch: Optional[str] = None
     pinned_sha: Optional[str] = None
+    upstream: bool = False
     dirty: bool = False
     dirty_files: list = field(default_factory=list)
     committed: bool = False
@@ -107,13 +125,21 @@ def in_nested_repo(file_path: Path, repo_root: Path) -> bool:
 
 
 def clean_gitkeeps(repo_root: Path) -> None:
-    """Delete .gitkeep files from folders that now contain other files."""
-    for gitkeep in repo_root.rglob(".gitkeep"):
-        if in_nested_repo(gitkeep, repo_root):
+    """Remove .gitkeep from populated folders; create .gitkeep in empty folders."""
+    for dirpath in repo_root.rglob("*"):
+        if not dirpath.is_dir():
             continue
-        siblings = [f for f in gitkeep.parent.iterdir() if f.name != ".gitkeep"]
-        if siblings:
-            gitkeep.unlink()
+        if in_nested_repo(dirpath, repo_root):
+            continue
+        contents = list(dirpath.iterdir())
+        non_gitkeep = [f for f in contents if f.name != ".gitkeep"]
+        gitkeep = dirpath / ".gitkeep"
+        if non_gitkeep:
+            if gitkeep.exists():
+                gitkeep.unlink()
+        else:
+            if not gitkeep.exists():
+                gitkeep.touch()
 
 
 # ── Submodule discovery ───────────────────────────────────────────────────────
@@ -144,6 +170,7 @@ def parse_gitmodules(path: Path) -> list[dict]:
 def scan() -> list[SubmoduleResult]:
     """Discover all submodules: AWI-level first, then nested inside each client."""
     results: list[SubmoduleResult] = []
+    node_id_map = build_node_id_map()
 
     # AWI direct submodules
     awi_modules = parse_gitmodules(AWI_ROOT / ".gitmodules")
@@ -151,7 +178,7 @@ def scan() -> list[SubmoduleResult]:
         sub_path = m.get("path", m["name"])
         abs_path = AWI_ROOT / sub_path
         name = sub_path.split("/")[-1]
-        node_id = NODE_ID_MAP.get(("AWI", sub_path), name)
+        node_id = node_id_map.get(("AWI", sub_path), name)
         results.append(SubmoduleResult(
             name=name,
             path=sub_path,
@@ -162,6 +189,7 @@ def scan() -> list[SubmoduleResult]:
             node_id=node_id,
             pinned_sha=get_pinned_sha(AWI_ROOT, sub_path),
             tracked_branch=m.get("branch", "main"),
+            upstream=m.get("upstream", "false").lower() == "true",
         ))
 
     # Nested submodules — scan each cloned client
@@ -173,7 +201,7 @@ def scan() -> list[SubmoduleResult]:
             sub_path = m.get("path", m["name"])
             abs_path = parent.abs_path / sub_path
             name = sub_path.split("/")[-1]
-            node_id = NODE_ID_MAP.get((parent.name, sub_path), name)
+            node_id = node_id_map.get((parent.name, sub_path), name)
             results.append(SubmoduleResult(
                 name=name,
                 path=sub_path,
@@ -251,20 +279,26 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
 
     pulled = "Already up to date" not in res.stdout
 
-    # Push
-    res = git(["push", "origin", target], cwd=path)
-    if res.returncode != 0:
-        r.sync_status = "failed"
-        r.error = f"Push failed: {res.stderr.strip()}"
-        return r
-    r.pushed = True
+    # Push (skip for upstream-only repos)
+    if not r.upstream:
+        res = git(["push", "origin", target], cwd=path)
+        if res.returncode != 0:
+            r.sync_status = "failed"
+            r.error = f"Push failed: {res.stderr.strip()}"
+            return r
+        r.pushed = True
 
     r.sync_status = "pulled" if pulled else "already_up_to_date"
     return r
 
 
 def sync_all(results: list[SubmoduleResult]) -> list[SubmoduleResult]:
-    return [sync_one(r) for r in results]
+    synced = []
+    for r in results:
+        r = sync_one(r)
+        synced.append(r)
+        _write_table_row(r)
+    return synced
 
 
 def sync_root() -> dict:
@@ -315,7 +349,8 @@ def sync_awi_core() -> dict:
     result: dict = {"drift": [], "missing": [], "committed": False,
                     "pushed": False, "status": "ok", "error": None}
 
-    core_root = AWI_ROOT / "_data" / "clients" / "rabbitek" / "codebase" / "awi-core"
+    public_repo_path = AWI_ROOT / ".claude" / "config" / "public-repo-path"
+    core_root = AWI_ROOT / public_repo_path.read_text().strip()
     whitelist_path = AWI_ROOT / ".claude" / "config" / "public-whitelist"
 
     if not core_root.is_dir():
@@ -389,7 +424,29 @@ def clone_status_label(r: SubmoduleResult) -> str:
     return f"🟢 cloned · {branch}"
 
 
+def _write_table_row(r: SubmoduleResult) -> None:
+    """Update the registry table row for a single submodule. Called after each sync."""
+    if not REGISTRY_PATH.exists():
+        return
+    lines = REGISTRY_PATH.read_text().splitlines()
+    local_path = str(r.abs_path.relative_to(AWI_ROOT))
+    anchor = f"`{local_path}`"
+    sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
+    status_cell = f" {clone_status_label(r)} "
+    new_lines: list[str] = []
+    for line in lines:
+        if anchor in line and line.strip().startswith("|"):
+            parts = line.split("|")
+            if len(parts) >= 6:
+                parts[-3] = sha_cell
+                parts[-2] = status_cell
+                line = "|".join(parts)
+        new_lines.append(line)
+    REGISTRY_PATH.write_text("\n".join(new_lines))
+
+
 def update_registry(results: list[SubmoduleResult]) -> None:
+    """Rebuild Mermaid class lines from all results. Called once after all syncs."""
     if not REGISTRY_PATH.exists():
         return
 
@@ -420,27 +477,7 @@ def update_registry(results: list[SubmoduleResult]) -> None:
         else:
             updated.append(line)
 
-    lines = updated
-
-    # ── Update table rows (Pinned SHA + Clone status) ────────────────────────
-    for r in results:
-        local_path = str(r.abs_path.relative_to(AWI_ROOT))
-        anchor = f"`{local_path}`"
-        sha_cell = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
-        status_cell = f" {clone_status_label(r)} "
-
-        new_lines: list[str] = []
-        for line in lines:
-            if anchor in line and line.strip().startswith("|"):
-                parts = line.split("|")
-                if len(parts) >= 8:
-                    parts[-3] = sha_cell
-                    parts[-2] = status_cell
-                    line = "|".join(parts)
-            new_lines.append(line)
-        lines = new_lines
-
-    REGISTRY_PATH.write_text("\n".join(lines))
+    REGISTRY_PATH.write_text("\n".join(updated))
 
 
 # ── Report ────────────────────────────────────────────────────────────────────
@@ -494,7 +531,10 @@ def print_report(results: list[SubmoduleResult], root: dict, core: dict) -> int:
         label = STATUS_LABEL.get(r.sync_status, r.sync_status)
         indent = "    " if r.parent != "AWI" else "  "
         branch_str = f" · {r.branch}" if r.branch and r.cloned else ""
-        tags = (" [committed]" if r.committed else "") + (" [pushed]" if r.pushed else "")
+        tags = (
+            (" [committed]" if r.committed else "")
+            + (" [upstream]" if r.upstream else (" [pushed]" if r.pushed else ""))
+        )
         print(f"{indent}{icon}  {r.name:<36} {label}{branch_str}{tags}")
         if r.error:
             print(f"{indent}   → {r.error}")

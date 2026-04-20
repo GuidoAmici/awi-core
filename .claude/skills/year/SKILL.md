@@ -9,19 +9,31 @@ subagent_type: Studio Producer
 
 Generate a high-level plan for the year from vault contents and user input.
 
+## Path Resolution
+
+Before accessing any agenda files:
+
+1. Read `_data/users/current-user.md`
+2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
+3. `<agenda-base>` = `<user-root>agenda/`
+
+If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+
+---
+
 ## Steps
 
 1. Get current date and year
-2. Check if `_clients/guido-amici/agenda/planning/YYYY-annual.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
-3. **Gather all projects** — read all `_clients/guido-amici/agenda/projects/*.md` regardless of status
-4. **Gather all tasks** — grep for `status: pending` or `status: in-progress` in `_clients/guido-amici/agenda/tasks/*.md`
+2. Check if `<agenda-base>planning/YYYY-annual.md` exists - if so, **do not overwrite** (skip unless user explicitly asks)
+3. **Gather all projects** — read all `<agenda-base>projects/*.md` regardless of status
+4. **Gather all tasks** — grep for `status: pending` or `status: in-progress` in `<agenda-base>tasks/*.md`
 5. **Review completed work** — grep for `status: complete` in tasks and projects to understand momentum
 6. **Cluster into themes** — group projects and tasks by domain tags into 3-5 strategic themes
 7. **Map themes to quarters** — assign each theme a primary quarter based on dependencies and urgency
 8. **Derive yearly goals** — 3-5 high-level goals that are measurable and outcome-oriented
 9. **Identify dependencies** — which goals/projects block others? Note the critical path
 10. **Ask user for input** — present draft goals and ask if anything is missing or needs reprioritizing
-11. Create `_clients/guido-amici/agenda/planning/YYYY-annual.md`
+11. Create `<agenda-base>planning/YYYY-annual.md`
 
 ## Theme Clustering
 
