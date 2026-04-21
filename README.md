@@ -147,7 +147,7 @@ A separate Claude instance spawns in a new terminal, working in the employee's r
 | `/delegate <task>` | Fork terminal for autonomous work | `/delegate write the quarterly report` |
 | `/awi-user-create <username>` | Create a new vault user | `/awi-user-create whyto` |
 | `/awi-user-login <username>` | Load user profile for session | `/awi-user-login whyto` |
-| `/initialize <name>` | Scaffold a new `<name>-workspace` repo | `/initialize newhaze` |
+| `/initialize <name>` | Scaffold a new `<name>-workspace` repo | `/initialize <org-name>` |
 | `/wrap-session` | End-of-session ritual | `/wrap-session` |
 
 ---
@@ -279,14 +279,14 @@ awi/
 │   └── gtd/                            # GTD methodology adaptations
 │
 ├── _data/entities/                         # One submodule per company/person
-│   ├── guido-amici/                    # Personal workspace (separate git repo)
+│   ├── <user-root>/                    # User's personal workspace (separate git repo)
 │   │   ├── agenda/                     # tasks/ projects/ people/ daily/ outputs/ …
 │   │   ├── documentation/              # writing-style, business-profile, wiki
 │   │   └── codebase/                   # personal code repos (submodules)
-│   ├── newhaze/                        # NewHaze workspace (separate git repo)
+│   ├── <org-name>/                     # Org workspace (separate git repo)
 │   │   ├── agenda/
-│   │   ├── documentation/              # newhaze-wiki (submodule)
-│   │   └── codebase/                   # newhaze-api, newhaze-learn, … (submodules)
+│   │   ├── documentation/              # org wiki (submodule)
+│   │   └── codebase/                   # org repos (submodules)
 │   └── <name>/                         # Created by /initialize <name>
 │       ├── agenda/
 │       ├── documentation/
@@ -331,7 +331,7 @@ git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
 git diff HEAD~1
 
 # File history
-git log -p _data/entities/guido-amici/agenda/tasks/my-task.md
+git log -p <user-root>/agenda/tasks/<creation-date>-my-task.md
 ```
 
 ---
@@ -351,12 +351,12 @@ git log -p _data/entities/guido-amici/agenda/tasks/my-task.md
 
 1. Ensure task has `due: YYYY-MM-DD` in frontmatter
 2. Check date format (ISO, no extra spaces)
-3. Verify task is in `_data/entities/guido-amici/agenda/tasks/`
+3. Verify task is in `<user-root>/agenda/tasks/`
 
 ### User login not working
 
 1. Confirm user file exists: `ls _system/users/`
-2. Verify `person:` field in the user file links to a file in `_data/entities/guido-amici/agenda/people/`
+2. Verify `person:` field in the user file links to a file in `<user-root>/agenda/contacts/people/`
 3. Re-run `/awi-user-create <username>` if the profile is missing
 
 ---

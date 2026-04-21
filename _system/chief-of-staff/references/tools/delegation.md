@@ -6,7 +6,7 @@ Delegate work to specialized AI employees running in separate terminal sessions.
 
 ## What Are AI Employees?
 
-AI employees are separate Claude Code repositories with specialized skills. Each lives in its own repo. The Chief of Staff orchestrates them via tasks in the second brain.
+AI employees are separate Claude Code repositories with specialized skills. Each lives in its own repo. The Chief of Staff orchestrates them via tasks in the AWI vault.
 
 Current employees: see `.claude/reference/employees.json`
 
@@ -18,8 +18,8 @@ Edit `.claude/reference/employees.json`:
 
 ```json
 {
-  "gemini-website": "~/projects/newhaze-website",
-  "gemini-learn": "~/projects/newhaze-learn"
+  "gemini-website": "~/projects/<org-name>-website",
+  "gemini-learn": "~/projects/<org-name>-learn"
 }
 ```
 
