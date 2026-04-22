@@ -40,3 +40,6 @@
 [submodule "_data/organizations/SMASH/codebase/SMASH"]
 	path = _data/organizations/SMASH/codebase/SMASH
 	url = https://github.com/ChristianSRgit/SMASH.git
+[submodule "_data/entities/SMASH"]
+	path = _data/entities/SMASH
+	url = https://github.com/ChristianSRgit/SMASH.git
