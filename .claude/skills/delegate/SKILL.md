@@ -113,7 +113,7 @@ python .claude/skills/delegate/scripts/delegate_monitor.py <slug> --tail 100
 
 **Kill a stuck/runaway delegate:**
 ```
-python .claude/skills/delegate/scripts/delegate_kill.py <slug>
+python3 .claude/skills/delegate/scripts/delegate_kill.py <slug>
 ```
 
 **Restart a delegate** (kill then re-run with same or adjusted prompt).
@@ -154,3 +154,4 @@ python3 .claude/skills/shared/scripts/log_command.py delegate <outcome>
 ```
 
 `<outcome>`: `completed` | `skipped` | `errored`
+

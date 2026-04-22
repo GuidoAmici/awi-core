@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+if which update-oui 2>/dev/null; then
+    update-oui
+elif which update-ieee-data 2>/dev/null; then
+    update-ieee-data
+else
+    echo "ERROR: please install package ieee-data: #apt install ieee-data" >&2
+fi

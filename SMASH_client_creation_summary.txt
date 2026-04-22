@@ -1,0 +1,10 @@
+SMASH client created.
+
+Structure:
+  _data/entities/SMASH/agenda/         ← tasks, projects, people, daily, weekly, outputs
+  _data/entities/SMASH/documentation/  ← wiki, context files
+  _data/entities/SMASH/codebase/       ← app submodules go here
+
+Next steps:
+  1. Add codebase app repos: git submodule add <url> _data/entities/SMASH/codebase/<app>
+  2. /awi-user-login <username>
