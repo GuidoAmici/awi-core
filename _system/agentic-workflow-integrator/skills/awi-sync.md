@@ -6,9 +6,9 @@ order: 1
 
 # awi-sync
 
-Sync all AWI submodules (direct + nested). Pulls main, skips dirty repos, updates _data/submodules.md.
+Sync all AWI submodules (direct + nested). Commits local changes, pulls, pushes, and updates _data/submodules.md.
 
-**Tools:** Bash, Write, Edit
+**Tools:** Bash
 
 > Node shapes and colors: see [_legend.md](_legend.md)
 
@@ -16,31 +16,21 @@ Sync all AWI submodules (direct + nested). Pulls main, skips dirty repos, update
 
 ```mermaid
 graph TD
-    A(["/awi-sync"]) --> B[[python3 sync_submodules.py]]
-    B --> C[Discover all submodules — AWI-level + nested client]
-    C --> D[For each: check clone status]
+    A(["/awi-sync"]) --> B[["python3 sync_submodules.py"]]
+    B --> C["Discover submodules — AWI-level + nested"]
+    C --> D["For each: check clone status"]
     D --> E{Uncommitted changes?}
-    E -->|yes| F["STOP — skip, report clearly"]
-    E -->|no| G[[Checkout main → pull]]
+    E -->|yes| F[["git add -A → commit"]]
+    E -->|no| G[["Checkout branch → pull → push"]]
+    F --> G
     G --> H[["Update _data/submodules.md — Mermaid + registry"]]
-    H --> I[/Show report + updated Mermaid graph/]
-    F --> I
-    I --> J((log_command.py awi-sync))
+    H --> I[["Print 1-line summary"]]
+    I --> J(("log_command.py awi-sync"))
+    J --> K[/"Show output · --full-report for graph · --breakdown for text"/]
 
-    classDef entry  fill:#89b4fa,color:#1e1e2e,stroke:#89b4fa
-    classDef ai     fill:#cba6f7,color:#1e1e2e,stroke:#cba6f7
-    classDef read   fill:#94e2d5,color:#1e1e2e,stroke:#94e2d5
-    classDef write  fill:#a6e3a1,color:#1e1e2e,stroke:#a6e3a1
-    classDef shell  fill:#f9e2af,color:#1e1e2e,stroke:#f9e2af
-    classDef user   fill:#fab387,color:#1e1e2e,stroke:#fab387
-    classDef stop   fill:#f38ba8,color:#1e1e2e,stroke:#f38ba8
-    classDef log    fill:#45475a,color:#cdd6f4,stroke:#45475a
+    classDef det   fill:#f9e2af,color:#1e1e2e,stroke:#f9e2af
+    classDef human fill:#fab387,color:#1e1e2e,stroke:#fab387
 
-    class A entry
-    class B,G shell
-    class C,D,E ai
-    class F stop
-    class H write
-    class I user
-    class J log
+    class A,K human
+    class B,C,D,E,F,G,H,I,J det
 ```

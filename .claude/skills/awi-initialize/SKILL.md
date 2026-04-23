@@ -1,11 +1,15 @@
 ---
 name: awi-initialize
-description: Scaffold the AWI repo file structure for the first time. Creates _system/, _clients/, CLAUDE.md, .gitignore, and initial git commit. Run after /awi-introduction. Usage: /awi-initialize
+description: Initialize all org submodules that are toggled on in the user's active-orgs.json. Registers any unregistered orgs in .gitmodules then runs git submodule update --init. Usage: /awi-initialize
 ---
 
-# /awi-initialize — Bootstrap AWI Repo
+# /awi-initialize — Initialize Orgs
 
-Sets up the AWI file structure from scratch. Run this once, in a fresh empty directory, after completing `/awi-introduction`.
+Reads the current user's `active-orgs.json` and initializes every org
+marked `active: true`. If an org is not yet registered in `.gitmodules`,
+it is added first using the stored URL.
+
+Run this after a fresh clone, after switching users, or after toggling orgs on.
 
 ## Usage
 
@@ -13,73 +17,72 @@ Sets up the AWI file structure from scratch. Run this once, in a fresh empty dir
 /awi-initialize
 ```
 
-No arguments needed.
-
 ---
 
 ## Steps
 
-### Step 1 — Verify location
-
-Check that we are not already inside an initialized AWI repo:
+### Step 1 — Run init script
 
 ```bash
-ls _system/ _clients/ 2>/dev/null
+python3 .claude/skills/awi-initialize/scripts/init_orgs.py
 ```
 
-If either directory exists, stop and say:
-```
-This directory already has an AWI structure. Nothing to do.
-Run /new-client <name> to add a client, or /awi-introduction to configure your profile.
-```
+Check the **exit code** and respond accordingly:
 
 ---
 
-### Step 2 — Run the bootstrap script
+### Exit 0 — Success
 
-```bash
-python3 .claude/skills/awi-initialize/scripts/init_awi.py
-```
-
-This creates:
-```
-./
-  _system/
-    users/
-    chief-of-staff/
-      references/
-    getting-things-done/
-    agentic-workflow-integrator/
-  _clients/
-    .abstract.md
-  CLAUDE.md
-  .gitignore
-```
-
-And runs `git init` + initial commit.
+Show the script output directly. No additional narration needed.
 
 ---
 
-### Step 3 — Confirm
+### Exit 1 — Hard error
 
-Output:
+Show the script output. Log as `errored`.
+
+---
+
+### Exit 2 — No orgs active, but inactive ones exist
+
+The script prints `INACTIVE: <name>, <name>, ...`
+
+Show the inactive list and ask:
+
 ```
-AWI initialized.
+No orgs are toggled on. These are currently off:
+  - <name>
+  - <name>
 
-Structure:
-  _system/     ← framework docs, user profiles
-  _clients/    ← client repos go here (one submodule each)
-
-Next steps:
-  1. /new-client <name>   — add your first client
-  2. /awi-user-create <username>   — create a user profile if not done yet
+Which would you like to toggle on? (list names, or n to skip)
 ```
+
+- **If names given** → for each name:
+  ```bash
+  python3 .claude/skills/awi-org-toggle/scripts/toggle_org.py on <name>
+  ```
+  Then re-run `init_orgs.py` from Step 1.
+
+- **If n / skip** → log as `skipped`, done.
+
+---
+
+### Exit 3 — No orgs registered at all
+
+Ask:
+
+```
+No orgs registered. Would you like to:
+  1. Create a new org
+  2. Import an existing one from GitHub
+```
+
+- **1 or 2** → hand off to `/awi-client` (handles both modes).
+- **Neither** → log as `skipped`, done.
 
 ---
 
 ## Logging
-
-At the end of this skill — regardless of outcome — log the invocation:
 
 ```bash
 python3 .claude/skills/shared/scripts/log_command.py awi-initialize <outcome>
