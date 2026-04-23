@@ -9,3 +9,11 @@
 - AfterTool hook auto-commits after write_file/edit_file operations on `_clients/` and `_system/` folders — do NOT commit manually unless asked.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `powershell -c "Get-Date"`.
+
+## 📋 Tareas Pendientes
+
+- [ ] **Diseñar Pipeline Agnóstico Gemini**:
+  - Separar mejoras del framework (branch `dev-gemini`) de datos sensibles (`_data/`).
+  - Automatizar push de entidades (`Bhunting`, `SMASH`) a sus propios repos.
+  - Crear flujo para proponer mejoras base a Guido sin exponer información personal.
+- [ ] **Corregir Script de Migración**: Revisar `_data/entities/SMASH/codebase/Scripts/migrate-awi-to-gemini.sh`. Actualmente falla al copiar archivos `.toml` (rutas incorrectas).
