@@ -764,7 +764,7 @@ def update_registry(results: list[SubmoduleResult], root: Optional[dict] = None)
 
 # ── Report ────────────────────────────────────────────────────────────────────
 
-# Maps internal status codes to the symbols printed in the --breakdown output
+# Maps internal status codes to the symbols printed in the report
 STATUS_ICON = {
     "ok": "✓",
     "already_up_to_date": "✓",
@@ -782,56 +782,16 @@ STATUS_LABEL = {
 }
 
 
-def _count_results(
-    results: list[SubmoduleResult], root: dict, core: dict
-) -> tuple[int, int]:
+def print_report(results: list[SubmoduleResult], root: dict, core: dict) -> int:
     """
-    Count synced vs failed across submodules, AWI root, and awi-core.
-    Returns (ok, failed).
+    Print a human-readable summary of the sync operation to stdout.
+    Returns exit code: 0 if everything succeeded, 1 if anything failed.
     """
     ok     = sum(1 for r in results if r.sync_status in ("ok", "already_up_to_date", "pulled"))
     failed = sum(1 for r in results if r.sync_status in ("failed", "not_cloned"))
-    if root.get("status") == "failed":
-        failed += 1
-    if core.get("status") == "failed":
-        failed += 1
-    return ok, failed
 
-
-def print_summary(ok: int, failed: int) -> int:
-    """
-    Always-printed 1-line summary.
-    Returns exit code: 0 if everything succeeded, 1 if anything failed.
-    """
-    print(f"✓ {ok} synced   ✗ {failed} failed")
-    return 1 if failed > 0 else 0
-
-
-def print_mermaid_graph() -> None:
-    """
-    Read _data/submodules.md and print the Mermaid diagram block to stdout.
-    Printed when --full-report is passed.
-    """
-    if not REGISTRY_PATH.exists():
-        return
-    content = REGISTRY_PATH.read_text()
-    # Find the opening ```mermaid fence and its closing ``` fence
-    start = content.find("```mermaid")
-    end   = content.find("```", start + 3)
-    if start != -1 and end != -1:
-        print()
-        print(content[start : end + 3])
-
-
-def print_breakdown(
-    results: list[SubmoduleResult], root: dict, core: dict
-) -> None:
-    """
-    Per-submodule text breakdown — printed when --breakdown is passed.
-    Shows each repo's sync status, branch, commit/push tags, and any errors.
-    """
     print()
-    print("AWI Submodule Sync — Breakdown")
+    print("AWI Submodule Sync")
     print("─" * 52)
 
     # AWI root repo status
@@ -843,6 +803,8 @@ def print_breakdown(
     print(f"  {icon}  {'my-awi-instance':<36} {label}{branch_str}{tags}")
     if root["error"]:
         print(f"     → {root['error']}")
+    if root["status"] == "failed":
+        failed += 1
 
     # Each submodule — grouped by parent for readability
     current_parent = None
@@ -875,18 +837,21 @@ def print_breakdown(
     elif core["status"] == "failed":
         print(f"  ✗  {'awi-core':<36} failed")
         print(f"     → {core['error']}")
+        failed += 1
 
     print()
     print("─" * 52)
+    print(f"✓ {ok} submodules synced   ✗ {failed} failed")
     print()
+    print("_data/submodules.md updated.")
+    print()
+
+    return 1 if failed > 0 else 0
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
-    full_report = "--full-report" in sys.argv   # show Mermaid graph
-    breakdown   = "--breakdown"   in sys.argv   # show per-submodule text
-
     # Step 1: Discover all submodules from .gitmodules files (no git operations yet)
     results = scan()
 
@@ -908,21 +873,8 @@ def main() -> None:
     # Step 6: Mirror any changed source files to awi-core dev-claude branch
     core = sync_awi_core()
 
-    # Step 7: Always print 1-line summary
-    ok, failed = _count_results(results, root, core)
-    exit_code  = print_summary(ok, failed)
-
-    # Step 8: Optional outputs based on flags
-    if full_report:
-        print_mermaid_graph()
-    if breakdown:
-        print_breakdown(results, root, core)
-
-    # Step 9: Log the invocation — outcome determined by exit code, no AI needed
-    outcome    = "completed" if exit_code == 0 else "errored"
-    log_script = Path(__file__).resolve().parents[2] / "shared" / "scripts" / "log_command.py"
-    subprocess.run([sys.executable, str(log_script), "awi-sync", outcome])
-
+    # Step 7: Print the summary and exit with 0 (success) or 1 (some failures)
+    exit_code = print_report(results, root, core)
     sys.exit(exit_code)
 
 
