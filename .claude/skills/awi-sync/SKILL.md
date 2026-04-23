@@ -5,7 +5,7 @@ description: Sync all AWI submodules (direct + nested). Commits local changes, p
 
 # /awi-sync — Submodule Sync
 
-Scans all submodules registered in AWI and nested client repos, syncs each to their tracked branch, and updates the registry in `_data/submodules.md`.
+Scans all submodules registered in AWI and nested client repos, syncs each to `main`, and updates the registry in `_data/submodules.md`.
 
 ## Usage
 
@@ -27,15 +27,17 @@ The script handles everything:
 - Discovers all submodules (AWI-level + nested inside each client)
 - For each: checks clone status → removes `.gitkeep` from populated folders → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
-- Prints a 1-line summary and logs the invocation
 
-### Step 2 — Show output verbatim
+### Step 2 — Present the report to the user
 
-The script always outputs a 1-line summary: `✓ N synced   ✗ M failed`
+Show the script output verbatim. Then add a one-line summary:
 
-Mention available flags:
-- `--full-report` — also prints the Mermaid submodule graph
-- `--breakdown` — also prints a per-submodule text breakdown
+- If all synced: `All submodules are up to date.`
+- If failed: `N repo(s) could not be synced. See errors above.`
+
+### Step 3 — Show the updated graph
+
+After the report, display the updated Mermaid graph from `_data/submodules.md` so the user can see the new state visually.
 
 ---
 
@@ -45,3 +47,15 @@ Mention available flags:
 |---|---|
 | `0` | All submodules synced successfully |
 | `1` | One or more submodules failed |
+
+---
+
+## Logging
+
+At the end of this skill — regardless of outcome — log the invocation:
+
+```bash
+python3 .claude/skills/shared/scripts/log_command.py awi-sync <outcome>
+```
+
+`<outcome>`: `completed` | `skipped` | `errored`
