@@ -302,9 +302,6 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     res = git(["branch", "--show-current"], cwd=path)
     r.branch = res.stdout.strip() or None   # Empty string means detached HEAD
 
-    # Maintain .gitkeep placeholder files in this repo
-    clean_gitkeeps(path)
-
     # Check for uncommitted changes — if any, commit them all
     res = git(["status", "--porcelain"], cwd=path)
     dirty_lines = [l for l in res.stdout.splitlines() if l.strip()]
@@ -379,8 +376,6 @@ def sync_root() -> dict:
     res = git(["branch", "--show-current"], cwd=path)
     branch = res.stdout.strip()
     result["branch"] = branch
-
-    clean_gitkeeps(path)
 
     # Commit any local changes (e.g. updated submodule pointers)
     res = git(["status", "--porcelain"], cwd=path)
@@ -915,7 +910,7 @@ def main() -> None:
     # Step 8: Optional outputs based on flags
     if full_report:
         print_mermaid_graph()
-    if breakdown:
+    if breakdown or failed > 0:
         print_breakdown(results, root, core)
 
     # Step 9: Log the invocation — outcome determined by exit code, no AI needed
