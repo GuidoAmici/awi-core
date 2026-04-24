@@ -915,7 +915,7 @@ def main() -> None:
     # Step 8: Optional outputs based on flags
     if full_report:
         print_mermaid_graph()
-    if breakdown:
+    if breakdown or failed > 0:
         print_breakdown(results, root, core)
 
     # Step 9: Log the invocation — outcome determined by exit code, no AI needed
