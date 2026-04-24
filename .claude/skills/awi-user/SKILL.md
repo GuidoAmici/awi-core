@@ -17,7 +17,7 @@ One skill for all user operations.
    ```bash
    bash .claude/hooks/get-datetime.sh full
    ```
-2. Read `_data/users/current-user.md` (may not exist).
+2. Read `_data/users/current-user.json` (may not exist).
 3. Display status and menu.
 
 **Status line:**
@@ -81,7 +81,7 @@ If none found: "No other users registered. Use 2b to log in."
 git submodule update --init _data/users/<new-id>
 ```
 
-Update `_data/users/current-user.md` (see format below). Load and display session primer from `_data/users/<new-id>/awi-user-profile.md`.
+Update `_data/users/current-user.json` (see format below). Load and display session primer from `_data/users/<new-id>/awi-user-profile.md`.
 
 ---
 
@@ -98,7 +98,7 @@ Update `_data/users/current-user.md` (see format below). Load and display sessio
    gh api user --jq '{id: .id, login: .login, name: .name}'
    ```
 
-3. If `_data/users/<id>/` already initialized — just update `current-user.md` and load. Skip steps 4–6.
+3. If `_data/users/<id>/` already initialized — just update `current-user.json` and load. Skip steps 4–6.
 
 4. Check for `my-awi-user` repo:
    ```bash
@@ -136,14 +136,14 @@ Update `_data/users/current-user.md` (see format below). Load and display sessio
    cd _data/users/<id> && git add -A && git commit -m "init: awi-user-profile" && git push origin only && cd -
    ```
 
-6. Write `_data/users/current-user.md`:
-   ```yaml
-   ---
-   user: _data/users/<id>/
-   github-id: <id>
-   login: <login>
-   since: <YYYY-MM-DD>
-   ---
+6. Write `_data/users/current-user.json`:
+   ```json
+   {
+     "user": "_data/users/<id>/",
+     "github-id": "<id>",
+     "login": "<login>",
+     "since": "<YYYY-MM-DD>"
+   }
    ```
 
 7. Update `_data/submodules.md` to add/reflect the new user submodule entry.
@@ -169,7 +169,7 @@ Populate `_data/users/<id>/awi-user-profile.md` with answers under `## Preferenc
 
 1. Run Sync Procedure for current user.
 2. Run Deactivate Procedure for current user.
-3. Delete `_data/users/current-user.md`.
+3. Delete `_data/users/current-user.json`.
 4. Output:
    ```
    Logged out @<login>. Run /awi-user to log in again.
@@ -207,15 +207,15 @@ Makes the user's local data inaccessible without deleting the GitHub repo:
 
 ---
 
-## current-user.md Format
+## current-user.json Format
 
-```yaml
----
-user: _data/users/<github-id>/
-github-id: <github-id>
-login: <login>
-since: <YYYY-MM-DD>
----
+```json
+{
+  "user": "_data/users/<github-id>/",
+  "github-id": "<github-id>",
+  "login": "<login>",
+  "since": "<YYYY-MM-DD>"
+}
 ```
 
 `user:` field is the `<user-root>` used by all other skills to resolve `<agenda-base>`.
