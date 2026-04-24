@@ -26,7 +26,7 @@ SYSTEM_GTD_RELDIR      = "_system/getting-things-done"
 
 # ── Absolute paths (for operational scripts) ─────────────────────────────────
 USERS_DIR        = AWI_ROOT / USERS_RELDIR
-CURRENT_USER     = USERS_DIR / "current-user.md"
+CURRENT_USER     = USERS_DIR / "current-user.json"
 
 ORGANIZATIONS_DIR = AWI_ROOT / ORGANIZATIONS_RELDIR
 SUBMODULES_MD    = AWI_ROOT / SUBMODULES_MD_RELPATH
