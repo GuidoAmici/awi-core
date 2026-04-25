@@ -29,16 +29,13 @@ The script handles everything:
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
 - Prints a 1-line summary and logs the invocation
 
-### Step 2 — Offer a breakdown
+### Step 2 — Show output verbatim
 
-Use the AskUserQuestion tool to ask:
+The script always outputs a 1-line summary: `✓ N synced   ✗ M failed`
 
-- **question:** "Want more detail?"
-- **options:** `["No", "Breakdown", "Full report"]`
-
-If the user picks **Breakdown**, re-run the script with `--breakdown`.
-If the user picks **Full report**, re-run with `--full-report`.
-If the user picks **No**, stop.
+Mention available flags:
+- `--full-report` — also prints the Mermaid submodule graph
+- `--breakdown` — also prints a per-submodule text breakdown
 
 ---
 

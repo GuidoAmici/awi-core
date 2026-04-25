@@ -302,6 +302,9 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     res = git(["branch", "--show-current"], cwd=path)
     r.branch = res.stdout.strip() or None   # Empty string means detached HEAD
 
+    # Maintain .gitkeep placeholder files in this repo
+    clean_gitkeeps(path)
+
     # Check for uncommitted changes — if any, commit them all
     res = git(["status", "--porcelain"], cwd=path)
     dirty_lines = [l for l in res.stdout.splitlines() if l.strip()]
@@ -327,8 +330,8 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
             return r
         r.branch = target
 
-    # Pull latest changes from the remote (rebase to avoid divergent branch errors)
-    res = git(["pull", "--rebase", "origin", target], cwd=path)
+    # Pull latest changes from the remote
+    res = git(["pull", "origin", target], cwd=path)
     if res.returncode != 0:
         r.sync_status = "failed"
         r.error = f"Pull failed: {res.stderr.strip()}"
@@ -377,6 +380,8 @@ def sync_root() -> dict:
     branch = res.stdout.strip()
     result["branch"] = branch
 
+    clean_gitkeeps(path)
+
     # Commit any local changes (e.g. updated submodule pointers)
     res = git(["status", "--porcelain"], cwd=path)
     dirty = [l for l in res.stdout.splitlines() if l.strip()]
@@ -389,7 +394,7 @@ def sync_root() -> dict:
             return result
         result["committed"] = True
 
-    res = git(["pull", "--rebase", "origin", branch], cwd=path)
+    res = git(["pull", "origin", branch], cwd=path)
     if res.returncode != 0:
         result["status"] = "failed"
         result["error"] = f"Pull failed: {res.stderr.strip()}"
