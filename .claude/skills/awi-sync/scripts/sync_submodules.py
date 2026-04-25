@@ -330,8 +330,8 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
             return r
         r.branch = target
 
-    # Pull latest changes from the remote
-    res = git(["pull", "origin", target], cwd=path)
+    # Pull latest changes from the remote (rebase to avoid divergent branch errors)
+    res = git(["pull", "--rebase", "origin", target], cwd=path)
     if res.returncode != 0:
         r.sync_status = "failed"
         r.error = f"Pull failed: {res.stderr.strip()}"
@@ -394,7 +394,7 @@ def sync_root() -> dict:
             return result
         result["committed"] = True
 
-    res = git(["pull", "origin", branch], cwd=path)
+    res = git(["pull", "--rebase", "origin", branch], cwd=path)
     if res.returncode != 0:
         result["status"] = "failed"
         result["error"] = f"Pull failed: {res.stderr.strip()}"
