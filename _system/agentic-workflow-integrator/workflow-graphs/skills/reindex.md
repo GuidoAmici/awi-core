@@ -17,7 +17,7 @@ Create or update .abstract.md (L0) and .overview.md (L1) files across _system/ a
 
 ```mermaid
 graph TD
-    A(["/reindex"]) --> B[["find _system _clients -mindepth 1 -type d"]]
+    A(["/reindex"]) --> B[["find _system _data/organizations -mindepth 1 -type d"]]
     B --> C[For each folder: list contents]
     C --> D[[Read existing .abstract.md + .overview.md if present]]
     D --> E{File status?}

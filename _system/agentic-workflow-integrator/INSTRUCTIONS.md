@@ -64,7 +64,7 @@ awi/
 
 Each `_data/organizations/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
-Use `/new-client <name>` to scaffold a new client repo and register it.
+Use `/awi-org <name>` to scaffold a new organization repo and register it.
 
 ## Taxonomy
 

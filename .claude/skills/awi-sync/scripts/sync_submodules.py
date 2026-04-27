@@ -94,7 +94,7 @@ def build_node_id_map() -> dict[tuple[str, str], str]:
 @dataclass
 class SubmoduleResult:
     name: str                   # Folder name, e.g. "newhaze"
-    path: str                   # Path relative to its parent repo, e.g. "_data/clients/newhaze"
+    path: str                   # Path relative to its parent repo, e.g. "_data/organizations/<org>"
     abs_path: Path              # Full path on disk
     parent: str                 # "AWI" for top-level, or parent submodule name for nested
     parent_abs: Path            # Full path of the parent repo root on disk

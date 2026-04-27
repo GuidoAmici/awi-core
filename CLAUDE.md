@@ -8,7 +8,7 @@
 
 - **Always run Bash commands using relative paths** (e.g. `bash .claude/hooks/get-datetime.sh full`, not absolute paths). Working directory is the project root.
 - PostToolUse hook auto-commits after Write/Edit operations on `_data/entities/` and `_system/` — do NOT commit manually unless asked.
-- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user`, `/awi-introduction`, `/new-client`.
+- Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user`, `/awi-introduction`, `/awi-org`.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 
