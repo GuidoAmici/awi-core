@@ -77,7 +77,7 @@ No orgs registered. Would you like to:
   2. Import an existing one from GitHub
 ```
 
-- **1 or 2** → hand off to `/awi-client` (handles both modes).
+- **1 or 2** → hand off to `/awi-org` (handles both modes).
 - **Neither** → log as `skipped`, done.
 
 ---

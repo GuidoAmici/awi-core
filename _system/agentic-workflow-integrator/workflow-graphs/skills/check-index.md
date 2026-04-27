@@ -18,7 +18,7 @@ Read-only audit of _system/ and _data/organizations/ for missing .abstract.md an
 ```mermaid
 graph TD
     A(["/check-index"]) --> B[["find _system -mindepth 1 -type d"]]
-    B --> C[["find _clients -mindepth 1 -maxdepth 3 -type d"]]
+    B --> C[["find _data/organizations -mindepth 1 -maxdepth 3 -type d"]]
     C --> D[Apply skip rules: git submodule roots, node_modules,<br/>.git, .claude, single-file folders, uninitialized submodules]
     D --> E{For each folder: .abstract.md exists?}
     E -->|missing| F[ERROR]

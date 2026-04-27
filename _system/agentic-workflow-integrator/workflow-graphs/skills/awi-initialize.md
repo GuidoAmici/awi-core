@@ -25,7 +25,7 @@ graph TD
     B -->|exit 3 — no orgs at all| F[/"No orgs registered. Create or import?"/]
     E -->|names given| G[["toggle_org.py on <name> · re-run init_orgs.py"]]
     E -->|skip| H["STOP — skipped"]
-    F -->|1 or 2| I["/awi-client"]
+    F -->|1 or 2| I["/awi-org"]
     F -->|skip| H
     G --> C
     C --> J(("log_command.py awi-initialize"))
