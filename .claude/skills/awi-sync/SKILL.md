@@ -20,14 +20,16 @@ Scans all submodules registered in AWI and nested client repos, syncs each to th
 ### Step 1 — Run the sync script
 
 ```bash
-python3 .claude/skills/awi-sync/scripts/sync_submodules.py
+python3 .claude/skills/awi-sync/scripts/sync_submodules.py --full-report
 ```
 
 The script handles everything:
 - Discovers all submodules (AWI-level + nested inside each client)
 - For each: checks clone status → removes `.gitkeep` from populated folders → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
-- Prints a 1-line summary and logs the invocation
+- Prints output at the requested verbosity level
+
+Capture the full output in memory. Show only the 1-line summary to the user.
 
 ### Step 2 — Offer a breakdown
 
@@ -36,8 +38,7 @@ Use the AskUserQuestion tool to ask:
 - **question:** "Want more detail?"
 - **options:** `["No", "Breakdown", "Full report"]`
 
-If the user picks **Breakdown**, re-run the script with `--breakdown`.
-If the user picks **Full report**, re-run with `--full-report`.
+If the user picks **Breakdown** or **Full report**, display the already-captured output — do NOT re-run the script.
 If the user picks **No**, stop.
 
 ---
