@@ -13,12 +13,14 @@ Single entry point for all daily rituals. Detects current state and asks what yo
 
 Before accessing any agenda files:
 
-1. Read `_data/users/current-user.md`
+1. Read `_data/users/current-user.json`
 2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
 3. `<agenda-base>` = `<user-root>agenda/`
-4. Read `<user-root>active-orgs.json` — build `<org-agenda-bases>`: one entry per org where `active: true`, path = `_data/organizations/<name>/agenda/`. If file missing or all orgs inactive: `<org-agenda-bases>` = [] (no orgs included).
+4. Read `<user-root>active-orgs.json`. For each org where `active: true`, build an entry in `<org-agenda-bases>`:
+   - `org-name` → `_data/organizations/<org-name>/agenda/`
+   - If the file doesn't exist, `<org-agenda-bases>` = empty list (no orgs active).
 
-If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+If `current-user.json` does not exist: stop and tell the operator to run `/awi-user-login`.
 
 ---
 
@@ -206,31 +208,48 @@ Extract:
 
 ### B2 — Gather tasks
 
+**Personal (user agenda):**
+
 ```bash
-# Today's tasks — user [personal]
+# Today's tasks (pending or in-progress only)
 grep -rl "due: YYYY-MM-DD" <agenda-base>tasks/ 2>/dev/null
 
-# Today's tasks — each active org (skip silently if agenda/tasks/ missing)
-for each <org-agenda-base> in <org-agenda-bases>:
-  grep -rl "due: YYYY-MM-DD" <org-agenda-base>tasks/ 2>/dev/null
-
-# All pending/in-progress for overdue check — user [personal]
+# All pending/in-progress for overdue check
 grep -rl "status: pending\|status: in-progress" <agenda-base>tasks/ 2>/dev/null
-
-# All pending/in-progress for overdue check — each active org
-for each <org-agenda-base> in <org-agenda-bases>:
-  grep -rl "status: pending\|status: in-progress" <org-agenda-base>tasks/ 2>/dev/null
 ```
-
-Tag each task with its source: `[personal]` for user tasks, `[<org-name>]` for org tasks. Apply same energy/priority/due-date filtering across all sources.
 
 Filter overdue by comparing due dates against today. Read matching files. Extract: `priority`, `energy`, `duration`.
 
 Grep `<agenda-base>projects/*.md` for `status: active`, read for next actions.
 
+**Org tasks (cross-org scan):**
+
+For each entry in `<org-agenda-bases>`, scan tasks/ and projects/ if the directory exists. Skip silently if missing.
+
+```bash
+# repeat for each active org — substitute <org-agenda-base> and <org-name>
+grep -rl "status: pending\|status: in-progress\|status: active" <org-agenda-base>tasks/ 2>/dev/null
+grep -rl "status: active" <org-agenda-base>projects/ 2>/dev/null
+```
+
+For each matching file extract: name (filename slug or `title:` frontmatter), `status`, `priority`. Keep org label attached as `[<org-name>]`.
+
 ```bash
 git log --since="midnight" --grep="cos:" --oneline
 ```
+
+### B2.5 — Build convergence map
+
+Group all gathered tasks (personal + org) into **2–5 themes** by domain/project cluster. Rules:
+
+1. Name each theme concisely (e.g. "NewHaze DS v2", "CI/CD Infra", "AWI Tooling")
+2. Count pending/in-progress items per theme
+3. Identify **gate tasks** — tasks that are explicitly blocking multiple others (look for `blocks:` frontmatter, or tasks many others depend on). Mark as gate.
+4. Pick the top 1–2 recommended focus themes based on: gates unlocked, priority density, active momentum.
+
+If more than 8 themes, merge the smallest into "Other".
+
+This map is informational only — it does not change task ordering or time budget.
 
 ### B3 — Build the plan
 
@@ -282,14 +301,47 @@ Update or create:
 - [ ] [task name] `[org-name]` — X days overdue — `energy:` `duration:` — [[tasks/slug]]
 
 ## Deferred (energy)
-- [task name] — deferred: energy ceiling is [level] — [[tasks/slug]]
+- [task name] `[org-name]` — deferred: energy ceiling is [level] — [[tasks/slug]]
 
 ## Active Projects
 - [Project Name] — next: [next action from file]
 
+## Convergence Map
+> Cross-org snapshot — [N] pending items across [M] orgs + personal
+
+| Theme | Tasks | Gate |
+|-------|-------|------|
+| [Theme name] | N | [gate task or —] |
+
+**Focus:** [Theme X] → [reason: gate unlocked / priority / momentum]
+
 ## Today So Far
 - [items from git log since midnight]
 ```
+
+After writing user daily, write org daily files:
+
+For each org in `<org-agenda-bases>` that has at least one task appearing (checked `[x]` or unchecked `[ ]`) in the user's plan, create or update `<org-agenda-base>daily/YYYY-MM-DD.md`:
+
+```markdown
+---
+type: org-daily
+date: YYYY-MM-DD
+org: <org-name>
+---
+
+# <Org Display Name> — DayOfWeek, Month DD
+
+## Work Log
+- **User:** <display name from current-user.json>
+- **Tasks in scope:** [task name], [task name], ...
+- **Completed:** [task name], ... (or "None")
+
+## Session Log
+- [items from git log since midnight filtered to this org's paths]
+```
+
+If `<org-agenda-base>daily/` does not exist, create it. Skip orgs with no tasks in today's plan.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today completed`
 
@@ -406,28 +458,23 @@ Append `## Day Review` to `<agenda-base>daily/<target-date>.md`. Update `checked
 
 Tell the user the full retrospective out loud before writing.
 
-#### Org daily writes
+### C5 — Write org daily files
 
-For each org in `<org-agenda-bases>` that has at least one task present in today's daily plan:
+For each org that had tasks in today's plan (same trigger as B4), update `<org-agenda-base>daily/<target-date>.md`:
 
-Create or update `_data/organizations/<org>/agenda/daily/<target-date>.md`:
+- Set `## Work Log` → `Completed:` based on `[x]` items from user daily
+- Append `## Session Summary`:
 
 ```markdown
----
-type: org-daily
-date: YYYY-MM-DD
-org: <org-name>
----
+## Session Summary
+### Planned vs Actual
+- [x] [org task] — done
+- [ ] [org task] — skipped ([reason if known])
 
-# <Org Display Name> — DayOfWeek, Month DD
-
-## Work Log
-- **User:** <display name from current-user.md>
-- **Tasks in scope:** [task name], [task name], ...  (or "None")
-- **Completed:** [task name], ...  (or "None")
-
-## Session Log
-- [items from git log since midnight]
+### Notes
+[One sentence — what moved, what didn't, handoff if relevant.]
 ```
+
+Create `<org-agenda-base>daily/` directory if it doesn't exist.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today-end completed`

@@ -1,0 +1,13 @@
+{
+  "slug": "delegate-skill-deviation",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "Compare the delegation skill in /home/unixadmin/GitHub/GuidoAmici/my-awi-instance/.claude/skills/delegate.md against the original implementation at https://github.com/bradautomates/second-brain. Steps: 1) Read the local file at /home/unixadmin/GitHub/GuidoAmici/my-awi-instance/.claude/skills/delegat",
+  "started_at": "2026-04-29T16:13:42.797999",
+  "finished_at": "2026-04-29T16:15:16.942899",
+  "exit_code": 0,
+  "pid": 85726,
+  "duration": "1m 34s"
+}

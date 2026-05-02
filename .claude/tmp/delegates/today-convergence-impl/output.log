@@ -1,0 +1,7 @@
+Looks like I need write permission for that file. Can you grant permission to edit `.claude/skills/today/SKILL.md`? The edit adds:
+
+1. **B2 split** — "Personal tasks" subheading + new "Org tasks (cross-org scan)" subheading with grep commands for all 3 orgs
+2. **B2.5** — New step "Build convergence map" with clustering/gating/naming logic
+3. **B4 update** — `## Convergence Map` section in daily file template between Active Projects and Today So Far
+
+Ready to apply once permission granted.

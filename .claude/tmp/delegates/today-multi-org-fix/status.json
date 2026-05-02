@@ -1,0 +1,13 @@
+{
+  "slug": "today-multi-org-fix",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "_data/organizations/rabbitek/codebase/awi-core",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are the Minimal Change Engineer. Read your personality from _system/agency-agents/engineering/engineering-minimal-change-engineer.md first.\n\n## Mission\n\nFix exactly 4 spec gaps in a task file, then implement the minimal diff in SKILL.md. No scope creep.\n\n## Context\n\nReality Checker found these 4",
+  "started_at": "2026-04-29T16:11:03.861609",
+  "finished_at": "2026-04-29T16:12:44.945652",
+  "exit_code": 0,
+  "pid": 83562,
+  "duration": "1m 41s"
+}

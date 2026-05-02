@@ -13,11 +13,20 @@ import json
 import os
 import platform
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
+
+
+def is_wsl():
+    try:
+        return "microsoft" in Path("/proc/version").read_text().lower()
+    except Exception:
+        return False
 
 
 def get_delegates_dir():
@@ -60,7 +69,10 @@ def run_worker(slug, prompt, model, repo, budget, delegates_dir):
 
     cwd = os.path.expanduser(repo) if repo else os.getcwd()
 
-    cmd = ["claude", "-p", prompt, "--model", model, "--dangerously-skip-permissions"]
+    claude_bin = shutil.which("claude") or os.path.expanduser("~/.local/bin/claude")
+    stdbuf = shutil.which("stdbuf")
+    base_cmd = [claude_bin, "-p", prompt, "--model", model, "--dangerously-skip-permissions"]
+    cmd = ([stdbuf, "-oL", "-eL"] + base_cmd) if stdbuf else base_cmd
     if budget:
         cmd += ["--max-budget-usd", str(budget)]
 
@@ -125,7 +137,7 @@ def run_worker(slug, prompt, model, repo, budget, delegates_dir):
     beep_done(final_status == "completed")
 
 
-def launch_worker(slug, prompt, model, repo, budget, delegates_dir, visible=False):
+def launch_worker(slug, prompt, model, repo, budget, delegates_dir):
     """Launcher mode: spawn worker as detached background process, return immediately."""
     script = Path(__file__).resolve()
     cmd = [
@@ -142,26 +154,17 @@ def launch_worker(slug, prompt, model, repo, budget, delegates_dir, visible=Fals
     if budget is not None:
         cmd += ["--budget", str(budget)]
 
-    if visible and platform.system() == "Windows":
-        # Open a new tab in Windows Terminal so the user can watch live output.
-        worker_cmd = " ".join(f'"{a}"' if " " in a else a for a in cmd)
-        subprocess.Popen(
-            ["wt", "--title", slug, "new-tab", "--", "cmd", "/k", worker_cmd],
-            close_fds=True,
-        )
+    kwargs = {}
+    if platform.system() == "Windows":
+        # CREATE_NO_WINDOW prevents a blank terminal from popping up.
+        # CREATE_NEW_PROCESS_GROUP ensures the worker survives the parent exiting.
+        kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
     else:
-        kwargs = {}
-        if platform.system() == "Windows":
-            # CREATE_NO_WINDOW prevents a blank terminal from popping up.
-            # CREATE_NEW_PROCESS_GROUP ensures the worker survives the parent exiting.
-            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
-        else:
-            kwargs["start_new_session"] = True
-        subprocess.Popen(cmd, close_fds=True, **kwargs)
+        kwargs["start_new_session"] = True
+    subprocess.Popen(cmd, close_fds=True, **kwargs)
 
     log_path = delegates_dir / slug / "output.log"
-    mode = "visible tab" if visible else "background"
-    print(f"Delegate '{slug}' started ({mode})")
+    print(f"Delegate '{slug}' started (background)")
     print(f"Log:     {log_path}")
     print(f"Monitor: python delegate_monitor.py {slug}")
     print(f"Kill:    python delegate_kill.py {slug}")
@@ -176,7 +179,6 @@ def main():
     parser.add_argument("--repo", help="Repository path to run in")
     parser.add_argument("--budget", type=float, default=0.50, help="Max spend in USD (default: 0.50)")
     parser.add_argument("--delegates-dir", help="Override delegates directory")
-    parser.add_argument("--visible", action="store_true", help="Open in a new Windows Terminal tab instead of running silently")
     args = parser.parse_args()
 
     delegates_dir = Path(args.delegates_dir) if args.delegates_dir else get_delegates_dir()
@@ -185,7 +187,7 @@ def main():
     if args.worker:
         run_worker(slug, args.prompt, args.model, args.repo, args.budget, delegates_dir)
     else:
-        launch_worker(slug, args.prompt, args.model, args.repo, args.budget, delegates_dir, visible=args.visible)
+        launch_worker(slug, args.prompt, args.model, args.repo, args.budget, delegates_dir)
 
 
 if __name__ == "__main__":
