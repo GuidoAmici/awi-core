@@ -16,6 +16,7 @@ Before accessing any agenda files:
 1. Read `_data/users/current-user.md`
 2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
 3. `<agenda-base>` = `<user-root>agenda/`
+4. Read `<user-root>active-orgs.json` — build `<org-agenda-bases>`: one entry per org where `active: true`, path = `_data/organizations/<name>/agenda/`. If file missing or all orgs inactive: `<org-agenda-bases>` = [] (no orgs included).
 
 If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
 
@@ -206,12 +207,22 @@ Extract:
 ### B2 — Gather tasks
 
 ```bash
-# Today's tasks (pending or in-progress only)
+# Today's tasks — user [personal]
 grep -rl "due: YYYY-MM-DD" <agenda-base>tasks/ 2>/dev/null
 
-# All pending/in-progress for overdue check
+# Today's tasks — each active org (skip silently if agenda/tasks/ missing)
+for each <org-agenda-base> in <org-agenda-bases>:
+  grep -rl "due: YYYY-MM-DD" <org-agenda-base>tasks/ 2>/dev/null
+
+# All pending/in-progress for overdue check — user [personal]
 grep -rl "status: pending\|status: in-progress" <agenda-base>tasks/ 2>/dev/null
+
+# All pending/in-progress for overdue check — each active org
+for each <org-agenda-base> in <org-agenda-bases>:
+  grep -rl "status: pending\|status: in-progress" <org-agenda-base>tasks/ 2>/dev/null
 ```
+
+Tag each task with its source: `[personal]` for user tasks, `[<org-name>]` for org tasks. Apply same energy/priority/due-date filtering across all sources.
 
 Filter overdue by comparing due dates against today. Read matching files. Extract: `priority`, `energy`, `duration`.
 
@@ -263,10 +274,12 @@ Update or create:
 
 ```markdown
 ## Due Today
-- [ ] [task name] — `energy:` `duration:` `priority:` — [[tasks/slug]]
+- [ ] [task name] `[personal]` — `energy:` `duration:` `priority:` — [[tasks/slug]]
+- [ ] [task name] `[org-name]` — `energy:` `duration:` `priority:` — [[tasks/slug]]
 
 ## Overdue
-- [ ] [task name] — X days overdue — `energy:` `duration:` — [[tasks/slug]]
+- [ ] [task name] `[personal]` — X days overdue — `energy:` `duration:` — [[tasks/slug]]
+- [ ] [task name] `[org-name]` — X days overdue — `energy:` `duration:` — [[tasks/slug]]
 
 ## Deferred (energy)
 - [task name] — deferred: energy ceiling is [level] — [[tasks/slug]]
@@ -392,5 +405,29 @@ Append `## Day Review` to `<agenda-base>daily/<target-date>.md`. Update `checked
 ```
 
 Tell the user the full retrospective out loud before writing.
+
+#### Org daily writes
+
+For each org in `<org-agenda-bases>` that has at least one task present in today's daily plan:
+
+Create or update `_data/organizations/<org>/agenda/daily/<target-date>.md`:
+
+```markdown
+---
+type: org-daily
+date: YYYY-MM-DD
+org: <org-name>
+---
+
+# <Org Display Name> — DayOfWeek, Month DD
+
+## Work Log
+- **User:** <display name from current-user.md>
+- **Tasks in scope:** [task name], [task name], ...  (or "None")
+- **Completed:** [task name], ...  (or "None")
+
+## Session Log
+- [items from git log since midnight]
+```
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today-end completed`

@@ -1,3 +1,7 @@
 {
-  "head-of-content": "~/Documents/GitHub/head-of-content"
+  "reality-checker": "_system/agency-agents/testing/testing-reality-checker.md",
+  "ai-engineer": "_system/agency-agents/engineering/engineering-ai-engineer.md",
+  "autonomous-optimization-architect": "_system/agency-agents/engineering/engineering-autonomous-optimization-architect.md",
+  "backend-architect": "_system/agency-agents/engineering/engineering-backend-architect.md",
+  "software-architect": "_system/agency-agents/engineering/engineering-software-architect.md"
 }
