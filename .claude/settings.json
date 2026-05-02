@@ -4,7 +4,8 @@
       "Bash(git add:*)",
       "Bash(grep:*)",
       "Bash(git commit:*)",
-      "Bash(date*)"
+      "Bash(date*)",
+      "Bash(bash .claude/hooks/get-datetime.sh*)"
     ]
   },
   "hooks": {
