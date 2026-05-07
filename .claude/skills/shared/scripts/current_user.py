@@ -38,6 +38,7 @@ def resolve_github_id() -> str:
         "github-id": str(data["id"]),
         "login": data["login"],
         "since": date.today().isoformat(),
+        "user_repo": f"{data['login']}/my-awi-user",
     }
     current_user_file.write_text(json.dumps(record, indent=2) + "\n")
     print(f"Auto-created current-user.json for @{data['login']}", file=sys.stderr)
