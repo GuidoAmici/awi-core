@@ -57,6 +57,6 @@
     ]
   },
   "enabledPlugins": {
-    "caveman@caveman": true
+    "claude-hud@claude-hud": true
   }
 }

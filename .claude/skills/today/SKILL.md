@@ -68,17 +68,6 @@ Determine state:
 
 ### A0 — Enforcement gates
 
-#### Friday gate: Week review
-
-If today is **Friday** (or Saturday/Sunday and no review was done):
-
-1. Check if this week's weekly file exists: `<agenda-base>weekly/YYYY-WNN.md`
-2. If it doesn't exist, or has no `## Selected for This Week` section:
-
-> ⚠ Weekly review hasn't been done yet. Run `/week-review` before planning today — it sets next week's priorities.
-
-Block the intake until `/week-review` is complete or the operator explicitly says to skip.
-
 #### Monday gate: Mental model
 
 If today is **Monday**:
@@ -129,8 +118,14 @@ Record each block with duration. If nothing, record that.
 
 > What are the 1–3 things you want to finish today, no matter what?
 
-Show the issue list from the script output (already fetched) so they can pick from real data.
-Present each issue as: `[org] #N — title (priority, duration)` with excerpt as hover description.
+Launch the interactive task picker (hard cap: 3 selections):
+
+```bash
+python3 .claude/skills/shared/scripts/today_issues.py \
+  | python3 .claude/skills/today/scripts/task_picker.py
+```
+
+The picker outputs a JSON array of selected issues. Read stdout. If the array is empty (user quit without selecting), ask verbally instead.
 
 These become **anchored tasks** in Check mode — scheduled first.
 
@@ -479,5 +474,18 @@ For each org that had tasks in today's plan (same trigger as B4), update `<org-a
 ```
 
 Create `<org-agenda-base>daily/` directory if it doesn't exist.
+
+### C6 — Friday gate: Week review
+
+If `<target-date>` is a **Friday**:
+
+1. Check if this week's weekly file exists: `<agenda-base>weekly/YYYY-WNN.md`
+2. If it doesn't exist, or has no `## Selected for This Week` section with actual content:
+
+> ⚠ Week review not done. Run `/week-review` before closing Friday — it sets next week's priorities.
+
+**Block the close-out.** Do not write `checked-out: true` or log `today-end` until `/week-review` is complete.
+
+Once `/week-review` is done, return here and finish End mode normally.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today-end completed`
