@@ -9,7 +9,7 @@ Outcomes:
     skipped    — operator cancelled or a prerequisite gate stopped execution
     errored    — a step failed unexpectedly
 
-Resolves the user via _data/users/current-user.md.
+Resolves the user via _data/users/current-user.json.
 Log written to _data/users/<github-id>/command-log.jsonl.
 """
 
@@ -26,19 +26,18 @@ VALID_OUTCOMES = {"completed", "skipped", "errored"}
 
 
 def resolve_github_id() -> str:
-    """Read github-id from current-user.md frontmatter."""
+    """Read github-id from current-user.json."""
     if not CURRENT_USER_FILE.exists():
         raise FileNotFoundError(
-            f"current-user.md not found at {CURRENT_USER_FILE}. "
-            "Run /awi-user-login first."
+            f"current-user.json not found at {CURRENT_USER_FILE}. "
+            "Run /awi-user first."
         )
 
-    for line in CURRENT_USER_FILE.read_text().splitlines():
-        line = line.strip()
-        if line.startswith("github-id:"):
-            return line.split(":", 1)[1].strip()
-
-    raise ValueError("github-id not found in current-user.md")
+    data = json.loads(CURRENT_USER_FILE.read_text())
+    github_id = data.get("github-id")
+    if not github_id:
+        raise ValueError("github-id not found in current-user.json")
+    return str(github_id)
 
 
 def log_command(command: str, outcome: str) -> None:

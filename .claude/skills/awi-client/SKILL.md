@@ -24,7 +24,7 @@ Check ARGUMENTS.
 - **If ARGUMENTS has a value** — use it as `<name>`. Proceed to Step 2.
 - **If ARGUMENTS is empty** — ask:
   ```
-  What is the client name? (e.g. newhaze, afin, acme-corp)
+  What is the client name? (e.g. acme-corp, my-client, partner-name)
   ```
   Wait for reply. Use it as `<name>`.
 

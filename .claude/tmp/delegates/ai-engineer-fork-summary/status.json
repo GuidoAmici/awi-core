@@ -1,0 +1,13 @@
+{
+  "slug": "ai-engineer-fork-summary",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are an AI Engineer \u2014 expert in LLM integration, production AI systems, and agentic workflows. Your persona: data-driven, systematic, performance-focused.\n\nCONTEXT: A reality check was run on the delegation skill in /home/unixadmin/GitHub/GuidoAmici/my-awi-instance. The report found one regressio",
+  "started_at": "2026-04-29T20:54:28.693479",
+  "finished_at": "2026-04-29T20:58:52.817618",
+  "exit_code": 0,
+  "pid": 161561,
+  "duration": "4m 24s"
+}

@@ -91,8 +91,8 @@ If `current-user.md` does not exist, stop and tell the operator to run `/awi-use
 ## Product/App/Feature References
 
 Every task and project MUST reference its parent in frontmatter:
-- `product:` — the product it belongs to (e.g., `newhaze`, `rabbittotem`)
-- `app:` — the application repo (e.g., `newhaze-website`, `newhaze-inner-panel`)
+- `product:` — the product it belongs to (e.g., `acme`, `my-product`)
+- `app:` — the application repo (e.g., `acme-website`, `acme-dashboard`)
 - `feature:` — specific feature if applicable (e.g., `auth`, `deploy-monitor`)
 
 Include whichever fields are relevant. At minimum, `product` should be set if it relates to a known product. If the input doesn't reference any product/app, ask the user.

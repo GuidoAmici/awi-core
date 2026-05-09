@@ -1,0 +1,29 @@
+Saved to `info/outputs/2026-04-29-delegate-skill-deviation.md`.
+
+---
+
+## Summary
+
+**Deviation score: HIGH** — architectural replacement, not a patch.
+
+### What changed
+
+Upstream uses `fork_terminal.py` to open **visible terminal windows** with **interactive** claude sessions. Local replaces this entirely with a **silent background runner** (`delegate_run.py`) plus monitoring/kill scripts.
+
+**Files added locally (don't exist upstream):**
+- `delegate_run.py` — headless launcher+worker, status JSON, inbox reporting, budget cap, audible beep
+- `delegate_monitor.py` — list/inspect delegates, stuck detection, log tail
+- `delegate_kill.py` — cross-platform process tree kill
+
+**`fork_terminal.py` improved locally:**
+- Temp batch file instead of inline string (fixes quoting with complex prompts)
+- `shell=False` (reduces injection surface)
+- `set CLAUDECODE=` unset (fixes nested claude launch)
+- `CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP` flags
+- Windows Terminal tab support (`wt --title slug new-tab`)
+
+### One regression
+
+The upstream **Fork Summary** feature — where Claude fills `fork_summary_user_prompt.md` with conversation history to pass context to the forked agent — was **removed** from SKILL.md. The template file still exists in `references/` but is now dead code. Medium severity: forked/delegated agents start cold with no cross-fork conversation continuity.
+
+### Net verdict: local is better for a background-first workflow, but should wire up the fork summary template to the `--prompt` arg if context continuity matters.

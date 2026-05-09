@@ -28,7 +28,7 @@ ls _data/users/ _data/organizations/ 2>/dev/null
 If both exist and are non-empty, stop and say:
 ```
 AWI is already set up. Nothing to do.
-Run /today to get started, or /new-client <name> to add a client.
+Run /today to get started, or /awi-org <name> to add an organization.
 ```
 
 ---
@@ -62,12 +62,12 @@ AWI works by organizing everything into two folders:
   _data/organizations/   — one folder per organization or project
   _system/    — your preferences and framework config
 
-Each client has:
+Each organization has:
   agenda/         tasks, projects, daily plans
   documentation/  notes, wiki, writing style
   codebase/       app repos (as submodules)
 
-You interact through slash commands like /today, /week, /new-client.
+You interact through slash commands like /today, /week, /awi-org.
 Claude handles the filing. You handle the thinking.
 ```
 
@@ -242,7 +242,7 @@ Do not narrate this step — it should feel instant and invisible.
 You're all set, <display_name>.
 
   /today          — start your day
-  /new-client <name>   — add your first client
+  /awi-org <name>      — add your first organization
   /help           — see all commands
 ```
 
