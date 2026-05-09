@@ -26,27 +26,45 @@ If `current-user.json` does not exist: stop and tell the operator to run `/awi-u
 
 ---
 
-## Step 1 — Detect state
+## Step 1 — Resolve working date
 
 ```bash
 bash .claude/hooks/get-datetime.sh full
 ```
 
-Read `<agenda-base>daily/YYYY-MM-DD.md` if it exists. Extract from frontmatter:
-- `checked-in:` — true/false
-- `checked-out:` — true/false
+**The day starts at 6am.** The working date is the calendar date whose 6am most recently passed:
+- If current hour ≥ 6:00 → working date = today
+- If current hour < 6:00 → working date = yesterday
 
-Determine state:
-- **Not started** — file missing OR `checked-in: false`
-- **In progress** — `checked-in: true`, `checked-out: false`
-- **Done** — `checked-out: true`
+**All file paths, dates, week numbers, and git log anchors use the working date throughout every mode.**
+
+The working week follows from the working date (week starts Monday 6am).
+Git log anchor: `--since="<working-date> 06:00:00"`
 
 ---
 
-## Step 2 — Route by state
+## Step 2 — Detect state and route
 
-- **Not started** → go directly to **Start mode**. Do not ask.
-- **In progress** → ask:
+Read `<agenda-base>daily/<working-date>.md` if it exists. Extract from frontmatter:
+- `checked-in:` — true/false
+- `checked-out:` — true/false
+
+**Always check yesterday:** regardless of current hour, if yesterday's file exists and is not checked out, launch the open-session TUI:
+
+```bash
+python3 .claude/skills/today/scripts/open_session.py \
+  --day-name <YesterdayDayName> \
+  --working-date <yesterday-date>
+```
+
+Read stdout JSON: `{"action": "continue" | "close_start"}`
+
+- `"continue"` → working date = yesterday, proceed to state detection below
+- `"close_start"` → run **End mode** for yesterday (full Q&A, working date = yesterday), then switch working date to today and run **Start mode**
+
+**Otherwise** (no open yesterday session), determine state from the working date's file:
+- **Not started** — file missing OR `checked-in: false` → go directly to **Start mode**
+- **In progress** — `checked-in: true`, `checked-out: false` → ask:
   ```
   question: "What do you need?"
   header: "Today"
@@ -56,7 +74,7 @@ Determine state:
     - label: "End my day"
       description: "Day retrospective — planned vs actual, tomorrow handoff"
   ```
-- **Done** → go directly to **End mode** with note: "Day already closed — running retrospective anyway."
+- **Done** — `checked-out: true` → go directly to **End mode** with note: "Day already closed — running retrospective anyway."
 
 ---
 
@@ -80,52 +98,44 @@ If today is **Monday**:
 
 4. If missing, note it and continue.
 
-### A1 — Ask three questions (one at a time)
+### A1 — Run the check-in TUI (Q1–Q3)
 
-#### Q1: How are you feeling?
-
-```
-question: "How are you feeling right now?"
-header: "Energy"
-options:
-  - label: "Great!"
-    description: "High energy — all task types available"
-  - label: "Okay"
-    description: "Medium energy — high-energy tasks flagged, avoid in afternoon"
-  - label: "Low"
-    description: "Low energy — only low/medium tasks; high-energy deferred"
-```
-
-| Answer | Energy ceiling |
-|---|---|
-| Great! | high |
-| Okay | medium |
-| Low | low |
-
-#### Q2: When are you working today?
-
-> What time did you start, and what time do you plan to stop? (e.g. "started at 9, stopping at 6")
-
-Parse into `HH:MM` values. If they say "now", use the current time from `get-datetime.sh`.
-
-#### Q3: What's already scheduled today?
-
-> Anything with a fixed time already on your calendar? Calls, meetings, errands — include duration.
-
-Record each block with duration. If nothing, record that.
-
-#### Q4: What are you committing to finishing today?
-
-> What are the 1–3 things you want to finish today, no matter what?
-
-Launch the interactive task picker (hard cap: 3 selections):
+Launch the check-in wizard for energy, hours, and scheduled blocks:
 
 ```bash
-python3 .claude/skills/shared/scripts/today_issues.py \
+python3 .claude/skills/today/scripts/start_checkin.py \
+  --working-date <working-date> \
+  --current-time <HH:MM from get-datetime.sh>
+```
+
+Read stdout JSON:
+```json
+{
+  "energy": "high" | "medium" | "low",
+  "start_time": "HH:MM",
+  "end_time": "HH:MM",
+  "scheduled_blocks": [{"description": "...", "duration": "..."}]
+}
+```
+
+If the script exits non-zero (user quit), stop and wait.
+
+| energy value | Energy ceiling |
+|---|---|
+| high | high |
+| medium | medium |
+| low | low |
+
+### A1.5 — Q4: What are you committing to finishing today?
+
+Launch the task picker TUI (hard cap: 3 selections):
+
+```bash
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
   | python3 .claude/skills/today/scripts/task_picker.py
 ```
 
-The picker outputs a JSON array of selected issues. Read stdout. If the array is empty (user quit without selecting), ask verbally instead.
+Read stdout JSON array of selected issues. If empty (user quit without selecting), proceed with no anchored tasks.
 
 These become **anchored tasks** in Check mode — scheduled first.
 
@@ -201,21 +211,31 @@ If daily file has no `## Morning Check-in` section:
 
 And stop.
 
-### B1 — Run the data script
+### B1 — Run the data script and launch plan TUI
 
 ```bash
-python3 .claude/skills/shared/scripts/today_issues.py
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
 ```
 
-Parse the JSON output. All fields are pre-computed — do not re-fetch from GitHub.
+Parse the JSON output. Surface any `errors` to the user before continuing.
 
-Key fields to extract:
-- `state` — should be `"ready"` (if `"needs_checkin"`, stop and send to Start mode)
-- `energy_ceiling` — gate tasks against this
-- `available_minutes` — use for time budget display and overload detection
-- `pinned` — issues to schedule first, always
-- `issues` — all other open issues, sorted to build the plan
-- `errors` — surface any fetch failures to the user before continuing
+Then pipe it to the plan TUI:
+
+```bash
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
+  | python3 .claude/skills/today/scripts/check_plan.py
+```
+
+Read stdout JSON:
+```json
+{
+  "deferred":  [{"number": N, "source_repo": "...", "title": "...", "reason": "..."}],
+  "unplanned": [{"title": "..."}],
+  "refreshed": bool
+}
+```
+
+Incorporate deferred and unplanned items when writing the daily file (B4).
 
 Read anchored tasks (commitments) from `## Morning Check-in` in the daily file.
 
@@ -232,7 +252,7 @@ Read each matching file. Extract: project name, `## Next Action` content. Keep a
 **Git log:**
 
 ```bash
-git log --since="midnight" --grep="cos:" --oneline
+git log --since="<working-date> 06:00:00" --grep="cos:" --oneline
 ```
 
 ### B2.5 — Build convergence map
@@ -314,7 +334,7 @@ Update or create:
 **Focus:** [Theme X] → [reason: gate unlocked / priority / momentum]
 
 ## Today So Far
-- [items from git log since midnight]
+- [items from git log since last 6am]
 ```
 
 After writing user daily, write org daily files:
@@ -349,20 +369,9 @@ Log: `python3 .claude/skills/shared/scripts/log_command.py today completed`
 
 > Day retrospective. Runs automatically when day is already closed, or when chosen from the in-progress menu.
 
-### C0 — Which day? (midnight rule)
+### C0 — Which day?
 
-If current hour is between 0:00 and 5:59, ask:
-
-```
-question: "Which day are you closing?"
-header: "Closing day"
-options:
-  - label: "Yesterday (YYYY-MM-DD)"
-  - label: "Today (YYYY-MM-DD)"
-```
-
-Use the selected date as `<target-date>` for all file reads and writes in this mode.
-If hour is 6:00 or later, `<target-date>` = today's date. No question needed.
+Use the working date resolved in Step 1 as `<target-date>` for all file reads and writes in this mode. (Before 6:00 → yesterday; 6:00 or later → today.)
 
 ### C1 — Get the full picture
 
@@ -373,10 +382,10 @@ Read `<agenda-base>daily/<target-date>.md`. Extract:
 - All `## Session Log` sections
 - All `## Breaks` entries
 
-Read current week file:
+Read current week file. Derive the ISO week number from the **working date** (not wall-clock):
 
 ```bash
-date '+%G-W%V'
+date -d "<working-date>" '+%G-W%V'
 ```
 
 Read `<agenda-base>weekly/YYYY-WNN.md`. If it doesn't exist, create with minimal structure before continuing:

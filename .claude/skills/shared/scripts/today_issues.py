@@ -231,6 +231,12 @@ def fetch_issues(
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--working-date", default=None,
+                        help="YYYY-MM-DD working date (default: today)")
+    args, _ = parser.parse_known_args()
+
     errors: list[str] = []
 
     # Resolve user paths
@@ -246,8 +252,8 @@ def main() -> None:
     active = {name: cfg for name, cfg in active_orgs.items() if cfg.get("active")}
     active_org_names = list(active.keys())
 
-    # Read today's daily file
-    today_str = date.today().isoformat()
+    # Resolve working date (supports 6am-boundary from SKILL.md)
+    today_str = args.working_date if args.working_date else date.today().isoformat()
     daily_path = user_root / "agenda" / "daily" / f"{today_str}.md"
     content = daily_path.read_text() if daily_path.exists() else ""
     fm = parse_frontmatter(content) if content else {}

@@ -52,15 +52,24 @@ def fmt_meta(issue: dict) -> str:
     return "  ".join(parts)
 
 
-def draw(stdscr, issues: list[dict], cursor: int, selected: set, scroll: int, warning: str):
+def filter_issues(issues: list[dict], query: str) -> list[dict]:
+    if not query:
+        return issues
+    q = query.lower()
+    return [i for i in issues if q in i.get("title", "").lower()]
+
+
+def draw(stdscr, issues: list[dict], cursor: int, selected: set,
+         scroll: int, warning: str, filter_text: str = ""):
     stdscr.erase()
     h, w = stdscr.getmaxyx()
 
-    # Reserve rows: 3 header + 1 excerpt + 2 footer = 6
+    # Reserve rows: 3 header + 1 filter + 1 excerpt + 2 footer = 7
     HEADER_ROWS = 3
+    FILTER_ROWS = 1
     EXCERPT_ROWS = 2
     FOOTER_ROWS = 2
-    list_rows = max(1, h - HEADER_ROWS - EXCERPT_ROWS - FOOTER_ROWS)
+    list_rows = max(1, h - HEADER_ROWS - FILTER_ROWS - EXCERPT_ROWS - FOOTER_ROWS)
 
     # ── Header ──────────────────────────────────────────────────────────────
     title = f" Q4 — Commit to today  (select up to {MAX_SELECT})"
@@ -86,10 +95,18 @@ def draw(stdscr, issues: list[dict], cursor: int, selected: set, scroll: int, wa
     else:
         stdscr.addnstr(2, 0, "", 0)  # blank row
 
+    # ── Filter bar ───────────────────────────────────────────────────────────
+    filter_prompt = " Filter: "
+    filter_display = (filter_text or "")[-max(1, w - len(filter_prompt) - 1):]
+    filter_line = f"{filter_prompt}{filter_display}"
+    stdscr.attron(curses.color_pair(PAIR_EXCERPT))
+    stdscr.addnstr(HEADER_ROWS, 0, filter_line.ljust(w), w)
+    stdscr.attroff(curses.color_pair(PAIR_EXCERPT))
+
     # ── Issue list ───────────────────────────────────────────────────────────
     visible = issues[scroll: scroll + list_rows]
     for idx, issue in enumerate(visible):
-        row = HEADER_ROWS + idx
+        row = HEADER_ROWS + FILTER_ROWS + idx
         abs_idx = scroll + idx
         is_cursor = abs_idx == cursor
         is_sel = abs_idx in selected
@@ -117,7 +134,7 @@ def draw(stdscr, issues: list[dict], cursor: int, selected: set, scroll: int, wa
         stdscr.attroff(attr)
 
     # ── Excerpt ──────────────────────────────────────────────────────────────
-    excerpt_row = HEADER_ROWS + list_rows
+    excerpt_row = HEADER_ROWS + FILTER_ROWS + list_rows
     stdscr.attron(curses.color_pair(PAIR_DIM))
     stdscr.addnstr(excerpt_row, 0, "─" * w, w)
     stdscr.attroff(curses.color_pair(PAIR_DIM))
@@ -135,7 +152,7 @@ def draw(stdscr, issues: list[dict], cursor: int, selected: set, scroll: int, wa
     stdscr.addnstr(footer_row, 0, "─" * w, w)
     stdscr.attroff(curses.color_pair(PAIR_DIM))
 
-    keys = " ↑↓ navigate   SPACE select   ENTER confirm   Q quit"
+    keys = " ↑↓ navigate   SPACE select   ENTER confirm   type to filter   Q quit"
     stdscr.attron(curses.color_pair(PAIR_FOOTER))
     stdscr.addnstr(footer_row + 1, 0, keys.ljust(w), w)
     stdscr.attroff(curses.color_pair(PAIR_FOOTER))
@@ -159,21 +176,30 @@ def setup_colors():
     curses.init_pair(PAIR_FOOTER,     curses.COLOR_WHITE,  bg)
 
 
-def run(stdscr, issues: list[dict]) -> list[dict]:
+def run(stdscr, all_issues: list[dict]) -> list[dict]:
     curses.curs_set(0)
     setup_colors()
 
-    cursor   = 0
-    selected: set = set()
-    scroll   = 0
-    warning  = ""
+    filter_text = ""
+    issues      = all_issues          # currently visible (filtered) list
+    # selected stores indices into all_issues (stable across filter changes)
+    selected_keys: set = set()        # frozenset of (source_repo, number)
+    cursor  = 0
+    scroll  = 0
+    warning = ""
+
+    def visible_selected(vis: list[dict]) -> set[int]:
+        """Indices into vis that are selected."""
+        return {i for i, iss in enumerate(vis)
+                if (iss.get("source_repo"), iss.get("number")) in selected_keys}
 
     while True:
         h, _ = stdscr.getmaxyx()
         HEADER_ROWS  = 3
+        FILTER_ROWS  = 1
         EXCERPT_ROWS = 2
         FOOTER_ROWS  = 2
-        list_rows = max(1, h - HEADER_ROWS - EXCERPT_ROWS - FOOTER_ROWS)
+        list_rows = max(1, h - HEADER_ROWS - FILTER_ROWS - EXCERPT_ROWS - FOOTER_ROWS)
 
         # Keep cursor in view
         if cursor < scroll:
@@ -181,36 +207,53 @@ def run(stdscr, issues: list[dict]) -> list[dict]:
         elif cursor >= scroll + list_rows:
             scroll = cursor - list_rows + 1
 
-        draw(stdscr, issues, cursor, selected, scroll, warning)
+        vis_sel = visible_selected(issues)
+        draw(stdscr, issues, cursor, vis_sel, scroll, warning, filter_text)
         warning = ""
 
-        key = stdscr.getch()
+        ch = stdscr.getch()
 
-        if key in (ord("q"), ord("Q"), 27):   # q / Q / Escape
+        if ch in (ord("q"), ord("Q"), 27):    # q / Q / Escape
             return []
 
-        elif key == curses.KEY_UP:
+        elif ch == curses.KEY_UP:
             cursor = max(0, cursor - 1)
 
-        elif key == curses.KEY_DOWN:
+        elif ch == curses.KEY_DOWN:
             cursor = min(len(issues) - 1, cursor + 1)
 
-        elif key == curses.KEY_PPAGE:          # Page Up
+        elif ch == curses.KEY_PPAGE:           # Page Up
             cursor = max(0, cursor - list_rows)
 
-        elif key == curses.KEY_NPAGE:          # Page Down
+        elif ch == curses.KEY_NPAGE:           # Page Down
             cursor = min(len(issues) - 1, cursor + list_rows)
 
-        elif key == ord(" "):
-            if cursor in selected:
-                selected.discard(cursor)
-            elif len(selected) >= MAX_SELECT:
-                warning = f"Cap reached — deselect one to pick another (max {MAX_SELECT})"
-            else:
-                selected.add(cursor)
+        elif ch == ord(" "):
+            if issues:
+                iss    = issues[cursor]
+                iss_id = (iss.get("source_repo"), iss.get("number"))
+                if iss_id in selected_keys:
+                    selected_keys.discard(iss_id)
+                elif len(selected_keys) >= MAX_SELECT:
+                    warning = f"Cap reached — deselect one to pick another (max {MAX_SELECT})"
+                else:
+                    selected_keys.add(iss_id)
 
-        elif key in (curses.KEY_ENTER, ord("\n"), ord("\r")):
-            return [issues[i] for i in sorted(selected)]
+        elif ch in (curses.KEY_ENTER, ord("\n"), ord("\r")):
+            return [i for i in all_issues
+                    if (i.get("source_repo"), i.get("number")) in selected_keys]
+
+        elif ch in (curses.KEY_BACKSPACE, 127, 8):
+            if filter_text:
+                filter_text = filter_text[:-1]
+                issues = filter_issues(all_issues, filter_text)
+                cursor = min(cursor, max(0, len(issues) - 1))
+
+        elif 32 <= ch <= 126:
+            filter_text += chr(ch)
+            issues = filter_issues(all_issues, filter_text)
+            cursor = 0
+            scroll = 0
 
 
 def main():
