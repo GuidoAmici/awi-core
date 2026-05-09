@@ -4,7 +4,7 @@ Use `[[slug]]` wiki links throughout. Conventions:
 
 | Link type | Format |
 |---|---|
-| Project → Product | `[[products/newhaze]]` |
+| Project → Product | `[[products/<product-slug>]]` |
 | Task → Project | `[[projects/auth-unificado]]` |
 | Daily → Task | `[[tasks/research-ai-model-delegation]]` |
 | Project → Wiki | `[[wiki/arquitectura-digital/stack]]` |

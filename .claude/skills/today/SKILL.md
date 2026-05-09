@@ -1,6 +1,8 @@
 ---
 name: today
 description: Daily hub — start the day, view/refresh plan, or close out. Re-runnable throughout the day.
+allowed-tools: Read, Write, Edit, Bash, Glob
+model: sonnet
 ---
 
 # /today - Daily Hub
@@ -13,72 +15,76 @@ Single entry point for all daily rituals. Detects current state and asks what yo
 
 Before accessing any agenda files:
 
-1. Read `_data/users/current-user.md`
+1. Read `_data/users/current-user.json`
 2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
 3. `<agenda-base>` = `<user-root>agenda/`
+4. Read `<user-root>active-orgs.json`. For each org where `active: true`, build an entry in `<org-agenda-bases>`:
+   - `org-name` → `_data/organizations/<org-name>/agenda/`
+   - If the file doesn't exist, `<org-agenda-bases>` = empty list (no orgs active).
 
-If `current-user.md` does not exist: stop and tell the operator to run `/awi-user-login`.
+If `current-user.json` does not exist: stop and tell the operator to run `/awi-user-login`.
 
 ---
 
-## Step 1 — Detect state
+## Step 1 — Resolve working date
 
 ```bash
 bash .claude/hooks/get-datetime.sh full
 ```
 
-Read `<agenda-base>daily/YYYY-MM-DD.md` if it exists. Extract from frontmatter:
+**The day starts at 6am.** The working date is the calendar date whose 6am most recently passed:
+- If current hour ≥ 6:00 → working date = today
+- If current hour < 6:00 → working date = yesterday
+
+**All file paths, dates, week numbers, and git log anchors use the working date throughout every mode.**
+
+The working week follows from the working date (week starts Monday 6am).
+Git log anchor: `--since="<working-date> 06:00:00"`
+
+---
+
+## Step 2 — Detect state and route
+
+Read `<agenda-base>daily/<working-date>.md` if it exists. Extract from frontmatter:
 - `checked-in:` — true/false
 - `checked-out:` — true/false
 
-Determine state:
-- **Not started** — file missing OR `checked-in: false`
-- **In progress** — `checked-in: true`, `checked-out: false`
-- **Done** — `checked-out: true`
+**Always check yesterday:** regardless of current hour, if yesterday's file exists and is not checked out, launch the open-session TUI:
+
+```bash
+python3 .claude/skills/today/scripts/open_session.py \
+  --day-name <YesterdayDayName> \
+  --working-date <yesterday-date>
+```
+
+Read stdout JSON: `{"action": "continue" | "close_start"}`
+
+- `"continue"` → working date = yesterday, proceed to state detection below
+- `"close_start"` → run **End mode** for yesterday (full Q&A, working date = yesterday), then switch working date to today and run **Start mode**
+
+**Otherwise** (no open yesterday session), determine state from the working date's file:
+- **Not started** — file missing OR `checked-in: false` → go directly to **Start mode**
+- **In progress** — `checked-in: true`, `checked-out: false` → ask:
+  ```
+  question: "What do you need?"
+  header: "Today"
+  options:
+    - label: "Check — view / refresh plan"    ← recommended
+      description: "Build or refresh today's task list"
+    - label: "End my day"
+      description: "Day retrospective — planned vs actual, tomorrow handoff"
+  ```
+- **Done** — `checked-out: true` → go directly to **End mode** with note: "Day already closed — running retrospective anyway."
 
 ---
 
-## Step 2 — Ask what you need
+## Start mode
 
-Use `AskUserQuestion` tool. Highlight the recommended option based on state:
-
-```
-question: "What do you need?"
-header: "Today"
-options:
-  - label: "Start my day"
-    description: "Morning check-in: energy, schedule, commitments"
-  - label: "View / refresh plan"
-    description: "Build or refresh today's task list"
-  - label: "End my day"
-    description: "Day retrospective — planned vs actual, tomorrow handoff"
-```
-
-**Recommended option by state:**
-- Not started → "Start my day"
-- In progress → "View / refresh plan"
-- Done → "End my day" (note: day already closed, proceed anyway if chosen)
-
----
-
-## Mode A — Start my day
-
-> Runs the morning check-in. Equivalent to the former `/today-start`.
+> Morning check-in. Runs automatically when no check-in exists for today.
 
 **Do NOT skip questions.** The daily plan is only valid after the check-in is written.
 
 ### A0 — Enforcement gates
-
-#### Friday gate: Week review
-
-If today is **Friday** (or Saturday/Sunday and no review was done):
-
-1. Check if this week's weekly file exists: `<agenda-base>weekly/YYYY-WNN.md`
-2. If it doesn't exist, or has no `## Selected for This Week` section:
-
-> ⚠ Weekly review hasn't been done yet. Run `/week-review` before planning today — it sets next week's priorities.
-
-Block the intake until `/week-review` is complete or the operator explicitly says to skip.
 
 #### Monday gate: Mental model
 
@@ -92,50 +98,57 @@ If today is **Monday**:
 
 4. If missing, note it and continue.
 
-### A1 — Ask three questions (one at a time)
+### A1 — Run the check-in TUI (Q1–Q3)
 
-#### Q1: How are you feeling?
+Launch the check-in wizard for energy, hours, and scheduled blocks:
 
-```
-question: "How are you feeling right now?"
-header: "Energy"
-options:
-  - label: "Great!"
-    description: "High energy — all task types available"
-  - label: "Okay"
-    description: "Medium energy — high-energy tasks flagged, avoid in afternoon"
-  - label: "Low"
-    description: "Low energy — only low/medium tasks; high-energy deferred"
+```bash
+python3 .claude/skills/today/scripts/start_checkin.py \
+  --working-date <working-date> \
+  --current-time <HH:MM from get-datetime.sh>
 ```
 
-| Answer | Energy ceiling |
+Read stdout JSON:
+```json
+{
+  "energy": "high" | "medium" | "low",
+  "start_time": "HH:MM",
+  "end_time": "HH:MM",
+  "scheduled_blocks": [{"description": "...", "duration": "..."}]
+}
+```
+
+If the script exits non-zero (user quit), stop and wait.
+
+| energy value | Energy ceiling |
 |---|---|
-| Great! | high |
-| Okay | medium |
-| Low | low |
+| high | high |
+| medium | medium |
+| low | low |
 
-#### Q2: What's already scheduled today?
+### A1.5 — Q4: What are you committing to finishing today?
 
-> What's already on your schedule today? Calls, meetings, errands — anything with a fixed time or block. Include duration.
+Launch the task picker TUI (hard cap: 3 selections):
 
-Record each block with duration. Wait for confirmation. If nothing, record that.
+```bash
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
+  | python3 .claude/skills/today/scripts/task_picker.py
+```
 
-#### Q3: What are you committing to finishing today?
+Read stdout JSON array of selected issues. If empty (user quit without selecting), proceed with no anchored tasks.
 
-> What are the 1–3 things you want to finish today, no matter what?
-
-If operator hasn't seen the backlog, briefly show what's due/overdue and what's selected this week so they can pick from real data.
-
-These become **anchored tasks** in Mode B — scheduled first.
+These become **anchored tasks** in Check mode — scheduled first.
 
 ### A2 — Calculate time budget
 
+Compute from Q2 answers:
+
 ```
-Start time:        [current time]
-Working window:    8h (unless operator says otherwise)
-Scheduled blocks:  [sum from Q2]
+Start time:        [HH:MM from Q2]
+End time:          [HH:MM from Q2]
+Working window:    end - start
+Scheduled blocks:  [sum from Q3]
 Available time:    working window - scheduled blocks
-Recommended stop:  start time + working window
 ```
 
 Show:
@@ -144,7 +157,7 @@ Show:
 
 ### A3 — Write to daily file
 
-Create or update `<agenda-base>daily/YYYY-MM-DD.md`. Put `## Morning Check-in` and `## Time Budget` after the H1. Preserve all existing sections.
+Create or update `<agenda-base>daily/YYYY-MM-DD.md`. Preserve all existing sections.
 
 ```markdown
 ---
@@ -153,41 +166,44 @@ date: YYYY-MM-DD
 checked-in: true
 checked-out: false
 energy-ceiling: high | medium | low
+start-time: "HH:MM"
+end-time: "HH:MM"
 ---
 
 # DayOfWeek, Month DD
 
 ## Morning Check-in
 - **Feeling:** [answer] → energy ceiling: [high/medium/low]
+- **Working:** [HH:MM] → [HH:MM]
 - **Scheduled blocks:**
   - [block description] — [duration]
   - (or "None")
 - **Committing to:**
-  - [item 1]
-  - [item 2]
-  - [item 3]
+  - [issue ref or description]
 
 ## Time Budget
 | | |
 |---|---|
 | Start | HH:MM |
-| Working window | 8h |
+| End | HH:MM |
+| Working window | Xh Ym |
 | Scheduled blocks | Xh Ym |
 | Available for tasks | Xh Ym |
-| **Recommended stop** | **HH:MM** |
 ```
 
 After writing:
 
-> Check-in saved. Run `/today` again to generate your plan.
+> Check-in saved. Run `/today` again to build your plan.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today-start completed`
 
 ---
 
-## Mode B — View / refresh plan
+---
 
-> Builds or refreshes today's task list. Requires a morning check-in.
+## Check mode
+
+> Builds or refreshes today's task list. Requires a check-in.
 
 If daily file has no `## Morning Check-in` section:
 
@@ -195,48 +211,81 @@ If daily file has no `## Morning Check-in` section:
 
 And stop.
 
-### B1 — Read daily file and check-in
-
-Extract:
-- `energy-ceiling` from frontmatter
-- Scheduled blocks and durations from `## Morning Check-in`
-- Anchored tasks (commitments) from `## Morning Check-in`
-- Available time from `## Time Budget`
-
-### B2 — Gather tasks
+### B1 — Run the data script and launch plan TUI
 
 ```bash
-# Today's tasks (pending or in-progress only)
-grep -rl "due: YYYY-MM-DD" <agenda-base>tasks/ 2>/dev/null
-
-# All pending/in-progress for overdue check
-grep -rl "status: pending\|status: in-progress" <agenda-base>tasks/ 2>/dev/null
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
 ```
 
-Filter overdue by comparing due dates against today. Read matching files. Extract: `priority`, `energy`, `duration`.
+Parse the JSON output. Surface any `errors` to the user before continuing.
 
-Grep `<agenda-base>projects/*.md` for `status: active`, read for next actions.
+Then pipe it to the plan TUI:
 
 ```bash
-git log --since="midnight" --grep="cos:" --oneline
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
+  | python3 .claude/skills/today/scripts/check_plan.py
 ```
+
+Read stdout JSON:
+```json
+{
+  "deferred":  [{"number": N, "source_repo": "...", "title": "...", "reason": "..."}],
+  "unplanned": [{"title": "..."}],
+  "refreshed": bool
+}
+```
+
+Incorporate deferred and unplanned items when writing the daily file (B4).
+
+Read anchored tasks (commitments) from `## Morning Check-in` in the daily file.
+
+### B2 — Gather active projects
+
+Active projects are still read from files — they are context docs, not issues.
+
+```bash
+grep -rl "status: active" <org-agenda-base>projects/ 2>/dev/null
+```
+
+Read each matching file. Extract: project name, `## Next Action` content. Keep as project context, not as scheduled tasks. Run for each active org.
+
+**Git log:**
+
+```bash
+git log --since="<working-date> 06:00:00" --grep="cos:" --oneline
+```
+
+### B2.5 — Build convergence map
+
+Group all gathered tasks (personal + org) into **2–5 themes** by domain/project cluster. Rules:
+
+1. Name each theme concisely (e.g. "NewHaze DS v2", "CI/CD Infra", "AWI Tooling")
+2. Count pending/in-progress items per theme
+3. Identify **gate issues** — issues blocking multiple others (look for "blocked by" / "depends on" in issue body, or `priority:high` issues whose `project:` label appears in many other issues). Mark as gate.
+4. Pick the top 1–2 recommended focus themes based on: gates unlocked, priority density, active momentum.
+
+If more than 8 themes, merge the smallest into "Other".
+
+This map is informational only — it does not change task ordering or time budget.
 
 ### B3 — Build the plan
 
 **Ordering:**
-1. Anchored tasks first
-2. Due today — sorted by priority within energy tier
-3. Overdue — flagged with days overdue
-4. Active projects — next action only if time remains
+1. Pinned issues first (manually flagged `pinned` label)
+2. Anchored tasks (morning commitments) — match against issue titles if possible
+3. `priority:high` open issues — sorted by energy tier
+4. `priority:medium` open issues
+5. `priority:low` — list only, don't schedule unless time permits
+6. Active projects — next action only if time remains
 
 **Energy gating:**
-- Ceiling low → move all `energy: high` and `energy: medium` to `## Deferred (energy)`
-- Ceiling medium → allow `energy: high` before midday only; rest deferred
+- Ceiling low → move all `energy:high` and `energy:medium` issues to `## Deferred (energy)`
+- Ceiling medium → allow `energy:high` before midday only; rest deferred
 - Ceiling high → no gating
 
 **Time gating:**
 
-If total duration exceeds available time:
+Sum `duration` labels of scheduled issues. If total exceeds available time:
 
 ```
 ⚠ Overloaded: Planned Xh Ym | Available Xh Ym | Over by Xh Ym
@@ -244,15 +293,15 @@ If total duration exceeds available time:
 
 Ask:
 
-> This day is overloaded by [amount]. What should we defer or move to tomorrow?
+> This day is overloaded by [amount]. What should we defer?
 
 Wait before writing.
 
 **On re-run:**
-- Recalculate remaining time (available minus completed task durations)
+- Recalculate remaining time (available minus completed issue durations)
 - Keep `[x]` items in place
 - Update `## Today So Far` with latest git log
-- Include tasks added since last run
+- Include issues added since last run
 - Show: `Remaining: Xh Ym of Xh Ym`
 
 ### B4 — Update daily file
@@ -262,44 +311,67 @@ Preserve: `## Morning Check-in`, `## Time Budget`, `## Session Log`, `## Breaks`
 Update or create:
 
 ```markdown
-## Due Today
-- [ ] [task name] — `energy:` `duration:` `priority:` — [[tasks/slug]]
+## Pinned
+- [ ] [issue title] `[org-name]` — `energy:` `duration:` `priority:` — [org-workspace#N]
 
-## Overdue
-- [ ] [task name] — X days overdue — `energy:` `duration:` — [[tasks/slug]]
+## Today's Plan
+- [ ] [issue title] `[org-name]` — `energy:` `duration:` `priority:` — [org-workspace#N]
+- [ ] [issue title] `[org-name]` — `energy:` `duration:` `priority:` — [org-workspace#N]
 
 ## Deferred (energy)
-- [task name] — deferred: energy ceiling is [level] — [[tasks/slug]]
+- [issue title] `[org-name]` — deferred: energy ceiling is [level] — [org-workspace#N]
 
 ## Active Projects
-- [Project Name] — next: [next action from file]
+- [Project Name] `[org-name]` — next: [next action from project file]
+
+## Convergence Map
+> Cross-org snapshot — [N] pending items across [M] orgs + personal
+
+| Theme | Tasks | Gate |
+|-------|-------|------|
+| [Theme name] | N | [gate task or —] |
+
+**Focus:** [Theme X] → [reason: gate unlocked / priority / momentum]
 
 ## Today So Far
-- [items from git log since midnight]
+- [items from git log since last 6am]
 ```
+
+After writing user daily, write org daily files:
+
+For each org in `<org-agenda-bases>` that has at least one task appearing (checked `[x]` or unchecked `[ ]`) in the user's plan, create or update `<org-agenda-base>daily/YYYY-MM-DD.md`:
+
+```markdown
+---
+type: org-daily
+date: YYYY-MM-DD
+org: <org-name>
+---
+
+# <Org Display Name> — DayOfWeek, Month DD
+
+## Work Log
+- **User:** <display name from current-user.json>
+- **Tasks in scope:** [task name], [task name], ...
+- **Completed:** [task name], ... (or "None")
+
+## Session Log
+- [items from git log since midnight filtered to this org's paths]
+```
+
+If `<org-agenda-base>daily/` does not exist, create it. Skip orgs with no tasks in today's plan.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today completed`
 
 ---
 
-## Mode C — End my day
+## End mode
 
-> Day retrospective. Equivalent to the former `/today-end`.
+> Day retrospective. Runs automatically when day is already closed, or when chosen from the in-progress menu.
 
-### C0 — Which day? (midnight rule)
+### C0 — Which day?
 
-If current hour is between 0:00 and 5:59, ask:
-
-```
-question: "Which day are you closing?"
-header: "Closing day"
-options:
-  - label: "Yesterday (YYYY-MM-DD)"
-  - label: "Today (YYYY-MM-DD)"
-```
-
-Use the selected date as `<target-date>` for all file reads and writes in this mode.
-If hour is 6:00 or later, `<target-date>` = today's date. No question needed.
+Use the working date resolved in Step 1 as `<target-date>` for all file reads and writes in this mode. (Before 6:00 → yesterday; 6:00 or later → today.)
 
 ### C1 — Get the full picture
 
@@ -310,10 +382,10 @@ Read `<agenda-base>daily/<target-date>.md`. Extract:
 - All `## Session Log` sections
 - All `## Breaks` entries
 
-Read current week file:
+Read current week file. Derive the ISO week number from the **working date** (not wall-clock):
 
 ```bash
-date '+%G-W%V'
+date -d "<working-date>" '+%G-W%V'
 ```
 
 Read `<agenda-base>weekly/YYYY-WNN.md`. If it doesn't exist, create with minimal structure before continuing:
@@ -392,5 +464,37 @@ Append `## Day Review` to `<agenda-base>daily/<target-date>.md`. Update `checked
 ```
 
 Tell the user the full retrospective out loud before writing.
+
+### C5 — Write org daily files
+
+For each org that had tasks in today's plan (same trigger as B4), update `<org-agenda-base>daily/<target-date>.md`:
+
+- Set `## Work Log` → `Completed:` based on `[x]` items from user daily
+- Append `## Session Summary`:
+
+```markdown
+## Session Summary
+### Planned vs Actual
+- [x] [org task] — done
+- [ ] [org task] — skipped ([reason if known])
+
+### Notes
+[One sentence — what moved, what didn't, handoff if relevant.]
+```
+
+Create `<org-agenda-base>daily/` directory if it doesn't exist.
+
+### C6 — Friday gate: Week review
+
+If `<target-date>` is a **Friday**:
+
+1. Check if this week's weekly file exists: `<agenda-base>weekly/YYYY-WNN.md`
+2. If it doesn't exist, or has no `## Selected for This Week` section with actual content:
+
+> ⚠ Week review not done. Run `/week-review` before closing Friday — it sets next week's priorities.
+
+**Block the close-out.** Do not write `checked-out: true` or log `today-end` until `/week-review` is complete.
+
+Once `/week-review` is done, return here and finish End mode normally.
 
 Log: `python3 .claude/skills/shared/scripts/log_command.py today-end completed`
