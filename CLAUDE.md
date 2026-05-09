@@ -1,8 +1,8 @@
 # Agentic Workflow Integrator (AWI) — Claude Code
 
-**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/agentic-workflow-integrator/INSTRUCTIONS.md).** Read it before any vault operation.
+**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/_agentic-workflow-integrator/INSTRUCTIONS.md).** Read it before any vault operation.
 
-> **Do NOT modify this file for vault rules.** Update `_system/agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
+> **Do NOT modify this file for vault rules.** Update `_system/_agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
 
 ## Claude Code-specific
 
