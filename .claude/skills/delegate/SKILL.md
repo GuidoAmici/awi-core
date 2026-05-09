@@ -67,26 +67,16 @@ When related to an existing task/project:
 
 **Same repo (silent background):**
 ```
-python .claude/skills/delegate/scripts/delegate_run.py \
+python3 .claude/skills/delegate/scripts/delegate_run.py \
   --prompt "<PROMPT>" \
   --model <MODEL> \
   --slug <SLUG> \
   --budget <BUDGET>
 ```
 
-**Same repo (visible tab in Windows Terminal — user can TAB to it):**
-```
-python .claude/skills/delegate/scripts/delegate_run.py \
-  --prompt "<PROMPT>" \
-  --model <MODEL> \
-  --slug <SLUG> \
-  --budget <BUDGET> \
-  --visible
-```
-
 **Different repo (employee):**
 ```
-python .claude/skills/delegate/scripts/delegate_run.py \
+python3 .claude/skills/delegate/scripts/delegate_run.py \
   --prompt "<PROMPT>" \
   --model <MODEL> \
   --slug <SLUG> \
@@ -96,24 +86,22 @@ python .claude/skills/delegate/scripts/delegate_run.py \
 
 5. Report the slug back to the user so they can track it.
 
-Add `--visible` if the user says "let me watch it", "open in tab", or "visible". Omit for all other cases (silent is default).
-
 ## Monitoring & Control
 
 **List all delegates:**
 ```
-python .claude/skills/delegate/scripts/delegate_monitor.py
+python3 .claude/skills/delegate/scripts/delegate_monitor.py
 ```
 
 **Inspect a specific delegate (tail logs + stuck detection):**
 ```
-python .claude/skills/delegate/scripts/delegate_monitor.py <slug>
-python .claude/skills/delegate/scripts/delegate_monitor.py <slug> --tail 100
+python3 .claude/skills/delegate/scripts/delegate_monitor.py <slug>
+python3 .claude/skills/delegate/scripts/delegate_monitor.py <slug> --tail 100
 ```
 
 **Kill a stuck/runaway delegate:**
 ```
-python .claude/skills/delegate/scripts/delegate_kill.py <slug>
+python3 .claude/skills/delegate/scripts/delegate_kill.py <slug>
 ```
 
 **Restart a delegate** (kill then re-run with same or adjusted prompt).

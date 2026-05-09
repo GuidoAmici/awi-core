@@ -1,0 +1,2 @@
+# Append-only logs: auto-merge by keeping all lines from both sides
+command-log.jsonl merge=union
