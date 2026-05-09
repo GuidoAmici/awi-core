@@ -1,0 +1,13 @@
+{
+  "slug": "pending-tasks-convergence",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are analyzing pending tasks across all organizations and personal work in the AWI vault at /home/unixadmin/GitHub/GuidoAmici/my-awi-instance.\n\nTODAY: 2026-04-30 Thursday\n\nGOAL: Give a clear convergence view \u2014 what all pending tasks (personal + org) are pointing toward. Look for themes, critical ",
+  "started_at": "2026-04-30T20:48:52.306606",
+  "finished_at": "2026-04-30T20:51:41.372568",
+  "exit_code": 0,
+  "pid": 221685,
+  "duration": "2m 49s"
+}

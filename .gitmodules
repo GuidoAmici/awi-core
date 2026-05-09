@@ -4,17 +4,17 @@
 
 [submodule "_data/organizations/newhaze"]
 	path = _data/organizations/newhaze
-	url = https://github.com/GuidoAmici/newhaze-client.git
+	url = https://github.com/GuidoAmici/newhaze-workspace.git
 	branch = only
 
 [submodule "_data/organizations/rabbitek"]
 	path = _data/organizations/rabbitek
-	url = https://github.com/GuidoAmici/rabbitek-client.git
+	url = https://github.com/GuidoAmici/rabbitek-workspace.git
 	branch = only
 
 [submodule "_data/organizations/afin"]
 	path = _data/organizations/afin
-	url = https://github.com/GuidoAmici/afin-client.git
+	url = https://github.com/GuidoAmici/afin-workspace.git
 	branch = only
 
 # ─── Workframe ───────────────────────────────────────────────────────────────

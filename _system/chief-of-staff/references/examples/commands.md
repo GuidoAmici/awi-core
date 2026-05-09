@@ -14,7 +14,7 @@
 | `/history` | Recent git activity | `/history` |
 | `/delegate <task>` | Fork terminal for autonomous work | `/delegate write the quarterly report` |
 | `/wrap-session` | End-of-session ritual | `/wrap-session` |
-| `/awi-initialize <name>` | Scaffold new workspace submodule | `/awi-initialize newhaze` |
+| `/awi-initialize <name>` | Scaffold new workspace submodule | `/awi-initialize <client-name>` |
 
 ---
 
@@ -86,5 +86,5 @@ Loads user file from `_data/users/`. Reads linked person profile from the active
 Four-step ritual:
 1. Session summary
 2. Daily file update (completed + added work, impulse check)
-3. Observations → `user-profile-inference/` or `people/GuidoAmici.md`
+3. Observations → `user-profile-inference/` or `people/<username>.md`
 4. Unsaved info sweep

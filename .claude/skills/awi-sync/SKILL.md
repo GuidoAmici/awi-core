@@ -5,7 +5,7 @@ description: Sync all AWI submodules (direct + nested). Commits local changes, p
 
 # /awi-sync — Submodule Sync
 
-Scans all submodules registered in AWI and nested client repos, syncs each to `main`, and updates the registry in `_data/submodules.md`.
+Scans all submodules registered in AWI and nested client repos, syncs each to their tracked branch, and updates the registry in `_data/submodules.md`.
 
 ## Usage
 
@@ -20,24 +20,26 @@ Scans all submodules registered in AWI and nested client repos, syncs each to `m
 ### Step 1 — Run the sync script
 
 ```bash
-python3 .claude/skills/awi-sync/scripts/sync_submodules.py
+python3 .claude/skills/awi-sync/scripts/sync_submodules.py --full-report
 ```
 
 The script handles everything:
 - Discovers all submodules (AWI-level + nested inside each client)
 - For each: checks clone status → removes `.gitkeep` from populated folders → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
+- Prints output at the requested verbosity level
 
-### Step 2 — Present the report to the user
+Capture the full output in memory. Show only the 1-line summary to the user.
 
-Show the script output verbatim. Then add a one-line summary:
+### Step 2 — Offer a breakdown
 
-- If all synced: `All submodules are up to date.`
-- If failed: `N repo(s) could not be synced. See errors above.`
+Use the AskUserQuestion tool to ask:
 
-### Step 3 — Show the updated graph
+- **question:** "Want more detail?"
+- **options:** `["No", "Breakdown", "Full report"]`
 
-After the report, display the updated Mermaid graph from `_data/submodules.md` so the user can see the new state visually.
+If the user picks **Breakdown** or **Full report**, display the already-captured output — do NOT re-run the script.
+If the user picks **No**, stop.
 
 ---
 
@@ -47,15 +49,3 @@ After the report, display the updated Mermaid graph from `_data/submodules.md` s
 |---|---|
 | `0` | All submodules synced successfully |
 | `1` | One or more submodules failed |
-
----
-
-## Logging
-
-At the end of this skill — regardless of outcome — log the invocation:
-
-```bash
-python3 .claude/skills/shared/scripts/log_command.py awi-sync <outcome>
-```
-
-`<outcome>`: `completed` | `skipped` | `errored`

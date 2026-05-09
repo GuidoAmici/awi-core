@@ -1,0 +1,13 @@
+{
+  "slug": "skill-quality-audit",
+  "status": "killed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are the reality-checker. Audit ALL skills in /home/unixadmin/GitHub/GuidoAmici/my-awi-instance/.claude/skills/ for a single quality problem: they are too prescriptive \u2014 over-specifying exact bash commands, step numbers, and 'type this, type that' instructions instead of trusting Claude to figure",
+  "started_at": "2026-05-01T17:50:19.044243",
+  "finished_at": null,
+  "exit_code": null,
+  "pid": 5263,
+  "duration": null
+}

@@ -1,0 +1,28 @@
+Done. Analysis saved to `info/outputs/2026-04-29-ai-engineer-fork-summary-advice.md`.
+
+---
+
+## Findings
+
+**Don't re-integrate the file-based fork summary. Fix SKILL.md instead.**
+
+### Why not file-based
+
+1. **Race condition** — two simultaneous delegates overwrite the same `fork_summary_user_prompt.md`. No slug-scoping exists.
+2. **Stale state** — file persists between sessions; unfilled placeholders can corrupt a future delegate's context
+3. **Self-defeating** — "fill the file then read its contents into `--prompt`" is file-based injection with extra steps. If Claude has the content in memory, write it directly to the prompt string.
+4. **200K context windows** — no transport compression benefit in 2025/2026. Just embed it.
+
+### The cold-start problem is real
+
+Delegated agents run `claude -p` non-interactively. They can't ask follow-ups. They need the conversation context Claude already holds. The upstream was right to address it; the file mechanism was wrong.
+
+### Concrete fix
+
+**Three changes, no Python touched:**
+
+1. **Add "Context Distillation" section to SKILL.md** — mandatory `## Context` block format every prompt must open with: Goal / Constraints / Known paths / Source task
+2. **Update Step 2 wording** — replace vague "include all context" with reference to the new section + heredoc example showing format
+3. **Delete `fork_summary_user_prompt.md`** — dead code superseded by the inline format now documented in SKILL.md
+
+Full diff-ready SKILL.md content and example prompt with `## Context` block is in the output file.
