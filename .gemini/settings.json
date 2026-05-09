@@ -1,13 +1,33 @@
 {
   "hooks": {
-    "AfterTool": [
+    "Notification": [
       {
-        "matcher": "write_file|edit_file",
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/auto-commit.py",
+            "command": "touch /home/csr1/my-awi-instance/hook_fired.txt && bash /home/csr1/my-awi-instance/.gemini/hooks/permission-sound.sh"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace|run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/csr1/my-awi-instance/.gemini/hooks/auto-commit.sh",
             "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/csr1/my-awi-instance/.gemini/hooks/victory-sound.sh"
           }
         ]
       }

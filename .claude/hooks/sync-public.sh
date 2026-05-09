@@ -3,8 +3,11 @@
 # Called by auto-commit.sh after each successful private commit.
 # Usage: sync-public.sh <absolute-file-path>
 
+# Get the directory where the script is located and derive vault root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VAULT_ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
 FILE_PATH="$1"
-VAULT_ROOT="$CLAUDE_PROJECT_DIR"
 CONFIG_DIR="$VAULT_ROOT/.claude/config"
 WHITELIST="$CONFIG_DIR/public-whitelist"
 PATH_FILE="$CONFIG_DIR/public-repo-path"

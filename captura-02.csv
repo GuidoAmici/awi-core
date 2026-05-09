@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+90:D3:CF:BF:8C:1F, 2026-05-02 13:14:08, 2026-05-02 13:17:47,  6, 260, WPA2, CCMP, PSK, -38,      556,        0,   0.  0.  0.  0,  19, MOVISTAR-WIFI6-8C10, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

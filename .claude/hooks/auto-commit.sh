@@ -1,6 +1,10 @@
 #!/bin/bash
 # Auto-commit vault changes after Write/Edit/Bash(mv) operations
 
+# Get the directory where the script is located and derive vault root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VAULT_ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_name',''))" 2>/dev/null)
 FILE_PATH=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path') or d.get('tool_input',{}).get('filePath') or '')" 2>/dev/null)
@@ -9,7 +13,7 @@ COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); p
 # Handle Bash tool: only act on mv / git mv commands
 if [ "$TOOL_NAME" = "Bash" ]; then
   if echo "$COMMAND" | grep -qE '(^|[;&|[:space:]])(git[[:space:]]+mv|mv)[[:space:]]'; then
-    cd "$CLAUDE_PROJECT_DIR" || exit 0
+    cd "$VAULT_ROOT" || exit 0
     if ! git diff --cached --quiet 2>/dev/null; then
       SUMMARY=$(git diff --cached --name-status | awk '{print $NF}' | xargs -I{} basename {} | paste -sd ', ')
       git commit -m "cos: move/rename - $SUMMARY"
@@ -20,7 +24,6 @@ fi
 
 [ -z "$FILE_PATH" ] && exit 0
 
-VAULT_ROOT="$CLAUDE_PROJECT_DIR"
 REL_PATH="${FILE_PATH#$VAULT_ROOT/}"
 
 # Skip gitignored files

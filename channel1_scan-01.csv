@@ -1,0 +1,14 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+A0:8A:06:E6:37:DF, 2026-05-02 13:49:38, 2026-05-02 13:49:47,  1, 260, WPA2, CCMP, PSK, -68,       92,        0,   0.  0.  0.  0,  19, MOVISTAR-WIFI6-37D0, 
+AC:C6:62:C1:AA:67, 2026-05-02 13:49:38, 2026-05-02 13:49:48,  1, 130, WPA2, CCMP, PSK, -87,       80,        0,   0.  0.  0.  0,  10, Wifi-Mario, 
+30:93:BC:49:92:C6, 2026-05-02 13:49:38, 2026-05-02 13:49:47,  1, 260, WPA2, CCMP, PSK, -87,       59,        0,   0.  0.  0.  0,  15, TeleCentro-92c1, 
+08:3E:5D:51:FA:26, 2026-05-02 13:49:38, 2026-05-02 13:49:47,  1, 195, WPA2 WPA, CCMP TKIP, PSK, -87,       14,        3,   0.  0.  0.  0,  15, Telecentro-fa20, 
+32:93:BC:49:94:C7, 2026-05-02 13:49:39, 2026-05-02 13:49:45,  1, 260, OPN, ,   , -89,        1,        0,   0.  0.  0.  0,  15, TeleCentro Wifi, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+A4:22:49:08:AE:D2, 2026-05-02 13:49:38, 2026-05-02 13:49:47, -88,       14, 08:3E:5D:51:FA:26,
+A4:22:49:08:B0:FC, 2026-05-02 13:49:38, 2026-05-02 13:49:46, -92,        7, 08:3E:5D:51:FA:26,
+22:10:6C:5E:58:24, 2026-05-02 13:49:44, 2026-05-02 13:49:45, -96,        4, 08:3E:5D:51:FA:26,
+3C:31:78:BA:D8:28, 2026-05-02 13:49:45, 2026-05-02 13:49:45, -80,        3, (not associated) ,
+

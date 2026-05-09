@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/permission-sound.sh"
+            "command": "bash ./.claude/hooks/permission-sound.sh"
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.ps1",
+            "command": "bash ./.claude/hooks/check-delegates.sh || powershell.exe -ExecutionPolicy Bypass -File ./.claude/hooks/check-delegates.ps1",
             "timeout": 5
           }
         ]
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.ps1",
+            "command": "bash ./.claude/hooks/auto-commit.sh || powershell.exe -ExecutionPolicy Bypass -File ./.claude/hooks/auto-commit.ps1",
             "timeout": 30
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/victory-sound.sh"
+            "command": "bash ./.claude/hooks/victory-sound.sh"
           }
         ]
       }
