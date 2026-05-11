@@ -1,15 +1,14 @@
 ---
 name: awi-initialize
-description: Initialize all org submodules that are toggled on in the user's active-orgs.json. Registers any unregistered orgs in .gitmodules then runs git submodule update --init. Usage: /awi-initialize
+description: Initialize all submodules active in the user's user-submodules.json. Regenerates .gitmodules, inits active entries, deinits inactive ones. Usage: /awi-initialize
 ---
 
-# /awi-initialize — Initialize Orgs
+# /awi-initialize — Initialize Submodules
 
-Reads the current user's `active-orgs.json` and initializes every org
-marked `active: true`. If an org is not yet registered in `.gitmodules`,
-it is added first using the stored URL.
+Reads the current user's `user-submodules.json`, regenerates `.gitmodules`,
+initializes every active entry, and deinits any inactive entries still mounted.
 
-Run this after a fresh clone, after switching users, or after toggling orgs on.
+Run this after a fresh clone, after switching users, or after toggling submodules on.
 
 ## Usage
 
@@ -59,7 +58,7 @@ Which would you like to toggle on? (list names, or n to skip)
 
 - **If names given** → for each name:
   ```bash
-  python3 .claude/skills/awi-org-toggle/scripts/toggle_org.py on <name>
+  python3 .claude/skills/awi-submodule-toggle/scripts/toggle_submodule.py on <name>
   ```
   Then re-run `init_orgs.py` from Step 1.
 

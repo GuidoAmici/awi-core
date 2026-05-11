@@ -66,10 +66,39 @@ Show counts and a one-line summary per issue. Let the maintainer pick.
 
 3. **Reproduce (bugs only).** Before any grilling, attempt reproduction: read the reporter's steps, trace the relevant code, run tests or commands. Report what happened — successful repro with code path, failed repro, or insufficient detail (a strong `needs-info` signal). A confirmed repro makes a much stronger agent brief.
 
-4. **Grill (if needed).** If the issue needs fleshing out, run a `/grill-with-docs` session.
+4. **Grill (mandatory for `ready-for-agent`).** Run a three-phase panel. Each agent speaks with a `[agent-name]` label on every message. Later-phase agents may interrupt at any time — but only for blockers (scope explosion, technical impossibility, wildly wrong effort estimate). Each phase ends with a user sign-off; that summary becomes a section of the agent brief.
+
+   ### Phase 1 — Strategic alignment (`nexus-strategy`)
+
+   Covers: does this solve a real problem? who is it for? is it needed or just interesting?
+
+   **If the issue is unrelated to any active strategic goal:** ask exactly 3 questions to capture context (origin, affected party, future relevance trigger), then file a context issue:
+   ```bash
+   gh issue create --repo <owner/repo> \
+     --title "Context: <slug>" \
+     --label "needs-context" \
+     --body "<3 captured answers>"
+   ```
+   End the grill session. Do not proceed to phase 2.
+
+   **If strategically relevant:** continue until user signs off on the strategic rationale.
+
+   ### Phase 2 — Priority & effort (`reality-checker`)
+
+   Covers: urgency, effort estimate, quick win vs. big feature, dependencies.
+
+   Closes by recommending the `assigned-employee` from `.claude/reference/employees.json` based on effort and domain. Read the taglines to shortlist; propose one. User confirms before phase 3 opens.
+
+   ### Phase 3 — Quality specs (`assigned-employee`)
+
+   Load the confirmed employee's `.md` from the path in `employees.json`. Speak as that agent for the rest of the session.
+
+   Covers: acceptance criteria, scope boundaries, key interfaces, edge cases.
+
+   Closes when user signs off on the spec. That sign-off is the agent brief body.
 
 5. **Apply the outcome:**
-   - `ready-for-agent` — post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)).
+   - `ready-for-agent` — post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)) including `**Assigned employee:**` and `**Model:**`. This label may only be applied after a completed grill session.
    - `ready-for-human` — same structure as an agent brief, but note why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `needs-info` — post triage notes (template below).
    - `wontfix` (bug) — polite explanation, then close.
@@ -78,7 +107,7 @@ Show counts and a one-line summary per issue. Let the maintainer pick.
 
 ## Quick state override
 
-If the maintainer says "move #42 to ready-for-agent", trust them and apply the role directly. Confirm what you're about to do (role changes, comment, close), then act. Skip grilling. If moving to `ready-for-agent` without a grilling session, ask whether they want to write an agent brief.
+`ready-for-agent` requires a completed grill session — do not apply it without one. If the maintainer force-moves an issue to `ready-for-agent`, warn them: "This issue hasn't been grilled. `/delegate-issue` will skip it. Do you want to run a grill session now?" If they confirm skip, apply the label but add a comment noting the grill was bypassed.
 
 ## Needs-info template
 

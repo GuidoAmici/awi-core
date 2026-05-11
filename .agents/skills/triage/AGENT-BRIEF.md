@@ -41,6 +41,8 @@ State what is out of scope. This prevents the agent from gold-plating or making 
 
 **Category:** bug / enhancement
 **Summary:** one-line description of what needs to happen
+**Assigned employee:** <key from employees.json, e.g. `senior-developer`>
+**Model:** opus / sonnet / haiku
 
 **Current behavior:**
 Describe what happens now. For bugs, this is the broken behavior.

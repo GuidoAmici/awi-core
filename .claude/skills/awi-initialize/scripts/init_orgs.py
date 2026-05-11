@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Initialize all toggled-on AWI org submodules.
+"""Initialize AWI submodules for the current user.
 
-Reads _data/users/<github-id>/active-orgs.json (resolved from current-user.json,
-auto-created if missing) and for each active org:
-  1. Registers the submodule in .gitmodules if not already present.
-  2. Runs git submodule update --init --recursive.
+Reads user-submodules.json, regenerates .gitmodules, then:
+  - Inits every active entry
+  - Deinits (after commit+push) every inactive entry that's mounted on disk
 
 Exit codes:
-  0  All active orgs initialized successfully.
-  1  Hard error (bad URL, git failure, etc.).
-  2  No orgs active, but inactive ones exist.   Stdout: INACTIVE: <names>
-  3  No orgs registered at all.                 Stdout: NO_ORGS
+  0  All active submodules initialized successfully.
+  1  Hard error (commit/push failure, git failure, etc.).
+  2  No submodules active, but inactive ones exist.  Stdout: INACTIVE: <names>
+  3  No submodules registered at all.               Stdout: NO_ORGS
 """
 
 import json
@@ -19,88 +18,114 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
-from paths import AWI_ROOT, USERS_DIR, ORGANIZATIONS_RELDIR
+from paths import AWI_ROOT, USERS_DIR, USER_SUBMODULES_FILE
 from current_user import resolve_github_id
+from generate_gitmodules import write_gitmodules
 
 
-def resolve_state_file() -> Path:
-    return USERS_DIR / resolve_github_id() / "active-orgs.json"
+# ── Git helpers ───────────────────────────────────────────────────────────────
+
+def git(args: list[str], cwd: Path = AWI_ROOT) -> subprocess.CompletedProcess:
+    return subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True)
 
 
-def is_in_gitmodules(name: str) -> bool:
-    gitmodules = AWI_ROOT / ".gitmodules"
-    if not gitmodules.exists():
-        return False
-    return f"_data/organizations/{name}" in gitmodules.read_text()
+def is_mounted(path: Path) -> bool:
+    """True if the submodule working tree has content."""
+    return path.exists() and any(path.iterdir())
 
 
-def main():
-    state_file = resolve_state_file()
+def commit_and_push(path: Path, name: str) -> str | None:
+    """Commit any dirty state and push. Returns error string on failure, None on success."""
+    status = git(["status", "--porcelain"], cwd=path)
+    if status.stdout.strip():
+        rc = git(["add", "-A"], cwd=path)
+        if rc.returncode != 0:
+            return f"{name}: git add failed — {rc.stderr.strip()}"
+        rc = git(["commit", "-m", "cos: sync - stage local changes before deinit"], cwd=path)
+        if rc.returncode != 0:
+            return f"{name}: commit failed — {rc.stderr.strip()}"
 
-    # Auto-create empty state file if missing
-    if not state_file.exists():
-        state_file.write_text("{}\n")
+    rc = git(["push"], cwd=path)
+    if rc.returncode != 0:
+        return f"{name}: push failed — {rc.stderr.strip()}"
+    return None
 
-    state = json.loads(state_file.read_text())
 
-    active = [(name, entry) for name, entry in state.items() if entry.get("active", False)]
-    inactive = [name for name, entry in state.items() if not entry.get("active", False)]
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main() -> int:
+    github_id      = resolve_github_id()
+    submodules_file = USERS_DIR / github_id / USER_SUBMODULES_FILE
+
+    if not submodules_file.exists():
+        print("NO_ORGS")
+        return 3
+
+    raw = json.loads(submodules_file.read_text())
+    if not raw:
+        print("NO_ORGS")
+        return 3
+
+    active   = {k: v for k, v in raw.items() if v.get("active", False)}
+    inactive = {k: v for k, v in raw.items() if not v.get("active", False)}
 
     if not active:
-        if not state:
-            print("NO_ORGS")
-            return 3
         print(f"INACTIVE: {', '.join(inactive)}")
         return 2
 
-    names = [name for name, _ in active]
-    print(f"Initializing {len(active)} org(s): {', '.join(names)}\n")
+    # Regenerate .gitmodules from user-submodules.json + current-user.json
+    try:
+        write_gitmodules(AWI_ROOT)
+        print(".gitmodules regenerated.\n")
+    except Exception as e:
+        print(f"Error regenerating .gitmodules: {e}", file=sys.stderr)
+        return 1
 
-    errors = []
-    for name, entry in active:
+    errors: list[str] = []
+
+    # Deinit inactive entries that are still mounted
+    for name, entry in inactive.items():
+        path = AWI_ROOT / entry.get("path", "")
+        if not is_mounted(path):
+            continue
+        print(f"  deinit {name}...", end=" ", flush=True)
+        err = commit_and_push(path, name)
+        if err:
+            print("FAILED")
+            print(f"    ✗ {err}", file=sys.stderr)
+            errors.append(name)
+            continue
+        rc = git(["submodule", "deinit", "-f", entry["path"]])
+        if rc.returncode != 0:
+            print("FAILED")
+            print(f"    ✗ deinit failed: {rc.stderr.strip()}", file=sys.stderr)
+            errors.append(name)
+        else:
+            print("done")
+
+    if errors:
+        print(f"\n{len(errors)} submodule(s) failed to deinit — aborting init.", file=sys.stderr)
+        return 1
+
+    # Init active entries
+    names = list(active.keys())
+    print(f"Initializing {len(active)} submodule(s): {', '.join(names)}\n")
+
+    for name, entry in active.items():
         print(f"  → {name}...", end=" ", flush=True)
-
-        # Register in .gitmodules if missing
-        if not is_in_gitmodules(name):
-            url = entry.get("url", "")
-            if not url:
-                print("SKIPPED (no URL in active-orgs.json)")
-                errors.append(name)
-                continue
-            reg = subprocess.run(
-                ["git", "submodule", "add", url, f"{ORGANIZATIONS_RELDIR}/{name}"],
-                cwd=AWI_ROOT,
-                capture_output=True,
-                text=True,
-            )
-            if reg.returncode != 0:
-                print("FAILED (submodule add)")
-                errors.append(name)
-                if reg.stderr:
-                    print(f"    {reg.stderr.strip()}")
-                continue
-
-        # Initialize and checkout
-        result = subprocess.run(
-            ["git", "submodule", "update", "--init", "--recursive",
-             f"{ORGANIZATIONS_RELDIR}/{name}"],
-            cwd=AWI_ROOT,
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode == 0:
+        rc = git(["submodule", "update", "--init", "--recursive", entry["path"]])
+        if rc.returncode == 0:
             print("done")
         else:
             print("FAILED")
+            print(f"    ✗ {rc.stderr.strip()}", file=sys.stderr)
             errors.append(name)
-            if result.stderr:
-                print(f"    {result.stderr.strip()}")
 
     if errors:
-        print(f"\n{len(errors)} org(s) failed: {', '.join(errors)}")
+        print(f"\n{len(errors)} submodule(s) failed: {', '.join(errors)}")
         return 1
 
-    print(f"\nAll {len(active)} org(s) initialized.")
+    print(f"\nAll {len(active)} submodule(s) initialized.")
     return 0
 
 

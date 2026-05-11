@@ -21,7 +21,8 @@ FAST_BUDGET: 0.20
 
 ## Employees
 
-If user specifies "delegate to <name>", read `.claude/reference/employees.json` to get the repo path.
+Each entry in `.claude/reference/employees.json` is `{ "path": "...", "tagline": "..." }`.
+If user specifies "delegate to <name>", look up the entry and use `path` to resolve the employee repo.
 
 ## Instructions
 
