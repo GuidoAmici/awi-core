@@ -14,7 +14,7 @@ Issues live in GitHub Issues, distributed by scope. Use the `gh` CLI for all ope
 
 | Dimension | Examples |
 |-----------|---------|
-| Org | `org:newhaze`, `org:afin`, `org:rabbitek` |
+| Org | `org:newhaze`, `org:afin`, `org:rabbitek` — applied to every issue regardless of repo. Enables cross-repo filtering and local (off-GitHub) issue management by org. |
 | Codebase | `repo:newhaze-b2b-panel`, `repo:newhaze-api`, `repo:newhaze-ui` |
 | Project | `project:ci-cd-pipeline`, `project:sso` (matches `agenda/projects/*.md` slug) |
 | Triage | see `docs/agents/triage-labels.md` |

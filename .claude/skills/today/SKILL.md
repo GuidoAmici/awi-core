@@ -49,18 +49,20 @@ Read `<agenda-base>daily/<working-date>.md` if it exists. Extract from frontmatt
 - `checked-in:` — true/false
 - `checked-out:` — true/false
 
-**Always check yesterday:** regardless of current hour, if yesterday's file exists and is not checked out, launch the open-session TUI:
+**Always check yesterday:** regardless of current hour, if yesterday's file exists and is not checked out, ask:
 
-```bash
-python3 .claude/skills/today/scripts/open_session.py \
-  --day-name <YesterdayDayName> \
-  --working-date <yesterday-date>
+```
+question: "Yesterday's <DayName> session is still open. What do you want to do?"
+header: "Open session"
+options:
+  - label: "Continue yesterday"
+    description: "Keep working on yesterday's plan"
+  - label: "Close yesterday, start today"
+    description: "Run End mode for yesterday, then Start mode for today"
 ```
 
-Read stdout JSON: `{"action": "continue" | "close_start"}`
-
-- `"continue"` → working date = yesterday, proceed to state detection below
-- `"close_start"` → run **End mode** for yesterday (full Q&A, working date = yesterday), then switch working date to today and run **Start mode**
+- `"Continue yesterday"` → working date = yesterday, proceed to state detection below
+- `"Close yesterday, start today"` → run **End mode** for yesterday (full Q&A, working date = yesterday), then switch working date to today and run **Start mode**
 
 **Otherwise** (no open yesterday session), determine state from the working date's file:
 - **Not started** — file missing OR `checked-in: false` → go directly to **Start mode**
@@ -98,44 +100,72 @@ If today is **Monday**:
 
 4. If missing, note it and continue.
 
-### A1 — Run the check-in TUI (Q1–Q3)
+### A1 — Check-in questions (Q1–Q3)
 
-Launch the check-in wizard for energy, hours, and scheduled blocks:
+Ask the following **one at a time** using AskUserQuestion:
 
-```bash
-python3 .claude/skills/today/scripts/start_checkin.py \
-  --working-date <working-date> \
-  --current-time <HH:MM from get-datetime.sh>
+**Q1 — Energy:**
+```
+question: "How's your energy today?"
+header: "Energy"
+options:
+  - label: "High"
+    description: "Sharp — ready for deep, focused work"
+  - label: "Medium"
+    description: "Functional — can execute but not peak"
+  - label: "Low"
+    description: "Maintenance mode — easy tasks only"
 ```
 
-Read stdout JSON:
-```json
-{
-  "energy": "high" | "medium" | "low",
-  "start_time": "HH:MM",
-  "end_time": "HH:MM",
-  "scheduled_blocks": [{"description": "...", "duration": "..."}]
-}
+**Q2 — Working hours:**
 ```
+question: "When are you starting and finishing today?"
+header: "Hours"
+options:
+  - label: "Now → noon"
+  - label: "Now → 3pm"
+  - label: "Now → 6pm"
+  - label: "Other — I'll type the exact times"
+```
+If "Other", output: "What time are you starting and finishing? (e.g. 10:00 → 14:30)" and wait for free-text reply. Parse HH:MM from the answer.
 
-If the script exits non-zero (user quit), stop and wait.
+**Q3 — Scheduled blocks:**
+```
+question: "Any fixed blocks today that eat into work time?"
+header: "Blocks"
+options:
+  - label: "No blocks — full window available"
+  - label: "Yes — I have blocks"
+```
+If "Yes", output: "Describe each block and its duration (e.g. 'gym — 1h, lunch — 30m')." and wait for free-text reply.
 
-| energy value | Energy ceiling |
+| energy answer | Energy ceiling |
 |---|---|
-| high | high |
-| medium | medium |
-| low | low |
+| High | high |
+| Medium | medium |
+| Low | low |
 
 ### A1.5 — Q4: What are you committing to finishing today?
 
-Launch the task picker TUI (hard cap: 3 selections):
-
+Run:
 ```bash
-python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
-  | python3 .claude/skills/today/scripts/task_picker.py
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
 ```
 
-Read stdout JSON array of selected issues. If empty (user quit without selecting), proceed with no anchored tasks.
+Parse the JSON. Display the top `priority:high` issues (up to 10) as a numbered list grouped by org, with title and body summary. Example:
+
+```
+**newhaze**
+  1. [#30] Publish Privacy Policy page on newhaze.ar
+  2. [#22] Publish Google OAuth Consent Screen
+
+**rabbitek**
+  3. [#14] Rebuild Q4 daily picker as curses TUI
+
+Which issues are you committing to today? Type up to 3 numbers (e.g. "1, 3"). Press Enter with no input to skip.
+```
+
+Wait for user reply. Parse issue numbers from their response (hard cap: 3). If no input, proceed with no anchored tasks.
 
 These become **anchored tasks** in Check mode — scheduled first.
 
@@ -211,7 +241,7 @@ If daily file has no `## Morning Check-in` section:
 
 And stop.
 
-### B1 — Run the data script and launch plan TUI
+### B1 — Run the data script
 
 ```bash
 python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
@@ -219,23 +249,7 @@ python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-da
 
 Parse the JSON output. Surface any `errors` to the user before continuing.
 
-Then pipe it to the plan TUI:
-
-```bash
-python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
-  | python3 .claude/skills/today/scripts/check_plan.py
-```
-
-Read stdout JSON:
-```json
-{
-  "deferred":  [{"number": N, "source_repo": "...", "title": "...", "reason": "..."}],
-  "unplanned": [{"title": "..."}],
-  "refreshed": bool
-}
-```
-
-Incorporate deferred and unplanned items when writing the daily file (B4).
+The JSON now includes a `body` field on every issue — use it when building the plan and when reasoning about what each issue requires. Do not just use titles.
 
 Read anchored tasks (commitments) from `## Morning Check-in` in the daily file.
 

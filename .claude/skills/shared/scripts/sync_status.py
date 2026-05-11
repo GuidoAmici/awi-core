@@ -15,7 +15,9 @@ import hashlib
 import sys
 from pathlib import Path
 
-PRIVATE_DIRS = {"_data", ".git"}
+PRIVATE_DIRS  = {"_data", ".git"}
+# .gitmodules is ephemeral — generated per-user on awi-initialize, never mirrored.
+PRIVATE_FILES = {".gitmodules"}
 
 
 def md5(path: Path) -> str:
@@ -26,8 +28,10 @@ def collect_instance_files(awi_root: Path) -> dict[str, Path]:
     """All files in the instance outside _data/ (these are source code)."""
     files: dict[str, Path] = {}
     for f in sorted(awi_root.rglob("*")):
-        if f.is_file() and not any(p in PRIVATE_DIRS for p in f.relative_to(awi_root).parts):
-            rel = str(f.relative_to(awi_root))
+        rel = str(f.relative_to(awi_root))
+        if f.is_file() \
+                and not any(p in PRIVATE_DIRS for p in f.relative_to(awi_root).parts) \
+                and rel not in PRIVATE_FILES:
             files[rel] = f
     return files
 
