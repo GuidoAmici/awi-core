@@ -9,7 +9,7 @@ For each submodule:
   4. Checkout tracked branch and pull
   5. Push to remote
 
-After submodules: sync AWI root itself, then mirror drift to awi-core dev-claude.
+After submodules: sync AWI root itself, then mirror drift to awi-core dev.
 
 Outputs a human-readable report and updates _data/submodules.md.
 """
@@ -434,7 +434,7 @@ def find_awi_core_path(awi_root: Path) -> Optional[Path]:
 
 def sync_awi_core() -> dict:
     """
-    Mirror AWI instance source files to the awi-core dev-claude branch.
+    Mirror AWI instance source files to the awi-core dev branch.
     This keeps the shared template repo in sync with any local customizations.
     Returns a dict with keys: drift, missing, committed, pushed, status, error.
     """
@@ -448,10 +448,10 @@ def sync_awi_core() -> dict:
         result["error"] = "awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules"
         return result
 
-    res = git(["checkout", "dev-claude"], cwd=core_root)
+    res = git(["checkout", "dev"], cwd=core_root)
     if res.returncode != 0:
         result["status"] = "failed"
-        result["error"] = f"Cannot checkout dev-claude: {res.stderr.strip()}"
+        result["error"] = f"Cannot checkout dev: {res.stderr.strip()}"
         return result
 
     local_files = collect_instance_files(AWI_ROOT)
@@ -482,7 +482,7 @@ def sync_awi_core() -> dict:
         return result
     result["committed"] = True
 
-    res = git(["push", "origin", "dev-claude"], cwd=core_root)
+    res = git(["push", "origin", "dev"], cwd=core_root)
     if res.returncode != 0:
         result["status"] = "failed"
         result["error"] = f"awi-core push failed: {res.stderr.strip()}"
@@ -864,7 +864,7 @@ def print_breakdown(
             print(f"{indent}   → {r.error}")
 
     # awi-core mirror status
-    print("\n  [awi-core → dev-claude]")
+    print("\n  [awi-core → dev]")
     if core["status"] == "ok":
         print(f"  ✓  {'awi-core':<36} up to date")
     elif core["status"] == "synced":
@@ -905,7 +905,7 @@ def main() -> None:
     # Step 5: Update the Mermaid diagram colors to reflect the final sync state
     update_registry(results, root=root)
 
-    # Step 6: Mirror any changed source files to awi-core dev-claude branch
+    # Step 6: Mirror any changed source files to awi-core dev branch
     core = sync_awi_core()
 
     # Step 7: Always print 1-line summary

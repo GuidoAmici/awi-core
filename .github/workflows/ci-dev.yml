@@ -1,0 +1,38 @@
+name: CI — PR gate on dev
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  shellcheck:
+    name: shellcheck (.claude/hooks/*.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        run: |
+          find .claude/hooks -name '*.sh' -print0 | xargs -0 shellcheck
+
+  pytest:
+    name: pytest (skills scripts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run pytest
+        run: |
+          find . -path '**/skills/*/scripts/*.py' ! -name '__init__.py' -print0 \
+            | xargs -0 python -m pytest --tb=short

@@ -1,0 +1,28 @@
+name: Promote dev → stg
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    name: Merge dev into stg (no-ff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge dev into stg
+        run: |
+          git checkout stg
+          git merge --no-ff origin/dev --no-edit -m "ci: promote dev → stg ($(git rev-parse --short origin/dev))"
+          git push origin stg

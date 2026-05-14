@@ -23,4 +23,4 @@ If the skill file does not exist, tell the user the command is not available.
 | `/awi-introduction` | First-time onboarding — GitHub, language, preferences |
 | `/awi-initialize` | Bootstrap AWI repo file structure (run once after /awi-introduction) |
 | `/awi-org <name>` | Scaffold new `_data/organizations/<name>/` repo and register as submodule |
-| `/awi-sync` | Sync all repos (submodules + root + awi-core dev-claude mirror) |
+| `/awi-sync` | Sync all repos (submodules + root + awi-core dev mirror) |
