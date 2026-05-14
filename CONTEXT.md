@@ -54,6 +54,32 @@ _Avoid_: remove, unlink, delete
 Changing the Current User — triggered by `gh auth switch`. Requires a PreToolUse commit+push guard; followed by PostToolUse reconfiguration (update `current-user.json`, regenerate `.gitmodules`, init/deinit submodules).
 _Avoid_: login swap, account change
 
+### Release pipeline
+
+**Issue Branch**:
+A short-lived branch forked from `dev` to implement a single issue. Merged back into `dev` via PR, then deleted.
+_Avoid_: feature branch, personal branch, working branch
+
+**`dev`**:
+The main integration branch. All issue branches PR into `dev`. Auto-promoted to `stg` after CI passes. Formerly called `dev-claude`.
+_Avoid_: dev-claude (deprecated)
+
+**`stg`**:
+The staging branch. Receives auto-promotion from `dev` after CI. Milestones and release packages are assembled here. Promoted to `prod` manually.
+_Avoid_: staging, integration branch
+
+**`prod`**:
+The stable release branch. Only promoted from `stg` via manual PR.
+_Avoid_: main, master, release branch
+
+**Promotion**:
+An automated CI merge from one branch to the next tier (`dev` → `stg`). Triggered by a push to the source branch. Fails on conflict — never auto-resolves.
+_Avoid_: deploy, auto-merge, sync
+
+**Release**:
+The deliberate manual PR from `stg` → `prod`. Assembled in `stg` using a GitHub Milestone.
+_Avoid_: publish, ship, promotion (that term is reserved for automated CI)
+
 ### Agent delegation
 
 **Employee**:
@@ -100,8 +126,15 @@ _Avoid_: parking lot issue, backlog ticket
 > **Dev:** "Should I commit .gitmodules after adding a new org?"
 > **Domain expert:** "No — .gitmodules is Ephemeral. Add the org to user-submodules.json and re-run Initialize. The file regenerates itself."
 
+## Relationships
+
+- An **Issue Branch** always forks from `dev` and is deleted after its PR merges
+- **Promotion** is automated (`dev` → `stg`); **Release** is manual (`stg` → `prod`)
+- **Milestones** live in `stg` — a Release bundles one or more milestone-tagged issues
+
 ## Flagged ambiguities
 
 - `active-orgs.json` was used to mean what is now **user-submodules.json** — resolved: renamed and expanded to cover system repos alongside orgs.
 - `workspace_repo` field in the old schema conflicted with `url` expected by `init_orgs.py` — resolved: unified to `url` in the new schema.
 - "toggle" was used for both org-specific and system-repo operations — resolved: `/awi-org-toggle` deprecated in favour of `/awi-submodule-toggle`, which handles all entry types uniformly.
+- `dev-claude` and `dev-gemini` were long-lived personal branches encoding tool identity — resolved: collapsed into a single `dev` branch following standard git flow. `dev-gemini` treated as a one-time issue branch, PRed into `dev` and deleted.
