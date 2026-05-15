@@ -1,0 +1,11 @@
+{
+  "description": "Declares which submodule paths in AWI instances are owned and managed by awi-core. Committed to awi-core and pulled downstream via upstream sync. Consumed by the gitignore generator to prevent instance-specific .gitmodules drift from being pushed to awi-core.",
+  "awi_owned_paths": [
+    "_system/agency-agents"
+  ],
+  "gitignore_rules": {
+    "exclude_from_mirror": [
+      ".gitmodules"
+    ]
+  }
+}
