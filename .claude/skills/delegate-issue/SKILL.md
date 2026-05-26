@@ -24,7 +24,7 @@ gh issue list --repo <owner/repo> \
 ## Step 2: Validate each issue
 
 For each issue, find the `## Agent Brief` comment. It must contain:
-- `**Assigned employee:**` — a key present in `.claude/reference/employees.json`
+- `**Assigned employee:**` — a slug that resolves to a file in `_system/agency-agents/**/*.md` whose frontmatter `name` converted to kebab-case matches the slug
 - `**Model:**` — opus / sonnet / haiku
 
 If either field is missing, skip the issue and warn:
@@ -53,10 +53,7 @@ Wait for user input before proceeding.
 For each confirmed issue:
 
 1. **Load employee persona:**
-   ```
-   path = employees.json[assigned_employee]["path"]
-   ```
-   Read the full `.md` file at that path.
+   Scan `_system/agency-agents/**/*.md`. Find the file whose frontmatter `name` converted to kebab-case matches `assigned_employee`. Read that file in full.
 
 2. **Extract agent brief** from the issue comment (the `## Agent Brief` block).
 
