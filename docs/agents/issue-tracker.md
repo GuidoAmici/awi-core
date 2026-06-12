@@ -4,11 +4,15 @@ Issues live in GitHub Issues, distributed by scope. Use the `gh` CLI for all ope
 
 ## Where issues live
 
+Issues live only in org workspace repos, the AWI core repo, or the personal repo. **Never in codebase repos** (e.g. `newhaze-b2b-panel`). Use `repo:` labels to identify which codebase an issue belongs to.
+
 | Scope | Repo | When to use |
 |-------|------|-------------|
-| Codebase-specific | e.g. `GuidoAmici/newhaze-b2b-panel` | Work scoped entirely to one codebase |
-| Org-level | `GuidoAmici/newhaze-workspace`, `GuidoAmici/afin-workspace`, `GuidoAmici/rabbitek-workspace` | Work spanning multiple codebases within one org |
-| Cross-org | `GuidoAmici/my-awi-user` | Work touching multiple orgs, or personal/meta work |
+| One codebase or one org | `GuidoAmici/newhaze-workspace`, `GuidoAmici/afin-workspace`, `GuidoAmici/rabbitek-workspace` | Work scoped to one org, regardless of how many codebases it touches. Label with `repo:<codebase>` when codebase-specific. |
+| AWI harness | `GuidoAmici/awi-core` | Changes to the AWI system itself: skills, INSTRUCTIONS.md, hooks, documentation standards, agent behavior. |
+| Personal | `GuidoAmici/my-awi-user` | Strictly personal work (agenda, goals, personal projects). Never for harness or cross-org work. |
+
+When an issue touches codebases across multiple orgs, ask the maintainer which org workspace to file it in before creating it.
 
 ## Label schema
 
@@ -35,11 +39,12 @@ One GitHub Milestone per AWI project (`agenda/projects/*.md`). Create in the rel
 
 ## When a skill says "publish to the issue tracker"
 
-Determine scope first:
+Always ask the maintainer where to file before creating an issue. Suggest a destination based on scope:
 
-1. One codebase → issue in that codebase repo, labeled `org:<org>` + `repo:<codebase>`
-2. One org, multiple codebases → issue in that org's workspace repo, labeled `org:<org>`
-3. Multiple orgs → issue in `GuidoAmici/my-awi-user`
+1. One codebase → suggest that codebase's **org workspace repo**, labeled `repo:<codebase>`
+2. One org, multiple codebases → suggest that org's workspace repo
+3. AWI harness change (skill, hook, INSTRUCTIONS.md, doc standard) → `GuidoAmici/awi-core`
+4. Personal → `GuidoAmici/my-awi-user`
 
 ## When a skill says "fetch the relevant ticket"
 

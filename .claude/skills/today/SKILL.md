@@ -32,14 +32,16 @@ If `current-user.json` does not exist: stop and tell the operator to run `/awi-u
 bash .claude/hooks/get-datetime.sh full
 ```
 
-**The day starts at 6am.** The working date is the calendar date whose 6am most recently passed:
-- If current hour ≥ 6:00 → working date = today
-- If current hour < 6:00 → working date = yesterday
+Read `<user-root>user-config.json`. Extract `day_start_hour` (default: `"00:00:00"` if absent). This is the **day boundary time** — the time at which a new working day begins (format `HH:MM:SS`).
+
+**The day starts at `<day_start_hour>`.** The working date is the calendar date whose `<day_start_hour>` most recently passed:
+- If current time ≥ `<day_start_hour>` → working date = today
+- If current time < `<day_start_hour>` → working date = yesterday
 
 **All file paths, dates, week numbers, and git log anchors use the working date throughout every mode.**
 
-The working week follows from the working date (week starts Monday 6am).
-Git log anchor: `--since="<working-date> 06:00:00"`
+The working week follows from the working date (week starts Monday at `<day_start_hour>`).
+Git log anchor: `--since="<working-date> <day_start_hour>"`
 
 ---
 
@@ -266,7 +268,7 @@ Read each matching file. Extract: project name, `## Next Action` content. Keep a
 **Git log:**
 
 ```bash
-git log --since="<working-date> 06:00:00" --grep="cos:" --oneline
+git log --since="<working-date> <day_start_hour>" --grep="cos:" --oneline
 ```
 
 ### B2.5 — Build convergence map

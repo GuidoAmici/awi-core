@@ -83,6 +83,8 @@ git submodule update --init _data/users/<new-id>
 
 Update `_data/users/current-user.json` (see format below). Load and display session primer from `_data/users/<new-id>/awi-user-profile.md`.
 
+**After activating the new user, run Config Regeneration.**
+
 ---
 
 ### 2b — Log In
@@ -168,9 +170,10 @@ Populate `_data/users/<id>/awi-user-profile.md` with answers under `## Preferenc
 ## Option 3 — Log Out
 
 1. Run Sync Procedure for current user.
-2. Run Deactivate Procedure for current user.
-3. Delete `_data/users/current-user.json`.
-4. Output:
+2. Run Config Regeneration (generates a clean derived state for the next user).
+3. Run Deactivate Procedure for current user.
+4. Delete `_data/users/current-user.json`.
+5. Output:
    ```
    Logged out @<login>. Run /awi-user to log in again.
    ```
@@ -204,6 +207,21 @@ Makes the user's local data inaccessible without deleting the GitHub repo:
    ```
 
 2. Update `_data/submodules.md` to mark user as inactive.
+
+---
+
+## Config Regeneration
+
+Regenerates instance-level derived configs by reading the incoming user's `user-config.json`
+and the active org config files. Run this after activating a new user (switch) and before
+deactivating the current user (logout).
+
+```bash
+python3 .claude/skills/awi-initialize/scripts/init_orgs.py
+```
+
+This regenerates `.gitmodules` from the new user's `user-submodules.json` without prompting
+or writing to `user-config.json`. See `/awi-initialize` for full regeneration flow and exit codes.
 
 ---
 

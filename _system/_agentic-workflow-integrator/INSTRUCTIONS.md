@@ -6,6 +6,35 @@ Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and
 
 Always use relative paths from project root for Bash commands. Before requesting permission for any command, convert absolute paths to relative — the relative version may already be permitted and avoids unnecessary permission prompts.
 
+## GitHub MCP
+
+A GitHub MCP server (`mcp__github__*`) is available in every AWI instance. It runs via `npx @modelcontextprotocol/server-github` and sources its token automatically from `gh auth token` — no separate PAT setup required.
+
+### Available tools (auto-allowed)
+
+| Tool | Description |
+|------|-------------|
+| `mcp__github__list_issues` | List issues for a repo |
+| `mcp__github__get_issue` | Get a single issue by number |
+| `mcp__github__search_issues` | Search issues across repos |
+| `mcp__github__create_issue` | Create a new issue |
+| `mcp__github__update_issue` | Update issue title, body, state, labels, assignees |
+| `mcp__github__add_issue_comment` | Add a comment to an issue |
+| `mcp__github__list_pull_requests` | List PRs for a repo |
+| `mcp__github__get_pull_request` | Get a single PR by number |
+| `mcp__github__search_repositories` | Search repositories |
+| `mcp__github__get_file_contents` | Read a file from a repo |
+| `mcp__github__list_commits` | List commits on a branch |
+| `mcp__github__search_code` | Search code across repos |
+
+### When to prefer MCP over `gh` CLI
+
+- **Multi-repo queries**: fetching issues from several repos in parallel — one MCP call per repo vs. one `gh` subprocess per repo.
+- **Structured data**: MCP returns typed JSON; `gh` output requires parsing.
+- **Background agents**: MCP tools have no shell overhead and fewer permission prompts.
+
+For file system operations (clone, checkout, push) and `gh auth` management, continue using `gh` CLI directly.
+
 ## Submodule Changes
 
 `_data/submodules.md` is the source of truth for the submodule graph and registry. Read it before any submodule operation. Update it after every operation.
@@ -38,8 +67,8 @@ awi/
   .claude/                          - Claude Code config: skills, hooks, reference, settings
   _data/                            - Runtime data (not framework docs)
     users/                          - One submodule per user (<github-id>/)
-      current-user.md               - Points to active user's folder
-    entities/                       - One submodule per company/person
+      current-user.json             - Points to active user's folder
+    organizations/                  - One submodule per org/company
       <name>/
         agenda/                     - Tasks, projects, people, daily, outputs, etc.
         documentation/              - Writing style, business profile, personal wiki
@@ -122,6 +151,17 @@ Any architectural decision, infrastructure change, or significant vault improvem
 - Any decision that a future agent or collaborator would need to understand *why* something is the way it is
 
 The output file should cover: what changed, why, and any trade-offs considered.
+
+### ADR status lifecycle
+
+Every ADR must carry a `status:` field in its YAML frontmatter:
+
+| Status | Meaning |
+|--------|---------|
+| `Proposed` | Decision under discussion — not yet binding |
+| `Accepted` | Adopted and in effect |
+| `Superseded` | Replaced by a newer ADR (link to successor in body) |
+| `Deprecated` | No longer applies; not replaced by anything specific |
 
 ### Output → Wiki sync rule
 

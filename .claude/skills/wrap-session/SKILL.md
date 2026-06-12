@@ -1,112 +1,41 @@
 ---
 name: wrap-session
 description: End-of-session ritual. Saves observations about the user and flags any unsaved info from the conversation.
-allowed-tools: Read, Write, Edit, Bash, Glob
+allowed-tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
 model: sonnet
 subagent_type: general-purpose
 ---
 
-# /wrap-session - End of Session
+# /wrap-session — End of Session
 
-Five things before closing:
-1. **Session summary** — what was done and where things stand
-2. **Daily file update** — log completed work and tasks added on the run
-3. **Observations** — behavioral patterns noticed about the user this session
-4. **Unsaved info** — anything mentioned in conversation that wasn't filed to the vault
-5. **Rename session** — use `/rename` to give the conversation a descriptive title
+Four steps, in strict order. Steps 1–3 are fully automatic — no prompts, no confirmations. Step 4 uses `AskUserQuestion`, not free-form text. Do not print progress during Step 1 — output comes in Step 2.
 
 ---
 
-## Step 1 — Session summary
+## Step 1 — Save all files silently
 
-Briefly recap what happened this session: what was asked, what was done, and current state. Keep it short — 3–6 bullet points max. Focus on actions taken and any open threads, not on reasoning or process.
+Save every file below without asking for confirmation. Do not pause between saves.
 
-Format:
-```
-## Session summary
-- [action or outcome]
-- [action or outcome]
-- ...
-```
-
-Tell this to the user out loud before moving on.
-
----
-
-## Step 2 — Daily file update
-
-Resolve `<agenda-base>` first:
-1. Read `_data/users/current-user.md`
-2. Extract `user:` field — this is `<user-root>`
-3. `<agenda-base>` = `<user-root>agenda/`
-
-Read today's daily file at `<agenda-base>daily/YYYY-MM-DD.md`.
-
-If it doesn't exist yet, create it with minimal structure (`checked-in: false` — day was not formally started):
-
-```markdown
----
-type: daily
-date: YYYY-MM-DD
-checked-in: false
-checked-out: false
----
-
-# DayOfWeek, Month DD
-```
-
-Then append a `## Session Log` section (or add to an existing one) with two subsections:
-
-### Completed this session
-List everything that was done, whether or not it was on the plan. Mark each with `[x]` and link the task file if one exists. Include unscheduled work — that's the point.
-
-### Added this session
-List every task, decision, or idea that was created or filed during this session. For each one, include:
-- Its priority (`critical` / `high` / `medium` / `low`)
-- A flag: **[strategic]** if it was clearly planned or high-value, **[reactive]** if it was triggered in the moment (tool tweaks, housekeeping, low-stakes ideas)
-
-Then add a one-line **Impulse check**: was this session's added work mostly strategic or reactive? If reactive work dominated — especially low-priority items — name it plainly. The goal is to make the pattern visible without editorializing.
-
-Example:
-```markdown
-## Session Log
-
-### Completed this session
-- [x] Added `priority` field to task format — [[file-formats]]
-- [x] Backfilled priority across all 30 tasks
-
-### Added this session
-- `priority` field spec — `low` — [reactive] (arose from conversation, not planned)
-- `/wrap-session` skill rename — `low` — [reactive] (tool housekeeping mid-session)
-
-**Impulse check:** Mostly reactive. No scheduled tasks were touched.
-```
-
----
-
-## Step 3 — Resolve GitHub user + observations and profile updates
-
-### 3-pre — Resolve the GitHub user
-
-Run the following before anything else in this step:
+### 1a — Resolve context
 
 ```bash
+bash .claude/hooks/get-datetime.sh full
 gh api user --jq '{id: .id, login: .login, name: .name}'
 ```
 
-This gives three values used throughout the rest of Step 3:
-- `<github-id>` — the **numeric user ID** (stable, never changes even if the login is renamed)
-- `<login>` — the current GitHub username (used for inference filenames)
-- `<name>` — the display name (used as H1 heading in inference files)
+Read `_data/users/current-user.json` to get `<user-root>`.
 
-Two distinct files serve different purposes — use the right one. Both live under `_data/users/`:
+### 1b — Infer which orgs were touched
 
-| File | What goes here |
-|------|----------------|
-| `USERS_RELDIR/<github-id>/USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md` | Patterns Claude *noticed* — things the user likely doesn't consciously track about themselves |
-| `_data/users/<github-id>.md` | Profile facts, preferences, and things the user *self-stated* — dated entries. Named by numeric ID so it survives a username rename. |
+An org was touched if any of the following are true:
+1. Files were edited under `_data/organizations/<name>/`
+2. Issues were referenced by an org workspace repo (e.g. `GuidoAmici/newhaze-workspace`, `GuidoAmici/rabbitek-workspace`)
 
-### 3a — Unaware patterns → inference
+The org name is the repo prefix before `-workspace` (e.g. `newhaze` from `GuidoAmici/newhaze-workspace`). Build a list of touched org names — use it for Steps 1d and 1e.
+
+### 1c — User inference file
+
+Path: `<user-root>agenda/user-profile-inference/YYYY-MM-DD-<login>.md`
 
 Review the conversation for behavioral patterns the user may not be consciously aware of:
 - How they communicate (verbosity, delegation style, trust)
@@ -118,18 +47,14 @@ Write 1–3 observations. Each must be:
 - **Specific to this session** — grounded in what actually happened
 - **Non-judgmental** — framed as observation, not evaluation
 - About something they likely don't consciously track
-- **Must include explicit Pros and Cons** — this is mandatory, not optional
+- **Must include explicit Pros and Cons**
 
-**Before writing**, read existing entries so you don't repeat:
+Before writing, check existing entries to avoid repetition:
 ```bash
-ls $USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/ | sort -r | head -3
+ls <user-root>agenda/user-profile-inference/ | sort -r | head -3
 ```
-Then read the most recent 1–2 files.
 
-Save to `$USERS_RELDIR/<github-id>/$USER_PROFILE_INFERENCE_SUBDIR/YYYY-MM-DD-<login>.md`:
-- If the file already exists for today: append a new `<details>` block (don't add a new `##` heading)
-- If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
-
+Format:
 ```markdown
 <details><summary><strong>Short label</strong></summary>
 
@@ -141,85 +66,101 @@ One short paragraph. Specific, grounded in what happened this session.
 </details>
 ```
 
-**Pros and Cons are required for every observation.** Do not write an observation without both. Tell the user all observations — including the pros/cons — out loud before writing to the file.
+- If the file exists for today: append a new `<details>` block
+- If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
 
-### 3b — Self-stated facts → _data/users/<github-id>.md § Preferences
+### 1d — User daily file
 
-If the user explicitly stated a preference, working style, or self-awareness this session, add it to `_data/users/<github-id>.md` under `## Preferences` with a `(YYYY-MM-DD)` date prefix.
+Path: `<user-root>agenda/daily/YYYY-MM-DD.md`
 
-If the file doesn't exist yet, create it with this frontmatter so the login is also recorded:
-
+If it doesn't exist, create it:
 ```markdown
 ---
-github-id: <github-id>
-login: <login>
-name: <name>
+type: daily
+date: YYYY-MM-DD
+checked-in: false
+checked-out: false
 ---
 
-# <name>
-
-## Preferences
-
-## Long-term patterns
+# DayOfWeek, Month DD
 ```
 
-### 3c — Pattern graduation
+Append a `## Session Log` section with:
 
-If a pattern from `inference/` has now appeared across multiple sessions and can be considered stable, move it to `_data/users/<github-id>.md` under `## Long-term patterns`.
+**Completed this session** — everything done, marked `[x]`, linked to task file if one exists. Include unscheduled work.
 
-**Tell the user all observations and any graduations out loud** — don't just silently write them.
+**Added this session** — every task, decision, or idea created this session. For each: priority (`critical` / `high` / `medium` / `low`) and a flag: **[strategic]** or **[reactive]**.
+
+**Impulse check** — one line: was this session mostly strategic or reactive? If reactive dominated, name it plainly.
+
+### 1e — Org daily files
+
+For each org touched, save `_data/organizations/<name>/agenda/daily/YYYY-MM-DD.md`.
+
+If it doesn't exist, create with minimal structure:
+```markdown
+---
+type: daily
+org: <name>
+date: YYYY-MM-DD
+---
+
+# DayOfWeek, Month DD — <name>
+```
+
+Append a `## Session Log` section summarising work done for that org this session.
+
+### 1f — Outputs files
+
+If any outputs were produced during the session (plans, designs, decisions, reports), save them to:
+- `<user-root>agenda/outputs/YYYY-MM-DD-<slug>.md` for personal outputs
+- `_data/organizations/<name>/agenda/outputs/YYYY-MM-DD-<slug>.md` for org-specific outputs
+
+Only create outputs files for content that was actually produced, not for the session log itself.
 
 ---
 
-## Step 4 — Unsaved info sweep
+## Step 2 — Print one-liner per file saved
 
-Scan the conversation for anything **mentioned but not filed**:
-- Tasks or to-dos referenced but never `/new`'d
-- Ideas or decisions that belong in the vault
-- Project status changes not yet reflected in files
-- People or meetings mentioned in passing
-- Outputs (plans, designs, decisions) that should be in `<agenda-base>outputs/`
+After all saves, print a single line per file:
 
-For each item found: name it and ask whether to file it now or skip.
-
-If nothing unsaved: say so in one line.
+```
+_data/users/42481462/agenda/user-profile-inference/2026-05-14-GuidoAmici.md — 2 observations added
+_data/users/42481462/agenda/daily/2026-05-14.md — session log appended
+_data/organizations/newhaze/agenda/daily/2026-05-14.md — created, session log added
+_data/users/42481462/agenda/outputs/2026-05-14-wrap-session-rewrite.md — created
+```
 
 ---
 
----
+## Step 3 — Session summary
 
-## Step 5 — Rename session (if nameless)
-
-Check if session has a descriptive title. If still default/untitled, advise user to run `/rename` with a suggested title based on what was done. If already named, skip silently.
-
-Suggested title should reflect main work — not generic phrases like "wrap session" or today's date.
-
-Examples: `Wiki personal GuidoAmici — agenda structure`, `Fix auth middleware — compliance rewrite`, `Newhaze learn audit v2`.
-
----
-
-## Output format
+Print 3–6 bullet points covering actions taken and open threads. Focus on outcomes, not process.
 
 ```
 ## Session summary
 - [action or outcome]
+- [action or outcome]
 - ...
-
-## Daily file
-[confirmation that it was updated, or "Created (checked-in: false) — day was not formally started."]
-
-## Session observations
-[observations, told out loud]
-
-## Unsaved info
-[list of items, or "Nothing detected."]
 ```
 
 ---
 
-## Logging
+## Step 4 — Unsaved info gate
 
-At the end of this skill — regardless of outcome — log the invocation:
+Scan the conversation for anything mentioned but not filed:
+- Tasks or to-dos referenced but never created
+- Ideas or decisions that belong in the vault
+- Project status changes not yet reflected in files
+- People or meetings mentioned in passing
+
+For each unsaved item, use `AskUserQuestion` with one question at a time. Do not dump a markdown list. Do not use free-form text. One call per item, wait for a response before asking the next.
+
+If nothing is unsaved, say so in one line and stop.
+
+---
+
+## Logging
 
 ```bash
 python3 .claude/skills/shared/scripts/log_command.py wrap-session <outcome>

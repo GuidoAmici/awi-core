@@ -12,33 +12,70 @@ Status values:
 """
 
 import hashlib
+import json
 import sys
 from pathlib import Path
 
 PRIVATE_DIRS  = {"_data", ".git"}
+
 # .gitmodules is ephemeral — generated per-user on awi-initialize, never mirrored.
-PRIVATE_FILES = {".gitmodules"}
+# This set is the fallback when .awi-source is not present.
+_DEFAULT_PRIVATE_FILES = {".gitmodules"}
+
+
+def load_awi_source(awi_root: Path) -> dict:
+    """
+    Load .awi-source from the AWI root if it exists.
+    Returns the parsed JSON dict, or an empty dict if the file is missing/invalid.
+    """
+    source_file = awi_root / ".awi-source"
+    if not source_file.exists():
+        return {}
+    try:
+        return json.loads(source_file.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def get_mirror_exclusions(awi_root: Path) -> set:
+    """
+    Return the set of filenames to exclude from the awi-core mirror.
+    Reads 'gitignore_rules.exclude_from_mirror' from .awi-source if present,
+    falling back to the hardcoded default set.
+    """
+    source = load_awi_source(awi_root)
+    rules = source.get("gitignore_rules", {})
+    exclusions = rules.get("exclude_from_mirror", None)
+    if exclusions is not None:
+        return set(exclusions)
+    return set(_DEFAULT_PRIVATE_FILES)
 
 
 def md5(path: Path) -> str:
     return hashlib.md5(path.read_bytes()).hexdigest()
 
 
-def collect_instance_files(awi_root: Path) -> dict[str, Path]:
-    """All files in the instance outside _data/ (these are source code)."""
-    files: dict[str, Path] = {}
+def collect_instance_files(awi_root: Path) -> dict:
+    """All files in the instance outside _data/ (these are source code).
+
+    Consults .awi-source (via get_mirror_exclusions) to determine which
+    filenames are excluded from the awi-core mirror. Falls back to the
+    hardcoded default set when .awi-source is absent.
+    """
+    private_files = get_mirror_exclusions(awi_root)
+    files = {}
     for f in sorted(awi_root.rglob("*")):
         rel = str(f.relative_to(awi_root))
         if f.is_file() \
                 and not any(p in PRIVATE_DIRS for p in f.relative_to(awi_root).parts) \
-                and rel not in PRIVATE_FILES:
+                and f.name not in private_files:
             files[rel] = f
     return files
 
 
-def collect_core_files(core_root: Path) -> dict[str, Path]:
+def collect_core_files(core_root: Path) -> dict:
     """All files in awi-core (excluding .git)."""
-    files: dict[str, Path] = {}
+    files = {}
     for f in sorted(core_root.rglob("*")):
         if f.is_file() and ".git" not in f.parts:
             rel = str(f.relative_to(core_root))
@@ -46,7 +83,7 @@ def collect_core_files(core_root: Path) -> dict[str, Path]:
     return files
 
 
-def find_awi_core_path(awi_root: Path) -> Path | None:
+def find_awi_core_path(awi_root: Path):
     """Discover awi-core by scanning all .gitmodules files for GuidoAmici/awi-core."""
     for gitmodules in sorted(awi_root.rglob(".gitmodules")):
         if ".git" in gitmodules.parts:
