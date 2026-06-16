@@ -1,9 +1,14 @@
 ---
 name: awi-org-toggle
-description: Toggle an AWI org submodule on or off. Updates persistent state in the user's active-orgs.json and syncs the git submodule. Usage: /awi-org-toggle <org-name>
+description: "DEPRECATED — use /awi-submodule-toggle instead. Toggle an AWI org submodule on or off. Usage: /awi-org-toggle <org-name>"
+deprecated: true
+superseded_by: awi-submodule-toggle
 ---
 
-# /awi-org-toggle — Toggle Org
+# /awi-org-toggle — Toggle Org (DEPRECATED)
+
+> **Deprecated.** Use `/awi-submodule-toggle` instead — it handles both org
+> workspaces and system repos, and reads from `user-submodules.json`.
 
 Toggle an org submodule on or off. State is persisted per-user in
 `_data/users/<github-id>/active-orgs.json`. Orgs toggled on are initialized

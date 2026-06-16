@@ -25,7 +25,8 @@ Issue shape:
 {
   "number": int,
   "title": str,
-  "excerpt": str | null,
+  "body": str,                 # full raw issue body (for strategy and execution context)
+  "excerpt": str | null,       # first meaningful line, truncated (legacy display hint)
   "org": str | null,          # value of org: label (null = personal/cross-org)
   "repo": str | null,          # value of repo: label (codebase context)
   "project": str | null,       # value of project: label
@@ -214,6 +215,7 @@ def fetch_issues(
         issues.append({
             "number": raw["number"],
             "title": raw["title"],
+            "body": raw.get("body") or "",
             "excerpt": extract_excerpt(raw.get("body")),
             "org": org,
             "repo": label_value(label_names, "repo:"),

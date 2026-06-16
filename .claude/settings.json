@@ -1,14 +1,41 @@
 {
+  "enabledMcpjsonServers": ["github", "vercel"],
   "permissions": {
     "allow": [
       "Bash(git add:*)",
-      "Bash(grep:*)",
       "Bash(git commit:*)",
       "Bash(date*)",
-      "Bash(bash .claude/hooks/get-datetime.sh*)"
+      "Bash(bash .claude/hooks/get-datetime.sh*)",
+      "mcp__github__search_repositories",
+      "mcp__github__get_file_contents",
+      "mcp__github__list_commits",
+      "mcp__github__list_issues",
+      "mcp__github__get_issue",
+      "mcp__github__search_issues",
+      "mcp__github__search_code",
+      "mcp__github__list_pull_requests",
+      "mcp__github__get_pull_request",
+      "mcp__github__create_issue",
+      "mcp__github__update_issue",
+      "mcp__github__add_issue_comment"
+    ],
+    "deny": [
+      "mcp__supabase__apply_migration"
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/gh-auth-pre.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "matcher": "",
@@ -26,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.ps1",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-delegates.sh",
             "timeout": 5
           }
         ]
@@ -34,12 +61,22 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|Bash",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
             "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.sh || powershell.exe -ExecutionPolicy Bypass -File $CLAUDE_PROJECT_DIR/.claude/hooks/auto-commit.ps1",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/gh-auth-post.py",
+            "timeout": 60
           }
         ]
       }
@@ -57,6 +94,8 @@
     ]
   },
   "enabledPlugins": {
-    "claude-hud@claude-hud": true
+    "claude-hud@claude-hud": true,
+    "vercel@claude-plugins-official": true,
+    "mattpocock-skills@mattpocock": true
   }
 }

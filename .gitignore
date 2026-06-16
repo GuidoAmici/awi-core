@@ -28,3 +28,6 @@ apps/package-lock.json
 
 # Supabase CLI temp files (contain project ref and connection URLs)
 supabase/
+
+# Claude temp/scratch — never commit (filtró credenciales al repo público)
+.claude/tmp/

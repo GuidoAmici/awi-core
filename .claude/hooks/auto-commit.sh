@@ -73,26 +73,13 @@ FILENAME=$(basename "$FILE_PATH" .md)
 
 cd "$VAULT_ROOT" || exit 0
 
-# Regenerate workflow diagram when a skill file changes
-DIAGRAM_CHANGED=""
-if echo "$REL_PATH" | grep -qE "_system/agentic-workflow-integrator/skills/[^/]+\.md$" && \
-   [ "$(basename "$FILE_PATH")" != "workflow-diagram.md" ]; then
-  DIAGRAM="$VAULT_ROOT/_system/agentic-workflow-integrator/skills/workflow-diagram.md"
-  if python3 "$VAULT_ROOT/.claude/hooks/generate-workflow-diagram.py" \
-       "$VAULT_ROOT/_system/agentic-workflow-integrator/skills" 2>/dev/null; then
-    DIAGRAM_CHANGED="$DIAGRAM"
-  fi
-fi
-
 if git diff --quiet "$FILE_PATH" 2>/dev/null && git diff --cached --quiet "$FILE_PATH" 2>/dev/null; then
   if ! git ls-files --error-unmatch "$FILE_PATH" 2>/dev/null; then
     git add "$FILE_PATH"
-    [ -n "$DIAGRAM_CHANGED" ] && git add "$DIAGRAM_CHANGED"
     git commit -m "cos: new $TYPE - $FILENAME"
   fi
 else
   git add "$FILE_PATH"
-  [ -n "$DIAGRAM_CHANGED" ] && git add "$DIAGRAM_CHANGED"
   git commit -m "cos: update $TYPE - $FILENAME"
 fi
 

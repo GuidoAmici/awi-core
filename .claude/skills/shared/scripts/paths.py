@@ -17,6 +17,7 @@ AWI_ROOT = Path(__file__).resolve().parents[4]
 # ── Relative dir strings (for scaffolding) ────────────────────────────────────
 USERS_RELDIR                  = "_data/users"
 USER_PROFILE_INFERENCE_SUBDIR = "agenda/user-profile-inference"  # relative to user root (_data/users/<github-id>/), not AWI root
+USER_SUBMODULES_FILE   = "user-submodules.json"
 ORGANIZATIONS_RELDIR   = "_data/organizations"
 SUBMODULES_MD_RELPATH  = "_data/submodules.md"
 

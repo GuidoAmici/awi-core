@@ -22,6 +22,37 @@
         "GDRIVE_OAUTH_PATH": "/home/unixadmin/.config/gdrive-mcp-credentials.json",
         "GDRIVE_CREDENTIALS_PATH": "/home/unixadmin/.config/gdrive-mcp-server-credentials.json"
       }
+    },
+    "github": {
+      "command": "bash",
+      "args": [".claude/hooks/github-mcp-server.sh"],
+      "type": "stdio"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "headers": {
+        "Authorization": "Bearer ${VERCEL_TOKEN_FULL}"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "${AFIN_SUPABASE_PAT}"],
+      "type": "stdio"
+    },
+    "doppler": {
+      "command": "npx",
+      "args": ["-y", "@dopplerhq/mcp-server"],
+      "type": "stdio"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.com/mcp"
+    },
+    "mercadopago": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.mercadopago.com/mcp", "18999"],
+      "type": "stdio"
     }
   }
 }
