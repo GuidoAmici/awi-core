@@ -1,0 +1,15 @@
+Listo. Resumen de lo que se hizo:
+
+## Cambios aplicados — Issue #35
+
+**`PriceListController.cs`** (3 líneas):
+- `ValidRoles[]`: agregado `"all"` al inicio del array
+- `ValidRoles.Contains(role)` → `ValidRoles.Contains(role, StringComparer.OrdinalIgnoreCase)` 
+- Docstring actualizado: `(all, retail, wholesale, distributor)`
+
+**`docs/openapi/openapi.json`** (1 línea):
+- Agregado `"enum": ["all", "retail", "wholesale", "distributor"]` al parámetro `role`
+
+**Nota:** `dotnet` no está disponible en este entorno WSL, por lo que el spec fue actualizado manualmente en lugar de regenerarse vía Swashbuckle. Cuando se mergee en una máquina con dotnet, ejecutar `powershell scripts/generate-openapi.ps1` para producir el spec completo y preciso.
+
+El hook PostToolUse habrá auto-commiteado los cambios. El CI correrá los tests automáticamente al hacer push a `dev` y promoverá a `stg`.

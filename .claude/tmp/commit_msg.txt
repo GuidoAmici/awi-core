@@ -1,0 +1,20 @@
+security: apply full audit fixes (C1-C3, H1-H5, M2, M4, M8, L5, L6)
+
+- C1: remove Role from RegisterRequest — always assign consumer server-side
+- C2: add JWT audience validation (authenticated)
+- C3: remove @newhaze.ar email domain auto-grant
+- H1: rate limiting on auth endpoints (5/min) and verify-otp (10/5min)
+- H2: email enumeration fix — register and forgot-password always return 200
+- H3: rename DashboardController to DeployStatusController, tokens server-side via IConfiguration
+- H4: validate Google id_token locally via GoogleJsonWebSignature before forwarding to Supabase
+- H5: OpenAPI only served in non-production environments
+- M2: username length/char validation via StringLength + RegularExpression annotations
+- M4: constant-time blog admin key comparison via CryptographicOperations.FixedTimeEquals
+- M8: security headers middleware (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy)
+- L5: Dockerfile runs as non-root appuser
+- L6: waitlist RLS policies applied
+- Add PingAsync to SupabaseClient for keep-alive health check
+- Add HttpHead to HealthController for UptimeRobot compatibility
+- Add Google:ClientId placeholder to appsettings.json
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

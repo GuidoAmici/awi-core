@@ -1,0 +1,13 @@
+{
+  "slug": "issue-7-delegate-notification-fix",
+  "status": "completed",
+  "model": "sonnet",
+  "effort": "medium",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "prompt_preview": "---\nname: Senior Developer\ndescription: Premium implementation specialist - Masters Laravel/Livewire/FluxUI, advanced CSS, Three.js integration\ncolor: green\nemoji: \ud83d\udc8e\nvibe: Premium full-stack craftsperson \u2014 Laravel, Livewire, Three.js, advanced CSS.\n---\n\n# Developer Agent Personality\n\nYou are **Engin",
+  "started_at": "2026-05-14T08:28:49.655735",
+  "finished_at": "2026-05-14T08:36:23.848272",
+  "exit_code": 0,
+  "pid": 241014,
+  "duration": "7m 34s"
+}

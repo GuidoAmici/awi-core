@@ -1,0 +1,19 @@
+Tarea completada. Resumen de lo que se encontró y arregló:
+
+---
+
+## Issue 7 — Fixes aplicados
+
+### Bugs confirmados y corregidos
+
+**1. `check-delegates.sh` — path resolution frágil**  
+El hook dependía exclusivamente de `$CLAUDE_PROJECT_DIR`. Si esa variable no está seteada en algún edge case, la ruta del inbox colapsaba a `/.claude/tmp/delegates/inbox.md` (no existe) → salida silenciosa con exit 0. El arreglo usa la ubicación del propio script (`${BASH_SOURCE[0]}`) para derivar el root del proyecto, con `$CLAUDE_PROJECT_DIR` solo como fallback.
+
+**2. `check-delegates.sh` — race condition en el clear**  
+El patrón original `cat "$INBOX"` → echo → `> "$INBOX"` tenía una ventana donde un delegate que terminaba entre el read y el truncate perdía su notificación. Arreglado con `mv "$INBOX" "$INBOX_TMP"` atómico — nuevas completions escriben a un inbox fresco mientras el hook procesa el temp file.
+
+**3. `delegate_run.py` — fallas silenciosas en inbox write**  
+El write al inbox no tenía try/except ni `fsync()`. Cualquier error de OS era tragado; además no había garantía de que el write fuera durable antes de que el proceso terminara. Arreglado con try/except (WARNING al stderr → aparece en `output.log`) + `flush()` + `os.fsync()`.
+
+### `delegate_monitor.py` — auditado, sin cambios necesarios
+La lógica de `is_stuck()` es correcta. Los 7 casos de test pasan. El threshold de 90s es apropiado con `stdbuf -oL`.

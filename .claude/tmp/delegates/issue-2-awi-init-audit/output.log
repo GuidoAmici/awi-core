@@ -1,0 +1,31 @@
+Todo completado. Aquí un resumen de lo implementado:
+
+---
+
+## Issue 2 — awi-init-audit: implementación completa
+
+### Archivos creados
+
+| Archivo | Propósito |
+|---|---|
+| `_system/_agentic-workflow-integrator/references/user-config-schema.md` | Schema reference con los dos nuevos campos |
+| `_data/users/42481462/user-config.json` | Config inicial del usuario actual (`collaborator: false`, `awi_upstream_branch: "dev-claude"`) |
+| `.awi-source` (raíz de instancia) | Boundary file con `awi_owned_paths` y `gitignore_rules` |
+| `_data/organizations/rabbitek/codebase/awi-core/.awi-source` | Misma definición en awi-core |
+
+### Archivos modificados
+
+**`sync_status.py`** — Reemplaza el `PRIVATE_FILES = {".gitmodules"}` hardcodeado con `load_awi_source()` + `get_mirror_exclusions()` que lee `.awi-source`. Backward-compatible.
+
+**`sync_submodules.py`** — `sync_awi_core()` ahora tiene tres estados:
+- `collaborator` ausente/`false` → skip silencioso
+- `collaborator: true` pero sin permiso → Warning a stderr
+- `collaborator: true`, permiso OK, push falla → Error a stderr
+
+También usa `awi_upstream_branch` del user-config en lugar de `dev-claude` hardcodeado.
+
+**`awi-user/SKILL.md`** — Agrega sección **Config Regeneration** y la conecta al switch (2a) y logout (3).
+
+**`awi-initialize/SKILL.md`** — Agrega sección **Config Regeneration Notes** con referencia al schema.
+
+Comentario publicado en GuidoAmici/rabbitek-workspace#2.

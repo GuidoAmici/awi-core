@@ -1,0 +1,13 @@
+{
+  "slug": "research-competitor-pricing",
+  "status": "failed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 0.5,
+  "prompt_preview": "Research competitor pricing for New Haze, an Argentine company that imports and produces indoor cultivation measurement tools (pH meters, EC meters, temperature and humidity sensors for indoor growing).\n\nTASK:\n\n1. Search for pricing and product info on these competitors available in Argentina/LatAm:",
+  "started_at": "2026-04-18T11:54:59.436311",
+  "finished_at": "2026-04-18T11:58:01.454101",
+  "exit_code": 1,
+  "pid": 411823,
+  "duration": "3m 2s"
+}

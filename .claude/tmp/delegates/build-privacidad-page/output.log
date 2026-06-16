@@ -1,0 +1,8 @@
+Created `app/privacidad/page.tsx` — a static server component with:
+
+- `metadata` export for SEO (title + description)
+- All 10 sections with proper `h1` / `h2` / `h3` hierarchy
+- Tables for sections 3 and 4 with `border-collapse` and `border-border` tokens
+- Lists with `list-disc` for sections 2, 5, 6
+- All links using `<Link>` (internal) or `<a>` (external) with `underline` + hover styles
+- `text-muted-foreground` / `text-foreground` from the existing shadcn token set — no new styles introduced

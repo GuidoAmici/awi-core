@@ -1,0 +1,13 @@
+{
+  "slug": "issue-9-wrap-session-rewrite-v2",
+  "status": "completed",
+  "model": "sonnet",
+  "effort": "medium",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "prompt_preview": "---\nname: Technical Writer\ndescription: Expert technical writer specializing in developer documentation, API references, README files, and tutorials. Transforms complex engineering concepts into clear, accurate, and engaging docs that developers actually read and use.\ncolor: teal\nemoji: \ud83d\udcda\nvibe: Writ",
+  "started_at": "2026-05-14T08:47:25.227883",
+  "finished_at": "2026-05-14T08:48:53.670363",
+  "exit_code": 0,
+  "pid": 247679,
+  "duration": "1m 28s"
+}

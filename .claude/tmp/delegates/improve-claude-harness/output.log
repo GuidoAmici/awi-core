@@ -1,0 +1,17 @@
+Report saved to `info/outputs/2026-05-10-improve-claude-harness.md`.
+
+Here's the summary:
+
+**15 findings across 5 priority levels:**
+
+- **P0 (Broken):** `check-delegates.sh` doesn't exist — delegate completion notifications silently fail on every prompt submission, falling back to PowerShell with ~100ms penalty.
+
+- **P1 (Security):** `Bash(git:*)`, `Bash(python3:*)`, `Bash(gh api:*)` in local settings are dangerously broad. Combined with `skipDangerousModePermissionPrompt: true` in global settings, guardrails are significantly reduced.
+
+- **P2 (Performance):** Every Bash command spawns 2 hook processes (auto-commit + gh-auth-post) that parse JSON and exit early — ~100 unnecessary process invocations per session.
+
+- **P3 (Documentation Drift):** CLAUDE.md references `_data/entities/` (actual: `_data/organizations/`), wrap-session references `current-user.md` (actual: `.json`), and INSTRUCTIONS.md structure table is outdated.
+
+- **P4 (Gaps):** 6 stale one-off permissions cluttering the allow list, dead `sync-public.sh` config path, no force-push guard.
+
+**Top 6 quick wins** (under 30 min total): create the missing bash hook, clean stale permissions, fix 2 path references, narrow `git:*` permissions, remove `grep:*` from project settings.

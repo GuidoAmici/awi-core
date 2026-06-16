@@ -1,0 +1,13 @@
+{
+  "slug": "improve-claude-harness",
+  "status": "completed",
+  "model": "opus",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 2.0,
+  "prompt_preview": "You are the autonomous-optimization-architect. Your task is to audit and propose improvements to the Claude Code harness for this AWI instance.\n\nThe harness lives at /home/unixadmin/GitHub/GuidoAmici/my-awi-instance and includes:\n- .claude/settings.json \u2014 permissions, hooks configuration\n- .claude/h",
+  "started_at": "2026-05-10T22:08:58.777493",
+  "finished_at": "2026-05-10T22:11:25.128318",
+  "exit_code": 0,
+  "pid": 30226,
+  "duration": "2m 26s"
+}

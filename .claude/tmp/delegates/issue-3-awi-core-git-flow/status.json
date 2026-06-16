@@ -1,0 +1,13 @@
+{
+  "slug": "issue-3-awi-core-git-flow",
+  "status": "killed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "NO PREV PROMPT",
+  "started_at": "2026-05-14T04:54:58.098793",
+  "finished_at": null,
+  "exit_code": null,
+  "pid": 189899,
+  "duration": null
+}

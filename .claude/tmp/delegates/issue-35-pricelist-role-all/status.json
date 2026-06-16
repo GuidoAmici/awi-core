@@ -1,0 +1,13 @@
+{
+  "slug": "issue-35-pricelist-role-all",
+  "status": "completed",
+  "model": "sonnet",
+  "effort": "low",
+  "repo": "_data/organizations/newhaze/codebase/newhaze-api",
+  "prompt_preview": "---\nname: Minimal Change Engineer\ndescription: Engineering specialist focused on minimum-viable diffs \u2014 fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. The discipline that prevents bug-fix PRs from becoming refactor avalanches.\ncolor: slate\ne",
+  "started_at": "2026-05-14T08:28:46.676262",
+  "finished_at": "2026-05-14T08:30:19.661372",
+  "exit_code": 0,
+  "pid": 240717,
+  "duration": "1m 32s"
+}

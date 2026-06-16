@@ -1,0 +1,13 @@
+{
+  "slug": "today-convergence-impl",
+  "status": "completed",
+  "model": "opus",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 2.0,
+  "prompt_preview": "Modify the /today skill at /home/unixadmin/GitHub/GuidoAmici/my-awi-instance/.claude/skills/today/SKILL.md to add cross-org pending task convergence summarization.\n\n## Context\n\nThe /today skill is the daily hub. It has 3 modes: A (Start my day), B (View/refresh plan), C (End my day).\n\nMode B current",
+  "started_at": "2026-04-30T21:48:06.780170",
+  "finished_at": "2026-04-30T21:49:04.103959",
+  "exit_code": 0,
+  "pid": 243335,
+  "duration": "0m 57s"
+}

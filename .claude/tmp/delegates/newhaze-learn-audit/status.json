@@ -1,0 +1,13 @@
+{
+  "slug": "newhaze-learn-audit",
+  "status": "completed",
+  "model": "opus",
+  "repo": "D:/GitHub/GuidoAmici/second-brain/apps/newhaze-learn",
+  "budget_usd": 2.0,
+  "prompt_preview": "You are a Reality Checker performing a full audit of the newhaze-learn app. Default to NEEDS WORK. Be specific and evidence-based.\n\nThe app is running at http://localhost:5173. Source is at D:/GitHub/GuidoAmici/second-brain/apps/newhaze-learn/src/\n\nRead CLAUDE.md at D:/GitHub/GuidoAmici/second-brain",
+  "started_at": "2026-03-20T05:26:53.527823",
+  "finished_at": "2026-03-20T05:30:50.140371",
+  "exit_code": 0,
+  "pid": 36640,
+  "duration": "3m 56s"
+}

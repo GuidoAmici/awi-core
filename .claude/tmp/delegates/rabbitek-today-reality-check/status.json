@@ -1,0 +1,13 @@
+{
+  "slug": "rabbitek-today-reality-check",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "_data/organizations/rabbitek/codebase/awi-core",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are the Reality Checker agent. Read your personality from _system/agency-agents/testing/testing-reality-checker.md first, then adopt that identity fully.\n\n## Mission\n\nAssess two open tasks against the ACTUAL current implementation of the /today skill. Default to NEEDS WORK. Require evidence befo",
+  "started_at": "2026-04-29T15:31:50.110757",
+  "finished_at": "2026-04-29T15:34:49.198050",
+  "exit_code": 0,
+  "pid": 68850,
+  "duration": "2m 59s"
+}

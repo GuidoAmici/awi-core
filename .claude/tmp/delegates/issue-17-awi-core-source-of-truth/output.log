@@ -1,0 +1,16 @@
+Todo completado. Resumen de lo ejecutado:
+
+**Hooks eliminados (3):**
+- `notify-sound.wav`, `stop-sound.sh`, `stop-sound.wav` de `awi-core/.claude/hooks/`
+
+**settings.json corregido:**
+- Matcher `Write|Edit|Bash` → `Write|Edit` en `PostToolUse`
+- Fallback PS1 de `check-delegates` preservado
+
+**Skills añadidas (11) como directorios reales:**
+`diagnose`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `prototype`, `tdd`, `to-issues`, `to-prd`, `triage`, `write-a-skill`, `zoom-out`
+
+**Nota sobre out-of-scope:** El symlink `caveman` dentro de `to-issues` no fue incluido — es parte de la distinción `.agents/` vs `.claude/` que es issue separado.
+
+**Commits en `awi-core` (branch `dev`):** `9e3ed4e`, `115dfa7`, `770d184`
+**Issue comentado:** [GuidoAmici/my-awi-user#17](https://github.com/GuidoAmici/my-awi-user/issues/17#issuecomment-4536231342)

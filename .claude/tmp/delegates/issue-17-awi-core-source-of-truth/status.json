@@ -1,0 +1,13 @@
+{
+  "slug": "issue-17-awi-core-source-of-truth",
+  "status": "completed",
+  "model": "sonnet",
+  "effort": "high",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "prompt_preview": "---\nname: Minimal Change Engineer\ndescription: Engineering specialist focused on minimum-viable diffs \u2014 fixes only what was asked, refuses scope creep, prefers three similar lines over a premature abstraction. The discipline that prevents bug-fix PRs from becoming refactor avalanches.\ncolor: slate\ne",
+  "started_at": "2026-05-25T14:59:14.715829",
+  "finished_at": "2026-05-25T15:06:30.892102",
+  "exit_code": 0,
+  "pid": 92918,
+  "duration": "7m 16s"
+}
