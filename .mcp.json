@@ -44,6 +44,15 @@
       "command": "npx",
       "args": ["-y", "@dopplerhq/mcp-server"],
       "type": "stdio"
+    },
+    "notion": {
+      "type": "http",
+      "url": "https://mcp.notion.com/mcp"
+    },
+    "mercadopago": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.mercadopago.com/mcp", "18999"],
+      "type": "stdio"
     }
   }
 }

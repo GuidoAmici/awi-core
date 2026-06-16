@@ -545,6 +545,20 @@ def clone_status_label(r: SubmoduleResult) -> str:
     return "🟢 cloned"
 
 
+def short_repo(url: str) -> str:
+    """Compact a git remote URL down to `owner/repo` for readable node labels."""
+    s = url.rstrip("/")
+    if s.endswith(".git"):
+        s = s[:-4]
+    parts = s.split("/")
+    return "/".join(parts[-2:]) if len(parts) >= 2 else s
+
+
+def _node_box(r: SubmoduleResult) -> str:
+    """Render a single Mermaid node box with name + compact repo path."""
+    return f'        {r.node_id}["{r.name}<br/>{short_repo(r.remote_url)}"]'
+
+
 def create_registry_file(results: list) -> None:
     awi_subs    = [r for r in results if r.parent == "AWI"]
     nested_subs = [r for r in results if r.parent != "AWI"]
@@ -559,37 +573,44 @@ def create_registry_file(results: list) -> None:
     mermaid_lines: list = [
         "```mermaid",
         "graph TD",
-        "    AWI",
+        '    AWI(["AWI"])',
         "",
     ]
 
-    if clients:
-        mermaid_lines += ["    subgraph Clients", "        direction TD"]
-        for r in clients:
-            mermaid_lines.append(f'        {r.node_id}["{r.name}\\n{r.remote_url}"]')
-        mermaid_lines += ["    end", ""]
-
     if users:
-        mermaid_lines += ["    subgraph Users", "        direction TD"]
+        mermaid_lines += ["    subgraph Users", "        direction TB"]
         for r in users:
-            mermaid_lines.append(f'        {r.node_id}["{r.name}\\n{r.remote_url}"]')
+            mermaid_lines.append(_node_box(r))
         mermaid_lines += ["    end", ""]
 
-    for parent_name, children in nested_by_parent.items():
-        label = f"{parent_name.capitalize()} repos"
-        mermaid_lines += [f"    subgraph {label}", "        direction TD"]
+    # Each client that owns nested repos gets its own subgraph holding the
+    # client node together with its repos, so the parent→repo edges stay
+    # inside the box instead of crossing the whole diagram.
+    for c in clients:
+        children = nested_by_parent.get(c.name, [])
+        if not children:
+            continue
+        mermaid_lines += [f'    subgraph grp_{c.node_id}["{c.name}"]', "        direction TB"]
+        mermaid_lines.append(_node_box(c))
         for r in children:
-            mermaid_lines.append(f'        {r.node_id}["{r.name}\\n{r.remote_url}"]')
+            mermaid_lines.append(_node_box(r))
+        mermaid_lines.append(
+            f"        {c.node_id} --> " + " & ".join(r.node_id for r in children)
+        )
         mermaid_lines += ["    end", ""]
 
-    if clients:
-        mermaid_lines.append("    AWI --> " + " & ".join(r.node_id for r in clients))
-    if users:
-        mermaid_lines.append("    AWI --> " + " & ".join(r.node_id for r in users))
+    # Clients with no nested repos share a single group.
+    solo_clients = [c for c in clients if not nested_by_parent.get(c.name)]
+    if solo_clients:
+        mermaid_lines += ["    subgraph Clients", "        direction TB"]
+        for c in solo_clients:
+            mermaid_lines.append(_node_box(c))
+        mermaid_lines += ["    end", ""]
 
-    for parent_name, children in nested_by_parent.items():
-        parent_node = next((r.node_id for r in awi_subs if r.name == parent_name), parent_name)
-        mermaid_lines.append(f"    {parent_node} --> " + " & ".join(r.node_id for r in children))
+    for r in users:
+        mermaid_lines.append(f"    AWI --> {r.node_id}")
+    for c in clients:
+        mermaid_lines.append(f"    AWI --> {c.node_id}")
 
     all_node_ids = [r.node_id for r in results]
     mermaid_lines += [

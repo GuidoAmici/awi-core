@@ -18,6 +18,9 @@
       "mcp__github__create_issue",
       "mcp__github__update_issue",
       "mcp__github__add_issue_comment"
+    ],
+    "deny": [
+      "mcp__supabase__apply_migration"
     ]
   },
   "hooks": {
