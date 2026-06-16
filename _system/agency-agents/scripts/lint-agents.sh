@@ -17,11 +17,14 @@ AGENT_DIRS=(
   engineering
   finance
   game-development
+  gis
+  integrations
   marketing
   paid-media
   product
   project-management
   sales
+  security
   spatial-computing
   specialized
   strategy
@@ -55,6 +58,15 @@ lint_file() {
 
   if [[ ! -f "$file" ]]; then
     echo "ERROR $file: not a file or does not exist"
+    errors=$((errors + 1))
+    return
+  fi
+
+  # 0. Reject CRLF line endings (repo standard is LF — see .gitattributes).
+  # A trailing \r otherwise makes the frontmatter check below fail with a
+  # confusing "missing frontmatter ---" even when the file clearly starts ---.
+  if LC_ALL=C grep -q $'\r' "$file"; then
+    echo "ERROR $file: CRLF line endings detected — convert to LF (e.g. 'perl -i -pe \"s/\\r\$//\" $file'); repo uses LF per .gitattributes"
     errors=$((errors + 1))
     return
   fi

@@ -21,7 +21,7 @@ Each workspace follows the same structure and is operated by the same skills. AW
 - **Plans your day** — Aggregates due tasks, overdue items, and active projects into a daily plan
 - **Reviews progress** — Compares planned vs actual at end of day, updates statuses, identifies patterns
 - **Delegates work** — Forks new terminal sessions to work on tasks autonomously across repos
-- **Tracks everything** — Every Write/Edit auto-commits with `cos:` prefix for easy filtering
+- **Tracks everything** — Changes are committed at logical task boundaries with a `cos:` prefix for easy filtering
 
 ---
 
@@ -161,7 +161,7 @@ When you use `/new`, the system:
 3. **Extracts** due dates, tags, names
 4. **Links** entities via `[[wiki-style]]` links
 5. **Writes** files to the appropriate folder under `_documentation/_agenda/`
-6. **Auto-commits** via PostToolUse hook
+6. **Commits** at logical task boundaries with a `cos:` prefix
 
 ### Classification Rules
 
@@ -244,16 +244,11 @@ last-updated: 2026-01-25
 
 The system uses hooks configured in `.claude/settings.json`:
 
-### Auto-Commit Hook (PostToolUse)
+### Commits
 
-Triggers after every `Write` or `Edit` operation on vault content:
+There is no auto-commit hook. The agent commits at logical task boundaries with a `cos:` prefix and a clear message — not after every `Write`/`Edit`.
 
-```bash
-.claude/hooks/auto-commit.sh
-```
-
-- Only commits files in `_data/entities/` and `_system/` folders
-- Generates commit messages: `cos: new task - task-name`
+- Use the `cos:` prefix so vault activity stays filterable
 - Filter all activity: `git log --grep="cos:"`
 
 ### Stop Sound Hook
@@ -298,7 +293,6 @@ awi/
     │   ├── public-whitelist
     │   └── public-repo-path
     ├── hooks/
-    │   ├── auto-commit.sh
     │   └── stop-sound.sh
     └── skills/
         ├── new/          today/        today-start/    today-end/
@@ -338,14 +332,12 @@ git log -p <user-root>/agenda/tasks/<creation-date>-my-task.md
 
 ## Troubleshooting
 
-### Auto-commit not working
+### Work not being committed
 
-1. Check permissions in `.claude/settings.json`:
-   ```json
-   "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
-   ```
-2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
-3. Confirm file is under `_data/entities/` or `_system/`
+There is no auto-commit hook. The agent commits at logical task boundaries; if something is left uncommitted, commit it yourself with a `cos:` prefix. Ensure git commit permissions are present in `.claude/settings.json`:
+```json
+"allow": ["Bash(git add:*)", "Bash(git commit:*)"]
+```
 
 ### Tasks not appearing in /today
 
@@ -367,7 +359,7 @@ git log -p <user-root>/agenda/tasks/<creation-date>-my-task.md
 2. **Natural language first** — Say what you mean, let classification handle the rest
 3. **Grep before glob** — Never load all files, search efficiently
 4. **Progressive disclosure** — Skills load context in layers to manage tokens
-5. **Auto-commit everything** — Hooks ensure nothing is lost
+5. **Commit at task boundaries** — Finished work is committed with a `cos:` prefix so nothing is lost
 6. **Cross-repo awareness** — Delegation maintains context across projects
 
 ---
