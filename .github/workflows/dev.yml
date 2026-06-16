@@ -1,9 +1,9 @@
-name: Dev — test & promote to stg
+name: Dev CI — test + merge to stg + release PR
 
-# Modelo de 3 ramas (dev → stg → prod):
-#   push a dev → tests → (si pasan) automerge dev → stg → release-please
-#   refresca el Release PR sobre stg.
-# La promoción stg → prod vive en release.yml (al aceptar el Release PR).
+# Adaptado del patrón de afin-website (3 ramas: dev → stg → prod).
+#   push a dev → tests → merge dev → stg (app token) → release-please
+#   mantiene el Release PR sobre stg.
+# La promoción stg → prod vive en release-prod.yml (al mergear el Release PR).
 
 on:
   push:
@@ -15,8 +15,13 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: shellcheck + pytest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,30 +37,37 @@ jobs:
           pip install pytest
           pytest -q tests
 
-  promote-to-stg:
+  merge-to-stg:
+    name: Merge dev → stg
     needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
-          ref: stg
           fetch-depth: 0
-      - name: Merge dev into stg
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Merge dev → stg
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin dev:dev
-          git merge --no-ff dev -m "ci: automerge dev → stg"
+          git checkout stg
+          git merge origin/dev --no-ff -X theirs -m "chore: auto-merge dev → stg"
           git push origin stg
 
   release-please:
-    needs: promote-to-stg
-    if: github.event_name == 'push'
+    name: Release PR → stg
+    needs: merge-to-stg
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           target-branch: stg
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

@@ -1,0 +1,47 @@
+name: Release — promote stg → prod
+
+# Adaptado de afin-website. Se dispara cuando se mergea el Release PR de
+# release-please en stg (head_ref = release-please--branches--stg...).
+# Mergea stg → prod con el app token (bypass del ruleset).
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [stg]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-prod
+  cancel-in-progress: false
+
+jobs:
+  merge-to-prod:
+    name: Merge stg → prod
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.head_ref, 'release-please--branches--stg'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Merge stg → prod
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout prod
+          git pull origin prod
+          TITLE="${{ github.event.pull_request.title }}"
+          MESSAGE="chore: promote stg → prod${TITLE:+ ($TITLE)}"
+          git merge origin/stg --no-ff -m "$MESSAGE"
+          git push origin prod
