@@ -58,6 +58,11 @@
       "command": "npx",
       "args": ["-y", "mcp-arca-afip"],
       "type": "stdio"
+    },
+    "gmail": {
+      "command": "npx",
+      "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
+      "type": "stdio"
     }
   }
 }
