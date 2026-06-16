@@ -4,6 +4,10 @@ name: Dev CI — test + merge to stg + release PR
 #   push a dev → tests → merge dev → stg (app token) → release-please
 #   mantiene el Release PR sobre stg.
 # La promoción stg → prod vive en release-prod.yml (al mergear el Release PR).
+#
+# El job `guard` detecta si los secrets de la GitHub App están cargados.
+# Hasta que se carguen, los jobs de merge se saltean (run verde, latente);
+# una vez cargados, el pipeline se activa solo.
 
 on:
   push:
@@ -37,10 +41,27 @@ jobs:
           pip install pytest
           pytest -q tests
 
+  guard:
+    name: Check GitHub App configured
+    runs-on: ubuntu-latest
+    outputs:
+      has_app: ${{ steps.check.outputs.has_app }}
+    steps:
+      - id: check
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+        run: |
+          if [ -n "$APP_ID" ]; then
+            echo "has_app=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_app=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::APP_ID no configurado — se saltea el merge a stg. Cargá APP_ID/APP_PRIVATE_KEY para activar."
+          fi
+
   merge-to-stg:
     name: Merge dev → stg
-    needs: test
-    if: github.event_name == 'push'
+    needs: [test, guard]
+    if: github.event_name == 'push' && needs.guard.outputs.has_app == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/create-github-app-token@v3
