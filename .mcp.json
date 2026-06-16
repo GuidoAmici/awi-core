@@ -53,6 +53,11 @@
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.mercadopago.com/mcp", "18999"],
       "type": "stdio"
+    },
+    "arca-afip": {
+      "command": "npx",
+      "args": ["-y", "mcp-arca-afip"],
+      "type": "stdio"
     }
   }
 }

@@ -1,0 +1,13 @@
+Done. Key architectural decisions made:
+
+**maxSelections: 3** — on the tool call, not in instructions. Tool enforces it; no re-ask logic needed, no ambiguity.
+
+**Empty backlog fallback** — skip `AskUserQuestion` entirely, use existing free-form prompt. An empty options list is an error waiting to happen.
+
+**"Other" explicit** — added as last option with follow-up prompt. No assumption that it's automatic.
+
+**Candidate cap at 10** — avoids overwhelming the selection UI; tier ranking ensures highest-value tasks surface first.
+
+**6 testable acceptance criteria** — each maps to a discrete behavior, independently verifiable.
+
+SKILL.md untouched — spec only, as instructed.

@@ -1,0 +1,13 @@
+{
+  "slug": "today-multiselect-spec",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "_data/organizations/rabbitek/codebase/awi-core",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are the Software Architect. Read your personality from _system/agency-agents/engineering/engineering-software-architect.md first.\n\n## Mission\n\nRewrite a broken task spec from scratch. Do NOT touch SKILL.md \u2014 spec only.\n\n## Context\n\nReality Checker found the task spec for '/today commitments mult",
+  "started_at": "2026-04-29T16:11:24.532270",
+  "finished_at": "2026-04-29T16:12:08.651316",
+  "exit_code": 0,
+  "pid": 84011,
+  "duration": "0m 44s"
+}

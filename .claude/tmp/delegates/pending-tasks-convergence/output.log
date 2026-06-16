@@ -1,0 +1,29 @@
+Saved to `info/outputs/2026-04-30-pending-tasks-convergence.md`.
+
+---
+
+## What everything converges toward
+
+**5 themes, ~45 pending/in-progress items:**
+
+1. **New Haze DS v2 / Brand** (9) — tokens.css is the gate; 5+ tasks blocked until it ships
+2. **Three-Org SaaS Strategy** (7) — NH full system → AFIN schema → Rabbitek Growshop; one OAuth task is holding up the entire sequence
+3. **New Haze CI/CD / Infra** (5) — hardens delivery before scaling feature work
+4. **AWI Tooling** (8) — daily workflow is broken for multi-org; 2 tasks in-progress
+5. **Content / Presence** (2) — YouTube devlog, Claude Cowork
+
+## Top 3 blockers
+
+| Blocker | What it gates |
+|---------|---------------|
+| `publish-google-oauth-consent-screen` | SSO → newhaze-full-system → AFIN → Rabbitek SaaS |
+| `newhaze-brand-token-file` | All DS v2 consumers (website, learn, b2b-panel) |
+| `today-skill-multi-org` | Correct daily workflow across all 3 orgs |
+
+## Recommended hit order
+
+1. **Finish `today-skill-multi-org`** — in-progress, high, unblocks daily workflow + next task
+2. **`publish-google-oauth-consent-screen`** — one task, unblocks the entire three-org chain
+3. **`newhaze-brand-token-file`** — kills 5+ downstream tasks in one shot
+4. **`frontend-ci-workflows` + `github-branch-protection-rules`** — pair; harden before scaling
+5. **`today-commitments-multiselect` + `modify-wrap-session-skill`** — AWI polish batch

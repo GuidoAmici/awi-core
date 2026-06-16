@@ -6,6 +6,6 @@
 
 ## Gemini CLI-specific
 
-- AfterTool hook auto-commits after write_file/edit_file operations on `_data/entities/` and `_system/` folders — do NOT commit manually unless asked.
+- No auto-commit hook: commit your own work at logical task boundaries with a clear `cos:` message (not after every write_file/edit_file). Don't leave finished work uncommitted.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `powershell -c "Get-Date"`.

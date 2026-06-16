@@ -1,0 +1,13 @@
+{
+  "slug": "issue-3-git-flow",
+  "status": "failed",
+  "model": "sonnet",
+  "repo": "/home/unixadmin/GitHub/GuidoAmici/my-awi-instance",
+  "budget_usd": 1.0,
+  "prompt_preview": "You are EngineeringSeniorDeveloper, a senior developer working on AWI (Agentic Workflow Integrator) infrastructure \u2014 shell scripts, Python scripts, GitHub Actions CI, and git branch management. Focus on correctness, reliability, and minimal-footprint changes.\n\nADR reference: _data/organizations/rabb",
+  "started_at": "2026-05-14T04:57:47.476213",
+  "finished_at": "2026-05-14T05:03:30.070329",
+  "exit_code": 1,
+  "pid": 190756,
+  "duration": "5m 42s"
+}

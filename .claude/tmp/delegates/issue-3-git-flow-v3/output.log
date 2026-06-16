@@ -1,0 +1,22 @@
+Done. Here's a summary of what was verified and done in this run:
+
+## v3 Agent Run — Summary
+
+**All core tasks were completed by the previous v2 agent:**
+- Branches: `dev`, `stg`, `prod` on origin — no `dev-claude` or `dev-gemini`
+- `ci-dev.yml` and `promote-dev-to-stg.yml` workflows in place
+- Branch protection rules configured on all three branches
+- `awi-core/.claude/skills/awi-sync/scripts/sync_submodules.py` clean
+
+**Patched in this run:**
+- `_system/_agentic-workflow-integrator/tables/skills.md`: updated `/awi-sync` description from "dev-claude mirror" → "dev mirror"
+- `_data/organizations/rabbitek/agenda/tasks/ci-pipeline-awi-core.md`: status set to `done`
+- Output summary updated with accurate status
+
+**One manual action required** — the agent sandbox blocked writes to `.claude/skills/`:
+```bash
+sed -i 's/dev-claude/dev/g' .claude/skills/awi-sync/scripts/sync_submodules.py
+```
+This file has 7 remaining `dev-claude` references including live `git checkout dev-claude` and `git push origin dev-claude` calls that will fail at runtime.
+
+Comment posted: GuidoAmici/rabbitek-workspace#3

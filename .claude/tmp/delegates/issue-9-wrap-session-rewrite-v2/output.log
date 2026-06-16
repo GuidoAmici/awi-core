@@ -1,0 +1,17 @@
+El entorno requiere aprobación explícita del usuario para escribir en `.claude/skills/wrap-session/SKILL.md`. No puedo completar la tarea automáticamente sin esa autorización.
+
+**¿Puedes aprobar el permiso de escritura para `.claude/skills/wrap-session/SKILL.md`?**
+
+Una vez aprobado, el skill reescribirá el archivo con el nuevo flujo:
+
+1. **Step 1** — Guardar todos los archivos silenciosamente: inference, daily (usuario + orgs tocadas), outputs
+2. **Step 2** — Imprimir una línea por archivo guardado
+3. **Step 3** — Imprimir resumen de sesión (3–6 bullets)
+4. **Step 4** — Imprimir sugerencia `/rename`
+5. **Step 5** — `AskUserQuestion` por cada item no guardado (uno a la vez)
+
+Los cambios principales respecto a la versión actual:
+- Steps 1–4 son completamente automáticos, sin confirmaciones
+- Se agregan **org daily files** y **outputs files** al alcance
+- Step 5 usa la herramienta `AskUserQuestion` en lugar de texto libre
+- El orden se invierte: primero guardar, luego mostrar al usuario

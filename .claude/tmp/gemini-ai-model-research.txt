@@ -1,0 +1,27 @@
+Research which AI models (Claude Opus/Sonnet, GPT-4o, Gemini 2.5 Pro, Grok, etc.) excel at which specific development tasks, based on senior engineer consensus, benchmarks, and real-world usage in 2025-2026.
+
+Cover these task types:
+- Code generation (new features, boilerplate)
+- Debugging & error analysis
+- Architecture & system design
+- Writing & documentation
+- Web research & summarization
+- Data analysis & SQL
+- Frontend UI / component design
+- Refactoring & code cleanup
+- Test writing
+- DevOps / infra / config
+
+For each task type, identify the best 1-2 models and explain WHY (speed, context window, reasoning, tool use, etc.).
+
+Produce:
+1. A model-task matrix table
+2. Actionable delegation rules: "For X type of task, use Y model"
+3. Brief notes on cost/speed tradeoffs
+
+Save the full output as a markdown file at:
+D:\GitHub\GuidoAmici\second-brain\info\organization\outputs\2026-03-12-ai-model-delegation.md
+
+When done, edit the task file at:
+D:\GitHub\GuidoAmici\second-brain\info\organization\tasks\research-ai-model-delegation.md
+Set `status: complete` and add a `## Output` section linking to [[2026-03-12-ai-model-delegation]].

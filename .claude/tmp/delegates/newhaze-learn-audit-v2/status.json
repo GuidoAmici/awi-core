@@ -1,0 +1,13 @@
+{
+  "slug": "newhaze-learn-audit-v2",
+  "status": "completed",
+  "model": "sonnet",
+  "repo": "D:\\GitHub\\GuidoAmici\\second-brain",
+  "budget_usd": 0.5,
+  "prompt_preview": "You are a Reality Checker agent. Your default verdict is NEEDS WORK. Only certify PRODUCTION READY with overwhelming evidence. Require visual/code proof for every claim.\n\nPerform a full audit of the newhaze-learn React app at D:\\GitHub\\GuidoAmici\\second-brain\\apps\\newhaze-learn\\src\nContext: A previo",
+  "started_at": "2026-03-20T06:23:08.452076",
+  "finished_at": "2026-03-20T06:26:05.448374",
+  "exit_code": 0,
+  "pid": 32248,
+  "duration": "2m 56s"
+}

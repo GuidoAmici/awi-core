@@ -1,0 +1,13 @@
+{
+  "slug": "fix-website-crash",
+  "status": "completed",
+  "model": "opus",
+  "repo": "D:/GitHub/GuidoAmici/second-brain/apps/newhaze-website",
+  "budget_usd": 2.0,
+  "prompt_preview": "newhaze-website is crashing on local dev. Your job: investigate and fix it.\n\nSteps:\n1. Check git log (last 10 commits) and git status to understand recent changes.\n2. Try running the dev server: 'npm run dev' and capture any errors (run briefly, then stop).\n3. Check package.json for the start/dev sc",
+  "started_at": "2026-03-24T19:51:55.814095",
+  "finished_at": "2026-03-24T19:54:56.261572",
+  "exit_code": 0,
+  "pid": 2964,
+  "duration": "3m 0s"
+}

@@ -8,7 +8,7 @@ supported agentic coding tools.
 - **[Claude Code](#claude-code)** — `.md` agents, use the repo directly
 - **[GitHub Copilot](#github-copilot)** — `.md` agents, use the repo directly
 - **[Antigravity](#antigravity)** — `SKILL.md` per agent in `antigravity/`
-- **[Gemini CLI](#gemini-cli)** — extension + `SKILL.md` files in `gemini-cli/`
+- **[Gemini CLI](#gemini-cli)** — `.md` agent files in `gemini-cli/agents/`
 - **[OpenCode](#opencode)** — `.md` agent files in `opencode/`
 - **[OpenClaw](#openclaw)** — `SOUL.md` + `AGENTS.md` + `IDENTITY.md` workspaces
 - **[Cursor](#cursor)** — `.mdc` rule files in `cursor/`
@@ -16,6 +16,7 @@ supported agentic coding tools.
 - **[Windsurf](#windsurf)** — `.windsurfrules` in `windsurf/`
 - **[Kimi Code](#kimi-code)** — YAML agent specs in `kimi/`
 - **[Qwen Code](#qwen-code)** — project-scoped `.md` SubAgents in `.qwen/agents/`
+- **[Codex](#codex)** — `.toml` custom agents in `codex/`
 
 ## Quick Install
 
@@ -28,6 +29,7 @@ supported agentic coding tools.
 ./scripts/install.sh --tool copilot
 ./scripts/install.sh --tool openclaw
 ./scripts/install.sh --tool claude-code
+./scripts/install.sh --tool codex
 
 # Gemini CLI needs generated integration files on a fresh clone
 ./scripts/convert.sh --tool gemini-cli
@@ -102,9 +104,9 @@ See [antigravity/README.md](antigravity/README.md) for details.
 
 ## Gemini CLI
 
-Agents are packaged as a Gemini CLI extension with individual skill files.
-The extension is installed to `~/.gemini/extensions/agency-agents/`.
-Because the Gemini manifest and skill folders are generated artifacts, run
+Agents are packaged as Gemini CLI subagents.
+Subagents are installed to `~/.gemini/agents/`.
+Because the agent files are generated artifacts, run
 `./scripts/convert.sh --tool gemini-cli` before installing from a fresh clone.
 
 ```bash
@@ -238,3 +240,20 @@ cd /your/project && /path/to/agency-agents/scripts/install.sh --tool qwen
 ```
 
 See [qwen/README.md](qwen/README.md) for details.
+
+---
+
+## Codex
+
+Each agent is converted into a standalone Codex custom agent TOML file and
+installed to `~/.codex/agents/`.
+
+Because Codex uses generated TOML files rather than the source Markdown
+directly, run the converter before installing from a fresh clone:
+
+```bash
+./scripts/convert.sh --tool codex
+./scripts/install.sh --tool codex
+```
+
+See [codex/README.md](codex/README.md) for details.

@@ -1,0 +1,27 @@
+Done. Results:
+
+---
+
+## Reality Check Complete
+
+Both tasks: **NEEDS WORK**
+
+### Task 1 — multi-org support
+
+Gaps are **real** (all 4 verified against SKILL.md). Direction is sound. Blocked by:
+
+1. **No org daily file template** — user daily has full template (lines 148–178); org daily is invented by implementer
+2. **"Session work" undefined** — trigger for writing org daily is ambiguous
+3. **B4 output format unspecified** — `[personal]`/`[org-name]` tags need placement in updated template (flat list vs per-org sections?)
+4. **Missing directory fallback** — no behavior spec for orgs without `agenda/tasks/`
+
+### Task 2 — multiselect commitments
+
+**Gap description is wrong.** Q3 (lines 124–129) is a free-form prompt, not single-select `AskUserQuestion`. This is a net-new call, not a conversion. Blocked by:
+
+1. **No acceptance criteria** — zero definition of done
+2. **Max-3 mechanism unspecified** — `maxSelections: 3` on tool? Re-ask instruction? Unknown
+3. **External reference without link** — "same as /mcp toggle" is a dependency leak
+4. **Empty backlog case missing**
+
+Full report at `info/outputs/2026-04-29-today-reality-check.md`. Task frontmatter updated with `reality-check:` field and `## Reality Check` sections appended.

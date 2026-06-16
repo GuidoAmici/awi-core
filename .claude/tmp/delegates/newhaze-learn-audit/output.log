@@ -1,0 +1,13 @@
+**Verdict: NEEDS WORK** — 3 critical, 7 high, 10 medium, 6 low issues found.
+
+Top blockers:
+
+1. **Chatbot is non-functional** — direct browser fetch to Anthropic API with no API key and no proxy. Will always 401. Adding a key to frontend code would be a security breach.
+
+2. **TopicModal onComplete passes `topic.id` (number) but App.jsx destructures it as an object** (`t.id`) — guest progress tracking silently stores `undefined` into localStorage.
+
+3. **API contracts in CLAUDE.md are stale** — docs say snake_case (`access_token`, `completed_topics`), code uses camelCase (`accessToken`, `completedTopics`). `completeTopic` response and `roles` field aren't documented at all. Badge shape mismatch may cause zero badges to render on initial load.
+
+Other notable findings: `TopicNode` never receives the `pulse` prop (P4 celebration is dead code), `setTimeout` animations leak on unmount, failed token restore leaves user in limbo (neither guest nor authenticated), and no keyboard/screen-reader accessibility on any modal.
+
+Report saved to `info/organization/outputs/2026-03-20-newhaze-learn-audit.md`.
