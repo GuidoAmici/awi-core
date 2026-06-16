@@ -31,3 +31,6 @@ supabase/
 
 # Claude temp/scratch — never commit (filtró credenciales al repo público)
 .claude/tmp/
+
+# pytest
+.pytest_cache/

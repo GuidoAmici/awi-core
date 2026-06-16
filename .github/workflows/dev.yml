@@ -1,0 +1,94 @@
+name: Dev CI — test + merge to stg + release PR
+
+# Adaptado del patrón de afin-website (3 ramas: dev → stg → prod).
+#   push a dev → tests → merge dev → stg (app token) → release-please
+#   mantiene el Release PR sobre stg.
+# La promoción stg → prod vive en release-prod.yml (al mergear el Release PR).
+#
+# El job `guard` detecta si los secrets de la GitHub App están cargados.
+# Hasta que se carguen, los jobs de merge se saltean (run verde, latente);
+# una vez cargados, el pipeline se activa solo.
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: shellcheck + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          find .claude/hooks -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: pytest
+        run: |
+          pip install pytest
+          pytest -q tests
+
+  guard:
+    name: Check GitHub App configured
+    runs-on: ubuntu-latest
+    outputs:
+      has_app: ${{ steps.check.outputs.has_app }}
+    steps:
+      - id: check
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+        run: |
+          if [ -n "$APP_ID" ]; then
+            echo "has_app=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_app=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::APP_ID no configurado — se saltea el merge a stg. Cargá APP_ID/APP_PRIVATE_KEY para activar."
+          fi
+
+  merge-to-stg:
+    name: Merge dev → stg
+    needs: [test, guard]
+    if: github.event_name == 'push' && needs.guard.outputs.has_app == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Merge dev → stg
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout stg
+          git merge origin/dev --no-ff -X theirs -m "chore: auto-merge dev → stg"
+          git push origin stg
+
+  release-please:
+    name: Release PR → stg
+    needs: merge-to-stg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target-branch: stg
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
