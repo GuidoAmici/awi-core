@@ -1,0 +1,61 @@
+name: Dev — test & promote to stg
+
+# Modelo de 3 ramas (dev → stg → prod):
+#   push a dev → tests → (si pasan) automerge dev → stg → release-please
+#   refresca el Release PR sobre stg.
+# La promoción stg → prod vive en release.yml (al aceptar el Release PR).
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          find .claude/hooks -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: pytest
+        run: |
+          pip install pytest
+          pytest -q tests
+
+  promote-to-stg:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: stg
+          fetch-depth: 0
+      - name: Merge dev into stg
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin dev:dev
+          git merge --no-ff dev -m "ci: automerge dev → stg"
+          git push origin stg
+
+  release-please:
+    needs: promote-to-stg
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          target-branch: stg
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
