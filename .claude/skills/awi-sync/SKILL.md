@@ -5,7 +5,7 @@ description: Sync all AWI submodules (direct + nested). Commits local changes, p
 
 # /awi-sync — Submodule Sync
 
-Scans all submodules registered in AWI and nested client repos, syncs each to their tracked branch, and updates the registry in `_data/submodules.md`.
+Scans all submodules registered in AWI and nested org repos, syncs each to their tracked branch, and updates the registry in `_data/submodules.md`.
 
 ## Usage
 
@@ -20,14 +20,14 @@ Scans all submodules registered in AWI and nested client repos, syncs each to th
 ### Step 1 — Run the sync script
 
 ```bash
-python3 .claude/skills/awi-sync/scripts/sync_submodules.py --full-report
+python3 .claude/skills/awi-sync/scripts/sync_submodules.py
 ```
 
 The script handles everything:
-- Discovers all submodules (AWI-level + nested inside each client)
-- For each: checks clone status → removes `.gitkeep` from populated folders → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
+- Discovers all submodules (AWI-level + nested inside each org)
+- For each: checks clone status → commits any local changes (`git add -A`) → checks out tracked branch → pulls → pushes
 - Updates `_data/submodules.md` (Mermaid class styles + registry table)
-- Prints output at the requested verbosity level
+- Always prints the full report (summary + Mermaid graph; breakdown on failure)
 
 Capture the full output in memory. Show only the 1-line summary to the user.
 
