@@ -16,6 +16,7 @@ Outputs a human-readable report and updates _data/submodules.md.
 
 # ── Standard library imports ──────────────────────────────────────────────────
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -27,35 +28,36 @@ from typing import Optional
 # ── Load shared path constants ────────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
 
-from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR, CURRENT_USER
+from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR, ORGANIZATIONS_RELDIR, CURRENT_USER
 from sync_status import collect_core_files, collect_instance_files, md5
 
 REGISTRY_PATH = SUBMODULES_MD
 
-_NESTED_NODE_IDS: dict = {
-    ("newhaze", "codebase/newhaze-api"): "api",
-    ("newhaze", "codebase/newhaze-b2b-panel"): "b2b",
-    ("newhaze", "codebase/newhaze-consumer-panel"): "consumer",
-    ("newhaze", "codebase/newhaze-intern-panel"): "intern",
-    ("newhaze", "codebase/newhaze-learn"): "learn",
-    ("newhaze", "codebase/newhaze-ui"): "ui",
-    ("newhaze", "codebase/newhaze-website"): "website",
-    ("newhaze", "documentation/wiki"): "wiki",
-    ("rabbitek", "codebase/awi-core"): "awicore",
-}
+def make_node_id_factory():
+    """
+    Return a function that deterministically maps a submodule's last path
+    segment to a unique, Mermaid-safe node id.
 
+    Rules (stable across machines, no hand-maintained table):
+      - lowercase alphanumeric slug of the segment (newhaze-api → newhazeapi)
+      - leading-digit guard (42481462 → n42481462; Mermaid ids must start alpha)
+      - collisions resolved with a deterministic numeric suffix (base, base2, …)
+    """
+    used: set = set()
 
-def build_node_id_map() -> dict:
-    mapping: dict = {}
-    for m in parse_gitmodules(AWI_ROOT / ".gitmodules"):
-        path = m.get("path", m["name"])
-        if path.startswith(USERS_RELDIR + "/"):
-            node_id = "user"
-        else:
-            node_id = path.split("/")[-1].replace("-", "")
-        mapping[("AWI", path)] = node_id
-    mapping.update(_NESTED_NODE_IDS)
-    return mapping
+    def make(segment: str) -> str:
+        base = re.sub(r"[^0-9a-z]+", "", segment.lower()) or "node"
+        if not base[0].isalpha():
+            base = "n" + base
+        node_id = base
+        i = 2
+        while node_id in used:
+            node_id = f"{base}{i}"
+            i += 1
+        used.add(node_id)
+        return node_id
+
+    return make
 
 
 @dataclass
@@ -177,14 +179,14 @@ def parse_gitmodules(path: Path) -> list:
 
 def scan() -> list:
     results: list = []
-    node_id_map = build_node_id_map()
+    make_node_id = make_node_id_factory()
 
     awi_modules = parse_gitmodules(AWI_ROOT / ".gitmodules")
     for m in awi_modules:
         sub_path = m.get("path", m["name"])
         abs_path = AWI_ROOT / sub_path
         name = sub_path.split("/")[-1]
-        node_id = node_id_map.get(("AWI", sub_path), name)
+        node_id = make_node_id(name)
         results.append(SubmoduleResult(
             name=name,
             path=sub_path,
@@ -206,7 +208,7 @@ def scan() -> list:
             sub_path = m.get("path", m["name"])
             abs_path = parent.abs_path / sub_path
             name = sub_path.split("/")[-1]
-            node_id = node_id_map.get((parent.name, sub_path), name)
+            node_id = make_node_id(name)
             results.append(SubmoduleResult(
                 name=name,
                 path=sub_path,
@@ -528,12 +530,13 @@ def _node_box(r: SubmoduleResult) -> str:
     return f'        {r.node_id}["{r.name}<br/>{short_repo(r.remote_url)}"]'
 
 
-def create_registry_file(results: list) -> None:
+def build_registry_file(results: list) -> None:
     awi_subs    = [r for r in results if r.parent == "AWI"]
     nested_subs = [r for r in results if r.parent != "AWI"]
 
-    clients = [r for r in awi_subs if not r.path.startswith(USERS_RELDIR + "/")]
-    users   = [r for r in awi_subs if r.path.startswith(USERS_RELDIR + "/")]
+    orgs  = [r for r in awi_subs if r.path.startswith(ORGANIZATIONS_RELDIR + "/")]
+    users = [r for r in awi_subs if r.path.startswith(USERS_RELDIR + "/")]
+    deps  = [r for r in awi_subs if r not in orgs and r not in users]
 
     nested_by_parent: dict = {}
     for r in nested_subs:
@@ -541,45 +544,42 @@ def create_registry_file(results: list) -> None:
 
     mermaid_lines: list = [
         "```mermaid",
+        "%%{init: {'flowchart': {'curve': 'linear'}}}%%",
         "graph TD",
         '    AWI(["AWI"])',
         "",
     ]
 
-    if users:
-        mermaid_lines += ["    subgraph Users", "        direction TB"]
-        for r in users:
+    def emit_group(label: str, members: list) -> None:
+        if not members:
+            return
+        mermaid_lines.extend([f"    subgraph {label}", "        direction TB"])
+        for r in members:
             mermaid_lines.append(_node_box(r))
-        mermaid_lines += ["    end", ""]
+        mermaid_lines.extend(["    end", ""])
 
-    # Each client that owns nested repos gets its own subgraph holding the
-    # client node together with its repos, so the parent→repo edges stay
-    # inside the box instead of crossing the whole diagram.
-    for c in clients:
-        children = nested_by_parent.get(c.name, [])
-        if not children:
-            continue
-        mermaid_lines += [f'    subgraph grp_{c.node_id}["{c.name}"]', "        direction TB"]
-        mermaid_lines.append(_node_box(c))
+    # One subgraph per org holding the org node together with its codebase
+    # repos, so org → repo edges stay short instead of crossing the diagram.
+    for org in orgs:
+        children = nested_by_parent.get(org.name, [])
+        mermaid_lines.extend(
+            [f'    subgraph grp_{org.node_id}["{org.name}"]', "        direction TB"]
+        )
+        mermaid_lines.append(_node_box(org))
         for r in children:
             mermaid_lines.append(_node_box(r))
-        mermaid_lines.append(
-            f"        {c.node_id} --> " + " & ".join(r.node_id for r in children)
-        )
-        mermaid_lines += ["    end", ""]
+        if children:
+            mermaid_lines.append(
+                f"        {org.node_id} --> " + " & ".join(r.node_id for r in children)
+            )
+        mermaid_lines.extend(["    end", ""])
 
-    # Clients with no nested repos share a single group.
-    solo_clients = [c for c in clients if not nested_by_parent.get(c.name)]
-    if solo_clients:
-        mermaid_lines += ["    subgraph Clients", "        direction TB"]
-        for c in solo_clients:
-            mermaid_lines.append(_node_box(c))
-        mermaid_lines += ["    end", ""]
+    # External dependencies and users get their own flat groups.
+    emit_group("Dependencies", deps)
+    emit_group("Users", users)
 
-    for r in users:
+    for r in orgs + deps + users:
         mermaid_lines.append(f"    AWI --> {r.node_id}")
-    for c in clients:
-        mermaid_lines.append(f"    AWI --> {c.node_id}")
 
     all_node_ids = [r.node_id for r in results]
     mermaid_lines += [
@@ -589,6 +589,7 @@ def create_registry_file(results: list) -> None:
         "    classDef danger  stroke:#f38ba8,stroke-width:2px,stroke-dasharray:4",
         "",
         f"    class {','.join(all_node_ids)} danger",
+        "    linkStyle default stroke:#555,stroke-width:2px",
         "```",
     ]
 
@@ -602,7 +603,12 @@ def create_registry_file(results: list) -> None:
     ]
     for r in awi_subs:
         local_path = str(r.abs_path.relative_to(AWI_ROOT))
-        repo_type  = "user" if r.path.startswith(USERS_RELDIR + "/") else "client"
+        if r.path.startswith(USERS_RELDIR + "/"):
+            repo_type = "user"
+        elif r.path.startswith(ORGANIZATIONS_RELDIR + "/"):
+            repo_type = "org"
+        else:
+            repo_type = "dependency"
         sha_cell   = f"`{r.pinned_sha}`" if r.pinned_sha else "not indexed"
         status     = clone_status_label(r)
         registry_lines.append(
@@ -613,7 +619,7 @@ def create_registry_file(results: list) -> None:
     for parent_name, children in nested_by_parent.items():
         registry_lines += [
             "",
-            f"### {parent_name}-client — nested submodules",
+            f"### {parent_name} — codebase submodules",
             "",
             "| Path | Local path | GitHub Repo | Branch | SHA | Clone status | Last synced |",
             "|---|---|---|---|---|---|---|",
@@ -837,13 +843,14 @@ def print_breakdown(results: list, root: dict, mirror: dict, pull: dict) -> None
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
-    full_report = "--full-report" in sys.argv
-    breakdown   = "--breakdown"   in sys.argv
+    breakdown = "--breakdown" in sys.argv
 
     results = scan()
 
-    if not REGISTRY_PATH.exists():
-        create_registry_file(results)
+    # Always rebuild the registry structure deterministically from .gitmodules,
+    # so the graph/table never drift when submodules are added or removed.
+    # sync_all() then fills per-row status; update_registry() recolors nodes.
+    build_registry_file(results)
 
     # 1. Mirror instance → awi-core (collaborators only, must run before sync_all
     #    so changes are in awi-core remote before the submodule pull merges them)
@@ -866,8 +873,7 @@ def main() -> None:
     ok, failed = _count_results(results, root, mirror, pull)
     exit_code  = print_summary(ok, failed)
 
-    if full_report:
-        print_mermaid_graph()
+    print_mermaid_graph()
     if breakdown or failed > 0:
         print_breakdown(results, root, mirror, pull)
 
