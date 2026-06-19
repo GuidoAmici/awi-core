@@ -104,32 +104,6 @@ def is_valid_git_repo(path: Path) -> bool:
     return r.returncode == 0
 
 
-def in_nested_repo(file_path: Path, repo_root: Path) -> bool:
-    p = file_path.parent
-    while p != repo_root:
-        if (p / ".git").exists():
-            return True
-        p = p.parent
-    return False
-
-
-def clean_gitkeeps(repo_root: Path) -> None:
-    for dirpath in repo_root.rglob("*"):
-        if not dirpath.is_dir():
-            continue
-        if in_nested_repo(dirpath, repo_root):
-            continue
-        contents = list(dirpath.iterdir())
-        non_gitkeep = [f for f in contents if f.name != ".gitkeep"]
-        gitkeep = dirpath / ".gitkeep"
-        if non_gitkeep:
-            if gitkeep.exists():
-                gitkeep.unlink()
-        else:
-            if not gitkeep.exists():
-                gitkeep.touch()
-
-
 # ── User config helpers ───────────────────────────────────────────────────────
 
 def read_user_config() -> dict:
@@ -269,9 +243,6 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     res = git(["branch", "--show-current"], cwd=path)
     r.branch = res.stdout.strip() or None
 
-    if r.parent == "AWI":
-        clean_gitkeeps(path)
-
     res = git(["status", "--porcelain"], cwd=path)
     dirty_lines = [l for l in res.stdout.splitlines() if l.strip()]
     r.dirty = bool(dirty_lines)
@@ -358,8 +329,6 @@ def sync_root() -> dict:
     res = git(["branch", "--show-current"], cwd=path)
     branch = res.stdout.strip()
     result["branch"] = branch
-
-    clean_gitkeeps(path)
 
     res = git(["status", "--porcelain"], cwd=path)
     dirty = [l for l in res.stdout.splitlines() if l.strip()]
