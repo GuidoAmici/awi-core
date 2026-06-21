@@ -226,6 +226,38 @@ def scan() -> list:
 
 # ── Sync logic ────────────────────────────────────────────────────────────────
 
+def _sync_upstream_mirror(r: SubmoduleResult, path: Path, target: str) -> SubmoduleResult:
+    """Sync a read-only upstream mirror: fetch + hard-reset to origin/<target>.
+
+    No local commit, no push — local drift is discarded so the mirror matches
+    upstream exactly.
+    """
+    res = git(["fetch", "origin", target], cwd=path)
+    if res.returncode != 0:
+        r.sync_status = "failed"
+        r.error = f"Fetch failed: {res.stderr.strip()}"
+        return r
+
+    if r.branch != target:
+        res = git(["checkout", target], cwd=path)
+        if res.returncode != 0:
+            r.sync_status = "failed"
+            r.error = f"Cannot checkout {target}: {res.stderr.strip()}"
+            return r
+        r.branch = target
+
+    before = git(["rev-parse", "HEAD"], cwd=path).stdout.strip()
+    res = git(["reset", "--hard", f"origin/{target}"], cwd=path)
+    if res.returncode != 0:
+        r.sync_status = "failed"
+        r.error = f"Reset to origin/{target} failed: {res.stderr.strip()}"
+        return r
+    after = git(["rev-parse", "HEAD"], cwd=path).stdout.strip()
+
+    r.sync_status = "pulled" if before != after else "already_up_to_date"
+    return r
+
+
 def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     path = r.abs_path
 
@@ -244,6 +276,14 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
 
     res = git(["branch", "--show-current"], cwd=path)
     r.branch = res.stdout.strip() or None
+    target = r.tracked_branch
+
+    # Upstream submodules are read-only mirrors of a third-party repo: never
+    # commit local drift, never push. Just fast-forward to upstream (a hard
+    # reset, so files relocated/removed upstream don't linger as fake "local
+    # changes" that would later be auto-committed and cause rebase conflicts).
+    if r.upstream:
+        return _sync_upstream_mirror(r, path, target)
 
     res = git(["status", "--porcelain"], cwd=path)
     dirty_lines = [l for l in res.stdout.splitlines() if l.strip()]
@@ -264,7 +304,6 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
         else:
             r.committed = True
 
-    target = r.tracked_branch
     if r.branch != target:
         res = git(["checkout", target], cwd=path)
         if res.returncode != 0:
