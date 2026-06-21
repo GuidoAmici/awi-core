@@ -18,7 +18,6 @@ AGENT_DIRS=(
   finance
   game-development
   gis
-  integrations
   marketing
   paid-media
   product
@@ -27,7 +26,6 @@ AGENT_DIRS=(
   security
   spatial-computing
   specialized
-  strategy
   support
   testing
 )
