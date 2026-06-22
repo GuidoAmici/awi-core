@@ -254,6 +254,11 @@ def _sync_upstream_mirror(r: SubmoduleResult, path: Path, target: str) -> Submod
         return r
     after = git(["rev-parse", "HEAD"], cwd=path).stdout.strip()
 
+    # Drop untracked files too (reset --hard leaves them), so the working tree
+    # matches upstream exactly and the parent gitlink isn't flagged "-dirty".
+    # Gitignored build artifacts are preserved (no -x).
+    git(["clean", "-fd"], cwd=path)
+
     r.sync_status = "pulled" if before != after else "already_up_to_date"
     return r
 
