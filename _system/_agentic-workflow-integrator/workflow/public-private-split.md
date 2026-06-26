@@ -78,7 +78,7 @@ Never manually push client data to the public repo. The sync script is the only 
 ```bash
 cd ~/awi-core
 git rm <file>
-git commit -m "cos: remove accidentally synced context file"
+git commit -m "chore: remove accidentally synced context file"
 ```
 
 Then add `kind: context` to that file's frontmatter in the private repo to prevent future syncs.

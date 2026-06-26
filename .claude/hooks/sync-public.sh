@@ -63,9 +63,9 @@ git diff --cached --quiet && exit 0
 FILENAME=$(basename "$REL_PATH" .md)
 FOLDER=$(basename "$(dirname "$REL_PATH")")
 if $IS_NEW; then
-  git commit -m "cos: new $FOLDER - $FILENAME"
+  git commit -m "docs($FOLDER): add $FILENAME"
 else
-  git commit -m "cos: update $FOLDER - $FILENAME"
+  git commit -m "docs($FOLDER): update $FILENAME"
 fi
 
 exit 0

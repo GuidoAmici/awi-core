@@ -297,7 +297,7 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
 
     if r.dirty:
         git(["add", "-A"], cwd=path)
-        res = git(["commit", "-m", "cos: sync - stage local changes"], cwd=path)
+        res = git(["commit", "-m", "chore(sync): stage local changes"], cwd=path)
         if res.returncode != 0:
             nothing = "nothing to commit" in res.stdout or "nothing to commit" in res.stderr
             if nothing:
@@ -380,7 +380,7 @@ def sync_root() -> dict:
     dirty = [l for l in res.stdout.splitlines() if l.strip()]
     if dirty:
         git(["add", "-A"], cwd=path)
-        res = git(["commit", "-m", "cos: sync - stage local changes"], cwd=path)
+        res = git(["commit", "-m", "chore(sync): stage local changes"], cwd=path)
         if res.returncode != 0:
             result["status"] = "failed"
             result["error"] = f"Commit failed: {res.stderr.strip()}"
@@ -486,7 +486,7 @@ def mirror_instance_to_awi_core() -> dict:
 
     git(["add", "-A"], cwd=core_root)
     n = len(result["drift"]) + len(result["missing"])
-    res = git(["commit", "-m", f"cos: sync - mirror {n} file(s) from AWI"], cwd=core_root)
+    res = git(["commit", "-m", f"chore(sync): mirror {n} file(s) from AWI"], cwd=core_root)
     if res.returncode != 0:
         result["status"] = "failed"
         result["error"] = f"awi-core commit failed: {res.stderr.strip()}"

@@ -31,7 +31,7 @@ If `current-user.md` does not exist: stop and tell the operator to run `/awi-use
 6. **Map projects to monthly milestones** — based on project next actions and linked tasks, suggest which month each project should hit its next milestone
 7. **Identify undated tasks** — distribute across months by priority (same priority order as /week)
 8. **Derive quarter goals** — synthesize 3-5 high-level goals from the projects and tasks. Goals should be outcome-oriented ("Launch auth across all apps") not activity-oriented ("Work on auth")
-9. Run `git log --since="<quarter start>" --grep="cos:" --format="%ad %s" --date=short` for quarter activity so far
+9. Run `git log --since="<quarter start>" -E --grep='^(cos|feat|fix|docs|chore|refactor|perf|test|build|ci|style|revert)(\([^)]+\))?!?: ' --format="%ad %s" --date=short` for quarter activity so far
 10. Create `<agenda-base>planning/YYYY-QN.md`
 
 ## Goal Derivation
@@ -98,7 +98,7 @@ date-range: YYYY-MM-DD to YYYY-MM-DD
 - Paused projects not planned for this quarter
 
 ## Activity So Far
-- Summary of cos: commits grouped by week
+- Summary of commits (prefijos conventional-commit) grouped by week
 ```
 
 ---

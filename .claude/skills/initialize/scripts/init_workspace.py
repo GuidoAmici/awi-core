@@ -78,7 +78,7 @@ def init_workspace(name: str, parent_path: Path):
     subprocess.run(["git", "init"], cwd=path, check=True)
     subprocess.run(["git", "add", "-A"], cwd=path, check=True)
     subprocess.run(
-        ["git", "commit", "-m", f"cos: initialize {name}-workspace [confidence: 1.00]"],
+        ["git", "commit", "-m", f"chore({name}): initialize workspace [confidence: 1.00]"],
         cwd=path,
         check=True,
     )
