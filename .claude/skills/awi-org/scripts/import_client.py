@@ -141,7 +141,7 @@ def main():
     # Commit additions
     subprocess.run(["git", "add", "-A"], cwd=client_path, check=True)
     subprocess.run(
-        ["git", "commit", "-m", f"cos: add missing AWI structure to {args.name}"],
+        ["git", "commit", "-m", f"chore({args.name}): add missing AWI structure"],
         cwd=client_path,
         check=True,
     )

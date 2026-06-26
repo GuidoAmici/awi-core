@@ -192,7 +192,7 @@ On any input:
 3. **File** - Create/update markdown in the correct workspace's `agenda/` folder
 4. **Respond** - Confirm what was done
 
-> **Commit at logical task boundaries** with a clear `cos:` message. There is no auto-commit hook — don't leave finished work uncommitted, but don't commit after every single edit either.
+> **Commit at logical task boundaries** using [Conventional Commits with scope](references/commit-format.md) (e.g. `docs(newhaze): …`, `chore(sync): …`). There is no auto-commit hook — don't leave finished work uncommitted, but don't commit after every single edit either.
 
 ## Confidence Scoring
 

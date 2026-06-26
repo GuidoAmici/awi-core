@@ -111,7 +111,7 @@ def init_awi(path: Path = Path(".")):
     subprocess.run(["git", "init"], cwd=path, check=True)
     subprocess.run(["git", "add", "-A"], cwd=path, check=True)
     subprocess.run(
-        ["git", "commit", "-m", "cos: initialize AWI repo"],
+        ["git", "commit", "-m", "chore: initialize AWI repo"],
         cwd=path,
         check=True,
     )

@@ -41,7 +41,7 @@ def commit_and_push(path: Path, name: str) -> str | None:
         rc = git(["add", "-A"], cwd=path)
         if rc.returncode != 0:
             return f"{name}: git add failed — {rc.stderr.strip()}"
-        rc = git(["commit", "-m", "cos: sync - stage local changes before deinit"], cwd=path)
+        rc = git(["commit", "-m", "chore(sync): stage local changes before deinit"], cwd=path)
         if rc.returncode != 0:
             return f"{name}: commit failed — {rc.stderr.strip()}"
 

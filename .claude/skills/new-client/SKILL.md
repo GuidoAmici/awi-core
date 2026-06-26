@@ -81,7 +81,7 @@ Only if GitHub repo was created:
 
 ```bash
 git submodule add --force https://github.com/GuidoAmici/<name>.git _data/entities/<name>
-git commit -m "cos: add client submodule - <name>"
+git commit -m "chore(<name>): add client submodule"
 ```
 
 If no GitHub repo, note that submodule registration can be done later.
@@ -97,7 +97,7 @@ Does <name> have a wiki or documentation repo? (y/n)
 - **Yes** → ask for the GitHub URL, then:
   ```bash
   git -C _data/entities/<name> submodule add <url> documentation/wiki
-  git -C _data/entities/<name> commit -m "cos: add wiki submodule"
+  git -C _data/entities/<name> commit -m "chore(<name>): add wiki submodule"
   ```
 - **No** → skip. Can be added later.
 

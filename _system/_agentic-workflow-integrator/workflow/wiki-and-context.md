@@ -78,7 +78,7 @@ cd _documentation/_context/<name>-wiki && git pull
 # After editing wiki files, commit the pointer in parent repo
 cd <workspace-root>
 git add _documentation/_context/<name>-wiki
-git commit -m "cos: update wiki pointer"
+git commit -m "chore: update wiki pointer"
 
 # Initialize wiki submodule on fresh clone
 git submodule update --init _documentation/_context/<name>-wiki

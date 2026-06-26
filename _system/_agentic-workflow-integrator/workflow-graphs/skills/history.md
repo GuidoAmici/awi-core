@@ -16,7 +16,7 @@ Show recent git activity (last 7 days) in readable format, grouped by day.
 
 ```mermaid
 graph TD
-    A(["/history"]) --> B[["git log --since=7 days ago --grep=cos: --format=date+subject"]]
+    A(["/history"]) --> B[["git log --since=7 days ago --grep=conventional --format=date+subject"]]
     B --> C[Group output by day]
     C --> D[Summarize actions per day]
     D --> E[/Display to user/]

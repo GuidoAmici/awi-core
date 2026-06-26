@@ -89,7 +89,7 @@ Only if GitHub repo was created:
 
 ```bash
 git submodule add --force https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
-git commit -m "cos: add organization submodule - <name>"
+git commit -m "chore(<name>): add organization submodule"
 ```
 
 ---
