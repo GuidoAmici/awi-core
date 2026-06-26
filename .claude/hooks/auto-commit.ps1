@@ -13,7 +13,7 @@ if ($ToolName -eq "Bash") {
         git diff --cached --quiet 2>$null
         if ($LASTEXITCODE -ne 0) {
             $Summary = (git diff --cached --name-status | ForEach-Object { ($_ -split "\t")[-1] } | Split-Path -Leaf) -join ", "
-            git commit -m "cos: move/rename - $Summary"
+            git commit -m "chore: move/rename $Summary"
         }
     }
     exit 0
@@ -65,12 +65,12 @@ if ($LASTEXITCODE -ne 0) { $hasDiff = $true }
 
 if ($hasDiff) {
     git add $FilePath
-    git commit -m "cos: update $Type - $Filename"
+    git commit -m "docs: update $Type $Filename"
 } else {
     git ls-files --error-unmatch $FilePath 2>$null
     if ($LASTEXITCODE -ne 0) {
         git add $FilePath
-        git commit -m "cos: new $Type - $Filename"
+        git commit -m "docs: add $Type $Filename"
     }
 }
 

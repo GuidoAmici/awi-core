@@ -90,7 +90,7 @@ Should I create a GitHub repo for <name>? (y/n)
 
 ```bash
 git submodule add https://github.com/GuidoAmici/<name>.git _workspace/<name>
-git commit -m "cos: add workspace submodule - <name>"
+git commit -m "chore(<name>): add workspace submodule"
 ```
 
 If no GitHub repo was created, skip this step and note that the submodule registration can be done later once the repo is published.
@@ -106,7 +106,7 @@ Does <name> have a wiki or documentation repo? (y/n)
 - **Yes** → ask for the GitHub URL, then:
   ```bash
   git -C _workspace/<name> submodule add <url> documentation/wiki
-  git -C _workspace/<name> commit -m "cos: add wiki submodule"
+  git -C _workspace/<name> commit -m "chore(<name>): add wiki submodule"
   ```
 - **No** → skip. Can be added later.
 

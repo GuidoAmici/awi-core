@@ -12,7 +12,7 @@ if [ "$TOOL_NAME" = "Bash" ]; then
     cd "$CLAUDE_PROJECT_DIR" || exit 0
     if ! git diff --cached --quiet 2>/dev/null; then
       SUMMARY=$(git diff --cached --name-status | awk '{print $NF}' | xargs -I{} basename {} | paste -sd ', ')
-      git commit -m "cos: move/rename - $SUMMARY"
+      git commit -m "chore: move/rename $SUMMARY"
     fi
   fi
   exit 0
@@ -76,11 +76,11 @@ cd "$VAULT_ROOT" || exit 0
 if git diff --quiet "$FILE_PATH" 2>/dev/null && git diff --cached --quiet "$FILE_PATH" 2>/dev/null; then
   if ! git ls-files --error-unmatch "$FILE_PATH" 2>/dev/null; then
     git add "$FILE_PATH"
-    git commit -m "cos: new $TYPE - $FILENAME"
+    git commit -m "docs: add $TYPE $FILENAME"
   fi
 else
   git add "$FILE_PATH"
-  git commit -m "cos: update $TYPE - $FILENAME"
+  git commit -m "docs: update $TYPE $FILENAME"
 fi
 
 # Mirror to public repo if file is on the whitelist.

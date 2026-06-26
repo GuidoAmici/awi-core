@@ -86,7 +86,7 @@ def scaffold_user(github_id: str, login: str) -> None:
         empty_state.write_text("{}\n")
 
     git(["add", "-A"], cwd=user_dir)
-    git(["commit", "-m", f"cos: scaffold AWI user {login}"], cwd=user_dir)
+    git(["commit", "-m", f"chore({login}): scaffold AWI user"], cwd=user_dir)
     git(["push", "--set-upstream", "origin", "only"], cwd=user_dir)
 
 

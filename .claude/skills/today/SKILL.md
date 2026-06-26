@@ -268,7 +268,7 @@ Read each matching file. Extract: project name, `## Next Action` content. Keep a
 **Git log:**
 
 ```bash
-git log --since="<working-date> <day_start_hour>" --grep="cos:" --oneline
+git log --since="<working-date> <day_start_hour>" -E --grep='^(cos|feat|fix|docs|chore|refactor|perf|test|build|ci|style|revert)(\([^)]+\))?!?: ' --oneline
 ```
 
 ### B2.5 — Build convergence map

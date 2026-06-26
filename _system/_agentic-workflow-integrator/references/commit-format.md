@@ -1,14 +1,43 @@
 # Commit Format
 
-The auto-commit hook uses this format:
+AWI usa **Conventional Commits con scope**. (Reemplaza al viejo prefijo `cos:`.)
 
 ```
-cos: <action> - <description>
+<tipo>(<scope>): <descripción en imperativo>
 
-cos: new task - call John (due: 2026-01-23)
-cos: complete task - review PR
-cos: update project - Website status to blocked
-cos: daily plan for 2026-01-23
+docs(newhaze): add BDR-0001 pricing de pHmetro
+feat(afin): login con Supabase
+fix(newhaze): corregir margen de growshop en la lista #27
+chore(sync): stage local changes
+chore: bump submódulos
+refactor(awi): simplificar sync_submodules
 ```
 
-Filter: `git log --grep="cos:"`
+## Tipos
+
+| Tipo | Para qué |
+|---|---|
+| `feat` | nueva capacidad/feature |
+| `fix` | corrección de un error |
+| `docs` | contenido del vault, wikis, BDR/ADR, notas, daily/weekly |
+| `chore` | mantenimiento: sync, bumps, scaffolding, init/deinit, mover/renombrar |
+| `refactor` | reestructurar sin cambiar comportamiento |
+| `perf` · `test` · `build` · `ci` · `style` · `revert` | uso estándar de Conventional Commits |
+
+## Scope
+
+El scope es **opcional pero recomendado**. Suele ser:
+
+- el **slug de la org/cliente** (`newhaze`, `afin`) — mapea a los submódulos,
+- `awi` para el sistema/vault,
+- `sync` para operaciones de sincronización automáticas.
+
+## Filtro de actividad
+
+Los reportes (`/today`, `/history`, `/quarter`) filtran por prefijo de
+Conventional Commit. Durante la transición el filtro también matchea el viejo
+`cos:` para no perder historial:
+
+```bash
+git log -E --grep='^(cos|feat|fix|docs|chore|refactor|perf|test|build|ci|style|revert)(\([^)]+\))?!?: '
+```

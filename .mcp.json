@@ -63,6 +63,14 @@
       "command": "npx",
       "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
       "type": "stdio"
+    },
+    "photoshop": {
+      "command": "/mnt/c/Users/Admin/AppData/Roaming/Python/Python311/Scripts/photoshop-mcp-server.exe",
+      "args": [],
+      "env": {
+        "PS_VERSION": "2023"
+      },
+      "type": "stdio"
     }
   }
 }

@@ -7,7 +7,7 @@
 ## Claude Code-specific
 
 - **Always run Bash commands using relative paths** (e.g. `bash .claude/hooks/get-datetime.sh full`, not absolute paths). Working directory is the project root.
-- No auto-commit hook: commit your own work at logical task boundaries with a clear `cos:` message (not after every Write/Edit). Don't leave finished work uncommitted.
+- No auto-commit hook: commit your own work at logical task boundaries using [Conventional Commits with scope](_system/_agentic-workflow-integrator/references/commit-format.md) — e.g. `docs(newhaze): …`, `chore(sync): …` (not after every Write/Edit). Don't leave finished work uncommitted.
 - Skills available: see `.claude/skills/` for `/today`, `/week`, `/quarter`, `/year`, `/new`, `/history`, `/delegate`, `/awi-user`, `/awi-introduction`, `/awi-org`.
 - Full file format templates: `_system/chief-of-staff/references/file-formats.md`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.

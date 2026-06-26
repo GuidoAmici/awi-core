@@ -99,7 +99,7 @@ def init_client(name: str, parent_path: Path):
     subprocess.run(["git", "init"], cwd=path, check=True)
     subprocess.run(["git", "add", "-A"], cwd=path, check=True)
     subprocess.run(
-        ["git", "commit", "-m", f"cos: initialize {name} client"],
+        ["git", "commit", "-m", f"chore({name}): initialize client"],
         cwd=path,
         check=True,
     )

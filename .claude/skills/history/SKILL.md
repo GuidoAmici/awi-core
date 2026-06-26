@@ -13,7 +13,7 @@ Show chief-of-staff activity from git log.
 ## Run
 
 ```bash
-git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
+git log --since="7 days ago" -E --grep='^(cos|feat|fix|docs|chore|refactor|perf|test|build|ci|style|revert)(\([^)]+\))?!?: ' --format="%ad %s" --date=short
 ```
 
 Group output by day and summarize actions.
