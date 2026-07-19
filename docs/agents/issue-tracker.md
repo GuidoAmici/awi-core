@@ -4,15 +4,16 @@ Issues live in GitHub Issues, distributed by scope. Use the `gh` CLI for all ope
 
 ## Where issues live
 
-Issues live only in org workspace repos, the AWI core repo, or the personal repo. **Never in codebase repos** (e.g. `newhaze-b2b-panel`). Use `repo:` labels to identify which codebase an issue belongs to.
+**Los issues de código viven en el repo del código; los workspace repos son solo para negocio, proyectos y decisiones.** (Convención corregida por el maintainer el 2026-07-16 — reemplaza a la regla anterior "never in codebase repos".)
 
 | Scope | Repo | When to use |
 |-------|------|-------------|
-| One codebase or one org | `GuidoAmici/newhaze-workspace`, `GuidoAmici/afin-workspace`, `GuidoAmici/rabbitek-workspace` | Work scoped to one org, regardless of how many codebases it touches. Label with `repo:<codebase>` when codebase-specific. |
+| Código (features, bugs, tests, deuda técnica) | El repo del codebase (e.g. `GuidoAmici/newhaze-webapp`) | Todo lo que se implementa en ese repo: features de app, fixes, infraestructura de tests, refactors. Ejemplos reales: variantes de producto (`newhaze-webapp#63`), pgTAP (`#65`), E2E (`#66`). |
+| Negocio / proyectos / decisiones de una org | `GuidoAmici/newhaze-workspace`, `GuidoAmici/afin-workspace`, `GuidoAmici/rabbitek-workspace` | Estrategia, pricing, lanzamientos (BDR), operaciones, tareas humanas, épicas cross-repo. Ejemplos reales: promos de lanzamiento (`newhaze-workspace#90`), packs en el sheet (`#61`). Label `repo:<codebase>` si referencia código. |
 | AWI harness | `GuidoAmici/awi-core` | Changes to the AWI system itself: skills, INSTRUCTIONS.md, hooks, documentation standards, agent behavior. |
 | Personal | `GuidoAmici/my-awi-user` | Strictly personal work (agenda, goals, personal projects). Never for harness or cross-org work. |
 
-When an issue touches codebases across multiple orgs, ask the maintainer which org workspace to file it in before creating it.
+Regla rápida: si lo cierra un PR, va en el repo del código; si lo cierra una decisión o una acción humana, va en el workspace. Cuando toca codebases de varias orgs, preguntar al maintainer en qué workspace filearlo.
 
 ## Label schema
 
