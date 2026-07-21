@@ -15,14 +15,6 @@
       "args": ["-Command", "meta-ads-mcp"],
       "type": "stdio"
     },
-    "gdrive": {
-      "command": "mcp-server-gdrive",
-      "type": "stdio",
-      "env": {
-        "GDRIVE_OAUTH_PATH": "/home/unixadmin/.config/gdrive-mcp-credentials.json",
-        "GDRIVE_CREDENTIALS_PATH": "/home/unixadmin/.config/gdrive-mcp-server-credentials.json"
-      }
-    },
     "github": {
       "command": "bash",
       "args": [".claude/hooks/github-mcp-server.sh"],
