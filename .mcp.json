@@ -56,12 +56,26 @@
       "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
       "type": "stdio"
     },
-    "photoshop": {
-      "command": "/mnt/c/Users/Admin/AppData/Roaming/Python/Python311/Scripts/photoshop-mcp-server.exe",
-      "args": [],
+    "photoshop-alis": {
+      "command": "/mnt/c/Program Files/nodejs/node.exe",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npx-cli.js",
+        "-y",
+        "@alisaitteke/photoshop-mcp"
+      ],
       "env": {
-        "PS_VERSION": "2023"
+        "LOG_LEVEL": "1"
       },
+      "type": "stdio"
+    },
+    "filesystem": {
+      "command": "/mnt/c/Program Files/nodejs/node.exe",
+      "args": [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npx-cli.js",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "D:\\ps-work"
+      ],
       "type": "stdio"
     }
   }
