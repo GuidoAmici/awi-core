@@ -4,81 +4,66 @@ kind: workflow
 
 # Public / Private Split
 
-How client-specific content is separated from reusable workflow infrastructure.
+How private instance data is kept out of the public, forkable `awi-core` repo.
 
 ---
 
 ## The model
 
-This system runs as two repos:
+There is **one canonical repo**: `awi-core`, and it is public. An AWI instance is a working checkout of it — not a fork that mirrors changes back. See [ADR 0007](../../../docs/adr/0007-awi-core-como-source-of-truth.md).
 
-| Repo | Contains | Who sees it |
-|---|---|---|
-| **Private** (`chief-of-staff`) | Everything — client data, schedule, context, workflow files | Operator only |
-| **Public** (`awi-core`) | Workflow files only — generic, no client data | Anyone who forks it |
+| Lives in `awi-core` (public) | Lives outside it (private) |
+|---|---|
+| Skills (`.claude/skills/`) | `_data/` — every user profile and org workspace |
+| Hooks (`.claude/hooks/`) | `.gitmodules` — generated per operator |
+| System docs (`_system/`) | Anything naming a client or containing their data |
+| Root docs (`CLAUDE.md`, `INSTRUCTIONS.md`, ADRs) | |
 
-The public repo is a forkable template. A new operator forks it, runs init, and has the full system scaffolded for a new client.
-
----
-
-## What is a workflow file vs. a context file
-
-**Workflow** — reusable across any engagement:
-- Skills (`.claude/skills/`)
-- Hooks (`.claude/hooks/`)
-- System documentation (`_system/chief-of-staff/`)
-- Generic ideas and mental models (`_documentation/_agenda/ideas/`)
-- Root docs (`CLAUDE.md`, `INSTRUCTIONS.md`, etc.)
-
-**Context** — specific to this client:
-- Tasks, projects, people, daily logs, outputs, planning
-- Wiki submodule and codebase docs
-- User profiles
-- Any file that references the client by name or contains client data
-
-**Rule of thumb:** if the file would need editing before sharing with a different client, it's context.
+**Rule of thumb:** if the file would need editing before another operator could use it, it is private.
 
 ---
 
-## How the sync works
+## How the boundary is enforced
 
-After every auto-commit to the private repo, `sync-public.sh` runs and:
+By `.gitignore` — not by a sync script, and not by merge strategy:
 
-1. Checks if the file's path matches the whitelist (`.claude/config/public-whitelist`)
-2. Checks the file's frontmatter for `kind: workflow` (opt-in) or `kind: context` (opt-out)
-3. If sync is warranted, copies the file to the public repo clone and commits there
-
-The sync is silent and non-blocking. No manual steps needed.
-
-### Per-file overrides
-
-Add to any `.md` file's frontmatter:
-
-```yaml
-kind: workflow   # Sync this file even if its path isn't in the whitelist
-kind: context    # Never sync this file even if its path is whitelisted
+```gitignore
+_data/                      # every instance's private data
+.gitmodules                 # generated from user-submodules.json
+_system/agency-agents/      # materialised by /awi-initialize
 ```
+
+Ignoring beats mirroring because there is nothing to keep in step: the private paths never enter the index, so they cannot leak through an accidental `git add -A`.
+
+**No gitlinks are versioned in awi-core.** A gitlink whose URL lives only in an ignored `.gitmodules` is an orphan pointer — a fresh clone fails with `fatal: No url found for submodule path`. Submodules are materialised from `user-submodules.json` instead. See [ADR 0001](../../../docs/adr/0001-gitmodules-is-ephemeral.md).
+
+---
+
+## Where private data actually lives
+
+Each org workspace and each user profile is its **own git repo**, cloned inside `_data/` but invisible to `awi-core`:
+
+| Path | Repo |
+|---|---|
+| `_data/users/<github-id>/` | the operator's `my-awi-user` |
+| `_data/organizations/<name>/` | that org's `<name>-workspace` |
+
+They are declared in `_data/users/<github-id>/user-submodules.json` and operated by `/awi-sync`. Because awi-core versions no gitlink for them, they are ordinary nested repos as far as it is concerned.
 
 ---
 
 ## Setup for a new operator
 
-1. Fork `awi-core` on GitHub
-2. Clone the fork locally
-3. Run `/awi-initialize` — it scaffolds the vault, creates the wiki submodule, and writes the public sync path
-4. Set the public repo clone path in `.claude/config/public-repo-path` (gitignored)
-5. Start working — the sync runs automatically
+1. Fork or clone `awi-core`
+2. Run `/awi-introduction` — links the GitHub account and creates the `my-awi-user` repo
+3. Run `/awi-initialize` — generates `.gitmodules` from `user-submodules.json` and clones each active submodule
+
+No sync path to configure: there is no second repo to mirror to.
 
 ---
 
-## Keeping the public repo clean
+## If private data reaches awi-core
 
-Never manually push client data to the public repo. The sync script is the only path in. If a file was accidentally synced:
+Remove it from the tree, add the path to `.gitignore`, and promote through `dev` → `stg` → `prod` so the public default branch stops serving it.
 
-```bash
-cd ~/awi-core
-git rm <file>
-git commit -m "chore: remove accidentally synced context file"
-```
-
-Then add `kind: context` to that file's frontmatter in the private repo to prevent future syncs.
+Note that **rewriting history does not reliably erase it**: GitHub keeps unreferenced objects addressable by SHA until it garbage-collects, which requires asking Support. Treat anything already pushed as disclosed, and weigh whether rotating the exposed resource beats rewriting the history.
