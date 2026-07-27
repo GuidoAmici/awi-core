@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Generate .gitmodules from current-user.json + user-submodules.json.
 
-.gitmodules is ephemeral — never committed, always regenerated.
+.gitmodules is ephemeral — never committed, always regenerated. That holds at
+both levels: the AWI root, and each org workspace's own .gitmodules, so one
+operator's choice of which codebases to clone never lands in a shared repo.
+
 Call write_gitmodules(awi_root) from any skill or hook.
 """
 
@@ -10,25 +13,30 @@ import sys
 from pathlib import Path
 
 
+def _entry(path: str, url: str, branch: str, upstream: bool = False) -> list[str]:
+    lines = [f'[submodule "{path}"]',
+             f"\tpath = {path}",
+             f"\turl = {url}",
+             f"\tbranch = {branch}"]
+    if upstream:
+        lines.append("\tupstream = true")
+    lines.append("")
+    return lines
+
+
 def _section(entries: dict, header: str, comment: str) -> list[str]:
     if not entries:
         return []
     lines = [f"# ─── {header} {'─' * max(0, 76 - len(header))}",
              f"# {comment}", ""]
     for entry in entries.values():
-        path = entry["path"]
-        lines.append(f'[submodule "{path}"]')
-        lines.append(f"\tpath = {path}")
-        lines.append(f"\turl = {entry['url']}")
-        lines.append(f"\tbranch = {entry.get('branch', 'only')}")
-        if entry.get("upstream"):
-            lines.append("\tupstream = true")
-        lines.append("")
+        lines += _entry(entry["path"], entry["url"],
+                        entry.get("branch", "only"), entry.get("upstream", False))
     return lines
 
 
-def generate(awi_root: Path) -> str:
-    """Return .gitmodules file content for the current user."""
+def load_submodules(awi_root: Path) -> tuple[dict, str, str]:
+    """Return (submodules, github_id, user_repo) for the logged-in user."""
     users_dir = awi_root / "_data" / "users"
     current_user_file = users_dir / "current-user.json"
 
@@ -42,10 +50,24 @@ def generate(awi_root: Path) -> str:
 
     submodules_file = users_dir / github_id / "user-submodules.json"
     raw = json.loads(submodules_file.read_text()) if submodules_file.exists() else {}
+    return raw, github_id, user_repo
+
+
+def _entry_type(entry: dict) -> str:
+    """Resolve an entry's type, falling back to the legacy path convention."""
+    declared = entry.get("type")
+    if declared:
+        return declared
+    return "org-workspace" if entry.get("path", "").startswith("_data/organizations/") else "system-repo"
+
+
+def generate(awi_root: Path) -> str:
+    """Return .gitmodules content for the AWI root."""
+    raw, github_id, user_repo = load_submodules(awi_root)
 
     active = {k: v for k, v in raw.items() if v.get("active", False)}
-    orgs   = {k: v for k, v in active.items() if v.get("path", "").startswith("_data/organizations/")}
-    system = {k: v for k, v in active.items() if not v.get("path", "").startswith("_data/organizations/")}
+    orgs   = {k: v for k, v in active.items() if _entry_type(v) == "org-workspace"}
+    system = {k: v for k, v in active.items() if _entry_type(v) != "org-workspace"}
 
     lines: list[str] = []
     lines += _section(orgs, "Entities",
@@ -59,18 +81,30 @@ def generate(awi_root: Path) -> str:
         "# ─── Workflow ─────────────────────────────────────────────────────────────────",
         "# Automation and tooling repos — the current user's workspace.",
         "",
-        f'[submodule "{user_path}"]',
-        f"\tpath = {user_path}",
-        f"\turl = https://github.com/{user_repo}.git",
-        "\tbranch = only",
-        "",
     ]
+    lines += _entry(user_path, f"https://github.com/{user_repo}.git", "only")
 
     return "\n".join(lines)
 
 
+def active_codebases(entry: dict) -> list[str]:
+    """Names of the codebases this operator wants materialised for one org.
+
+    Only the operator's choice lives in user-submodules.json. Each codebase's
+    url, path and branch stay in the org workspace's own committed .gitmodules —
+    that topology is shared by everyone working the org, and the gitlink is what
+    keeps the workspace linking the code instead of duplicating it.
+
+    An org with no `codebases` key means "all of them".
+    """
+    codebases = entry.get("codebases")
+    if codebases is None:
+        return []
+    return [name for name, cb in codebases.items() if cb.get("active", False)]
+
+
 def write_gitmodules(awi_root: Path) -> None:
-    """Regenerate .gitmodules at awi_root."""
+    """Regenerate .gitmodules at the AWI root."""
     (awi_root / ".gitmodules").write_text(generate(awi_root))
 
 
