@@ -13,7 +13,7 @@ Create items from natural language: `/new <input>`
 
 Input is in $ARGUMENTS.
 
-> **Do NOT commit manually unless explicitly asked.** A PostToolUse hook auto-commits after Write operations.
+> **Commit at logical task boundaries.** There is no auto-commit hook — see [ADR 0005](../../../docs/adr/0005-solution-package-commit-model.md). Don't leave finished work uncommitted.
 
 ## Steps
 
