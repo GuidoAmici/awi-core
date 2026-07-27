@@ -6,7 +6,7 @@ order: 1
 
 # awi-sync
 
-Sync all AWI submodules (direct + nested). Pulls main, skips dirty repos, updates _data/submodules.md.
+Sync all AWI submodules (direct + nested). Commits local changes, pulls, and pushes each repo. Updates _data/submodules.md.
 
 **Tools:** Bash, Write, Edit
 
