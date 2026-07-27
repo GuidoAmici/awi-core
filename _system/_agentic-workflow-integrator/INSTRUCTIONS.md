@@ -135,6 +135,18 @@ All AWI directory paths are declared there. When a directory moves, update `path
 
 See [routing-rules.md](routing-rules.md) for people vs. user-profile-inference routing and AI agent memory rules.
 
+## Delegating to Subagents
+
+The employee personas under `_system/agency-agents/` come from a **third-party upstream** (`msitarzewski/agency-agents`). They are pulled in read-only — **never edit them locally**. Local edits create drift that blocks `git submodule update --remote` and silently reverts on the next sync.
+
+Those personas are written against **a stack that is not ours**. `engineering-senior-developer.md`, for instance, describes itself as mastering Laravel/Livewire/FluxUI, while our codebases are Next.js + React + TypeScript + Supabase (or Python, or others). The roster is shared across every org, so no persona can be correct for all of them.
+
+**Therefore: the brief supplies the stack, the persona supplies the role.** When dispatching a subagent — via `/delegate-issue`, `/triage`, or a direct `Agent` call — the prompt **must** state the target repo's real stack explicitly, and instruct the agent to disregard any framework-specific framing carried by the persona. Read it from the repo's own `AGENTS.md` / `CONTEXT.md` rather than trusting the persona.
+
+Treat the persona as *role, seniority and judgement*; treat the stack as *something only the brief knows*.
+
+See [awi-core#77](https://github.com/GuidoAmici/awi-core/issues/77) for the open discussion on making the roster stack-agnostic.
+
 ## Links & Navigation
 
 See [references/wiki-links.md](references/wiki-links.md) for Obsidian link conventions and backlink requirements.
