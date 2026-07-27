@@ -10,8 +10,10 @@
 # Temporary files
 *.tmp
 
-# Local submodule status — machine-specific, not committed
-_data/submodules.md
+# Instance data — private to each AWI instance, never mirrored to awi-core.
+# Holds user profiles, org workspaces and their submodules. Source of truth for
+# .gitmodules generation (current-user.json + user-submodules.json).
+_data/
 
 # Python cache
 **/__pycache__/
@@ -22,6 +24,14 @@ apps/package-lock.json
 
 # Claude local settings — machine-specific, not committed
 .claude/settings.local.json
+
+# Generated per-user from _data/users/*/user-submodules.json — never committed.
+# See ADR 0001 and .claude/skills/shared/scripts/generate_gitmodules.py
+.gitmodules
+
+# Submodules declared in user-submodules.json and materialised by /awi-initialize.
+# Their gitlinks are not versioned either — see ADR 0001.
+_system/agency-agents/
 
 # Public sync — local machine path, never committed
 .claude/config/public-repo-path
