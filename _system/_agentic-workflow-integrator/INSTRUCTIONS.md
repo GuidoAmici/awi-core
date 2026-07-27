@@ -45,7 +45,7 @@ The comment must state:
 2. **Why it resolves the issue** — or, if the issue no longer applies, what made it moot
 3. **What remains**, if anything — link a follow-up issue rather than leaving the original half-done
 
-Closing is the operator's call, not the agent's: **offer** the close and act on the answer. The exception is an issue the operator explicitly asked to close.
+**Suggest the close, don't just offer it.** When the evidence points one way, say so and recommend the disposition — `completed`, `not planned`, or stay open — with the reason. A neutral "should I close this?" pushes back onto the operator work the agent already did. The operator accepts, corrects, or rejects; the agent never closes on its own unless asked.
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
