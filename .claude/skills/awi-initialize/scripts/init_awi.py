@@ -31,11 +31,11 @@ CLAUDE_MD = """\
 
 **All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/agentic-workflow-integrator/INSTRUCTIONS.md).** Read it before any vault operation.
 
-> **Do NOT modify this file for vault rules.** Update `_system/agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
+> **Do NOT modify this file for vault rules.** Update `_system/_agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
 
 ## Claude Code-specific
 
-- PostToolUse hook auto-commits after Write/Edit operations on `_clients/` and `_system/` — do NOT commit manually unless asked.
+- No auto-commit hook: commit your own work at logical task boundaries using Conventional Commits with scope (not after every Write/Edit). Don't leave finished work uncommitted.
 - Skills available: `/awi-introduction`, `/awi-initialize`, `/new-client`, `/awi-user-create`, `/awi-user-login`, `/today`, `/week`, `/new`, `/history`, `/delegate`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 """
