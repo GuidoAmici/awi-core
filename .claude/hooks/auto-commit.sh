@@ -83,8 +83,4 @@ else
   git commit -m "docs: update $TYPE $FILENAME"
 fi
 
-# Mirror to public repo if file is on the whitelist.
-# Requires .claude/config/public-repo-path to be set — exits silently if not configured.
-bash "$VAULT_ROOT/.claude/hooks/sync-public.sh" "$FILE_PATH" 2>/dev/null || true
-
 exit 0
