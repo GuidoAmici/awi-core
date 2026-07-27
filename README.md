@@ -289,9 +289,6 @@ awi/
 │
 └── .claude/
     ├── settings.json
-    ├── config/
-    │   ├── public-whitelist
-    │   └── public-repo-path
     ├── hooks/
     │   └── stop-sound.sh
     └── skills/
