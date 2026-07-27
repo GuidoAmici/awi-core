@@ -35,6 +35,20 @@ A GitHub MCP server (`mcp__github__*`) is available in every AWI instance. It ru
 
 For file system operations (clone, checkout, push) and `gh auth` management, continue using `gh` CLI directly.
 
+### Closing the loop on issues
+
+When work resolves, supersedes, or invalidates a tracked issue — in **any** repo, not just the one being worked on — **always comment on the issue and offer to close it**. Never close silently, and never leave a resolved issue open without a comment.
+
+The comment must state:
+
+1. **What changed** — the commit SHA, PR, or ADR that resolved it
+2. **Why it resolves the issue** — or, if the issue no longer applies, what made it moot
+3. **What remains**, if anything — link a follow-up issue rather than leaving the original half-done
+
+Closing is the operator's call, not the agent's: **offer** the close and act on the answer. The exception is an issue the operator explicitly asked to close.
+
+Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
+
 ## Submodule Changes
 
 `_data/submodules.md` is the source of truth for the submodule graph and registry. Read it before any submodule operation. Update it after every operation.
