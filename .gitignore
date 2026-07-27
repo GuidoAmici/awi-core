@@ -33,8 +33,5 @@ apps/package-lock.json
 # Their gitlinks are not versioned either — see ADR 0001.
 _system/agency-agents/
 
-# Public sync — local machine path, never committed
-.claude/config/public-repo-path
-
 # Supabase CLI temp files (contain project ref and connection URLs)
 supabase/

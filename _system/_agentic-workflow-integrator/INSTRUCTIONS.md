@@ -35,6 +35,20 @@ A GitHub MCP server (`mcp__github__*`) is available in every AWI instance. It ru
 
 For file system operations (clone, checkout, push) and `gh auth` management, continue using `gh` CLI directly.
 
+### Closing the loop on issues
+
+When work resolves, supersedes, or invalidates a tracked issue — in **any** repo, not just the one being worked on — **always comment on the issue and offer to close it**. Never close silently, and never leave a resolved issue open without a comment.
+
+The comment must state:
+
+1. **What changed** — the commit SHA, PR, or ADR that resolved it
+2. **Why it resolves the issue** — or, if the issue no longer applies, what made it moot
+3. **What remains**, if anything — link a follow-up issue rather than leaving the original half-done
+
+Closing is the operator's call, not the agent's: **offer** the close and act on the answer. The exception is an issue the operator explicitly asked to close.
+
+Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
+
 ## Submodule Changes
 
 `_data/submodules.md` is the source of truth for the submodule graph and registry. Read it before any submodule operation. Update it after every operation.
@@ -134,6 +148,18 @@ All AWI directory paths are declared there. When a directory moves, update `path
 ## Memory & Routing
 
 See [routing-rules.md](routing-rules.md) for people vs. user-profile-inference routing and AI agent memory rules.
+
+## Delegating to Subagents
+
+The employee personas under `_system/agency-agents/` come from a **third-party upstream** (`msitarzewski/agency-agents`). They are pulled in read-only — **never edit them locally**. Local edits create drift that blocks `git submodule update --remote` and silently reverts on the next sync.
+
+Those personas are written against **a stack that is not ours**. `engineering-senior-developer.md`, for instance, describes itself as mastering Laravel/Livewire/FluxUI, while our codebases are Next.js + React + TypeScript + Supabase (or Python, or others). The roster is shared across every org, so no persona can be correct for all of them.
+
+**Therefore: the brief supplies the stack, the persona supplies the role.** When dispatching a subagent — via `/delegate-issue`, `/triage`, or a direct `Agent` call — the prompt **must** state the target repo's real stack explicitly, and instruct the agent to disregard any framework-specific framing carried by the persona. Read it from the repo's own `AGENTS.md` / `CONTEXT.md` rather than trusting the persona.
+
+Treat the persona as *role, seniority and judgement*; treat the stack as *something only the brief knows*.
+
+See [awi-core#77](https://github.com/GuidoAmici/awi-core/issues/77) for the open discussion on making the roster stack-agnostic.
 
 ## Links & Navigation
 
