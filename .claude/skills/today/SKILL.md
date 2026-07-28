@@ -18,7 +18,7 @@ Before accessing any agenda files:
 1. Read `_data/users/current-user.json`
 2. Extract the `user:` field — this is `<user-root>` (e.g. `_data/users/42481462/`)
 3. `<agenda-base>` = `<user-root>agenda/`
-4. Read `<user-root>active-orgs.json`. For each org where `active: true`, build an entry in `<org-agenda-bases>`:
+4. Read `<user-root>user-submodules.json`. For each entry where `type: "org-workspace"` and `active: true`, build an entry in `<org-agenda-bases>`:
    - `org-name` → `_data/organizations/<org-name>/agenda/`
    - If the file doesn't exist, `<org-agenda-bases>` = empty list (no orgs active).
 
@@ -147,11 +147,39 @@ If "Yes", output: "Describe each block and its duration (e.g. 'gym — 1h, lunch
 | Medium | medium |
 | Low | low |
 
-### A1.5 — Q4: What are you committing to finishing today?
+**Q4 — Working orgs:**
 
-Run:
+Read `<user-root>user-submodules.json` and list every entry where `type: "org-workspace"` and `active: true`. Ask with `multiSelect: true`, one option per active org:
+```
+question: "Which orgs are you working today?"
+header: "Orgs"
+multiSelect: true
+options:
+  - label: "<org-name>"
+    description: "Issues from <org-name>'s tracker"
+  - (one per active org)
+```
+The answer is `<working-orgs>` — the list of org names selected. If every active org is selected, still record them explicitly.
+
+**Q5 — Personal issues:**
+```
+question: "Include your personal issues today?"
+header: "Personal"
+options:
+  - label: "Yes — include them"
+    description: "Issues from your own repo alongside org work"
+  - label: "No — org work only"
+    description: "Keep the day scoped to the orgs you picked"
+```
+The answer is `<include-personal>` (true/false).
+
+### A1.5 — Q6: What are you committing to finishing today?
+
+Run, passing the Q4/Q5 answers — the check-in has not written them to the daily file yet, so the flags are how the script learns them:
 ```bash
-python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
+python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date> \
+  --org <org1> --org <org2> \
+  --personal          # or --no-personal, per Q5
 ```
 
 Parse the JSON. Display the top `priority:high` issues (up to 10) as a numbered list grouped by org, with title and body summary. Example:
@@ -200,6 +228,8 @@ checked-out: false
 energy-ceiling: high | medium | low
 start-time: "HH:MM"
 end-time: "HH:MM"
+working-orgs: [org1, org2]
+include-personal: true | false
 ---
 
 # DayOfWeek, Month DD
@@ -210,6 +240,7 @@ end-time: "HH:MM"
 - **Scheduled blocks:**
   - [block description] — [duration]
   - (or "None")
+- **Orgs:** [org1, org2] · personal issues: [yes/no]
 - **Committing to:**
   - [issue ref or description]
 
@@ -248,6 +279,8 @@ And stop.
 ```bash
 python3 .claude/skills/shared/scripts/today_issues.py --working-date <working-date>
 ```
+
+No org flags here — the script reads `working-orgs` and `include-personal` from the daily file's frontmatter, which the morning check-in already wrote.
 
 Parse the JSON output. Surface any `errors` to the user before continuing.
 
