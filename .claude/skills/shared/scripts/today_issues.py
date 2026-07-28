@@ -2,11 +2,17 @@
 """
 today_issues.py — Data layer for /today skill.
 
-Reads active orgs + daily file state, fetches GitHub Issues, computes
-time budget. Outputs JSON to stdout. Claude reads output and routes.
+Reads the daily file's state, fetches GitHub Issues through fetch_issues.py,
+computes the time budget. Outputs JSON to stdout. Claude reads output and routes.
 
 Usage:
     python3 .claude/skills/shared/scripts/today_issues.py
+    python3 .claude/skills/shared/scripts/today_issues.py --org newhaze --no-personal
+
+Which trackers to read comes from the daily file's `working-orgs` and
+`include-personal` frontmatter, written at morning check-in. The matching CLI
+flags override it, which is what check-in itself uses — it must fetch with the
+answers it just collected, before it has written them to disk.
 
 Output schema:
 {
@@ -16,31 +22,21 @@ Output schema:
   "end_time": "HH:MM" | null,
   "window_minutes": int | null,
   "available_minutes": int | null,
+  "working_orgs": [str, ...] | null,   # null = every active org
+  "include_personal": bool,
   "pinned": [Issue, ...],
   "issues": [Issue, ...],
   "errors": [str, ...]
 }
 
-Issue shape:
+Issue shape: as returned by fetch_issues.normalise, plus:
 {
-  "number": int,
-  "title": str,
-  "body": str,                 # full raw issue body (for strategy and execution context)
-  "excerpt": str | null,       # first meaningful line, truncated (legacy display hint)
-  "org": str | null,          # value of org: label (null = personal/cross-org)
-  "repo": str | null,          # value of repo: label (codebase context)
-  "project": str | null,       # value of project: label
-  "priority": "high" | "medium" | "low",
-  "energy": "high" | "medium" | "low",
-  "duration": "15m" | "30m" | "1h" | "2h" | "3h+" | null,
-  "pinned": bool,
-  "source_repo": str           # GitHub repo slug where issue lives
+  "excerpt": str | null,       # first meaningful line, truncated (display hint)
 }
 """
 
 import json
 import re
-import subprocess
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -48,6 +44,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from paths import AWI_ROOT
 from current_user import resolve_github_id
+from fetch_issues import fetch_all_issues
 
 try:
     import yaml
@@ -71,13 +68,6 @@ def parse_duration_minutes(duration: str | None) -> int | None:
     if m:
         total += int(m.group(1))
     return total if total else None
-
-
-def label_value(label_names: list[str], prefix: str) -> str | None:
-    for name in label_names:
-        if name.startswith(prefix):
-            return name[len(prefix):]
-    return None
 
 
 def extract_excerpt(body: str | None) -> str | None:
@@ -171,63 +161,28 @@ def parse_completed_minutes(content: str, issues: list[dict]) -> int:
     return total
 
 
-# ── GitHub fetch ──────────────────────────────────────────────────────────────
+# ── Scope ─────────────────────────────────────────────────────────────────────
 
-def fetch_issues(
-    source_repo: str,
-    default_org: str | None,
-    active_org_names: list[str] | None = None,
-) -> tuple[list[dict], list[str]]:
+def resolve_scope(
+    fm: dict, cli_orgs: list[str] | None, cli_personal: bool | None
+) -> tuple[list[str] | None, bool]:
+    """Which trackers to read: CLI flags first, else the daily frontmatter.
+
+    working-orgs absent (or not a list) means every active org — the state of a
+    day checked in before org selection existed, and the sane default.
     """
-    Fetch open issues from source_repo.
+    if cli_orgs is not None:
+        orgs = cli_orgs
+    else:
+        declared = fm.get("working-orgs")
+        orgs = [str(o) for o in declared] if isinstance(declared, list) else None
 
-    default_org: if set, all issues get this org value (workspace repo case).
-    active_org_names: if set, filter cross-org issues by active org labels
-                      (user_repo case). Issues with no org: label are always kept.
-    """
-    cmd = [
-        "gh", "issue", "list",
-        "--repo", source_repo,
-        "--state", "open",
-        "--limit", "200",
-        "--json", "number,title,labels,body",
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return [], [f"gh issue list failed for {source_repo}: {result.stderr.strip()}"]
+    if cli_personal is not None:
+        include_personal = cli_personal
+    else:
+        include_personal = bool(fm.get("include-personal", True))
 
-    raw_list = json.loads(result.stdout or "[]")
-    issues = []
-    for raw in raw_list:
-        label_names = [lb["name"] for lb in raw.get("labels", [])]
-
-        # Determine org
-        if default_org is not None:
-            org = default_org
-        else:
-            # Cross-org: read from org: label
-            org = label_value(label_names, "org:")
-            # Filter: skip if org is set but not active
-            if org is not None and active_org_names is not None:
-                if org not in active_org_names:
-                    continue
-
-        issues.append({
-            "number": raw["number"],
-            "title": raw["title"],
-            "body": raw.get("body") or "",
-            "excerpt": extract_excerpt(raw.get("body")),
-            "org": org,
-            "repo": label_value(label_names, "repo:"),
-            "project": label_value(label_names, "project:"),
-            "priority": label_value(label_names, "priority:") or "medium",
-            "energy": label_value(label_names, "energy:") or "medium",
-            "duration": label_value(label_names, "duration:"),
-            "pinned": "pinned" in label_names,
-            "source_repo": source_repo,
-        })
-
-    return issues, []
+    return orgs, include_personal
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -237,24 +192,19 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--working-date", default=None,
                         help="YYYY-MM-DD working date (default: today)")
+    parser.add_argument("--org", action="append", dest="orgs", default=None,
+                        help="override working-orgs from the daily file (repeatable)")
+    parser.add_argument("--personal", action="store_true", dest="personal", default=None,
+                        help="force-include the personal repo")
+    parser.add_argument("--no-personal", action="store_false", dest="personal",
+                        help="force-exclude the personal repo")
     args, _ = parser.parse_known_args()
-
-    errors: list[str] = []
 
     # Resolve user paths
     github_id = resolve_github_id()
     user_root = AWI_ROOT / "_data" / "users" / github_id
-    current_user_path = AWI_ROOT / "_data" / "users" / "current-user.json"
-    current_user = json.loads(current_user_path.read_text())
-    user_repo: str | None = current_user.get("user_repo")
 
-    # Read active orgs
-    active_orgs_path = user_root / "active-orgs.json"
-    active_orgs: dict = json.loads(active_orgs_path.read_text()) if active_orgs_path.exists() else {}
-    active = {name: cfg for name, cfg in active_orgs.items() if cfg.get("active")}
-    active_org_names = list(active.keys())
-
-    # Resolve working date (supports 6am-boundary from SKILL.md)
+    # Resolve working date (supports day_start_hour boundary from SKILL.md)
     today_str = args.working_date if args.working_date else date.today().isoformat()
     daily_path = user_root / "agenda" / "daily" / f"{today_str}.md"
     content = daily_path.read_text() if daily_path.exists() else ""
@@ -282,26 +232,14 @@ def main() -> None:
     if start_dt and end_dt and end_dt > start_dt:
         window_minutes = int((end_dt - start_dt).total_seconds() / 60)
 
-    # Fetch issues from all active workspace repos
-    all_issues: list[dict] = []
-    for org_name, cfg in active.items():
-        workspace_repo = cfg.get("workspace_repo")
-        if not workspace_repo:
-            errors.append(f"No workspace_repo configured for org '{org_name}' in active-orgs.json")
-            continue
-        issues, errs = fetch_issues(workspace_repo, default_org=org_name)
-        all_issues.extend(issues)
-        errors.extend(errs)
-
-    # Fetch cross-org issues from user_repo
-    if user_repo:
-        cross_issues, errs = fetch_issues(
-            user_repo,
-            default_org=None,
-            active_org_names=active_org_names,
-        )
-        all_issues.extend(cross_issues)
-        errors.extend(errs)
+    # Fetch issues from the trackers this day is scoped to
+    working_orgs, include_personal = resolve_scope(fm, args.orgs, args.personal)
+    all_issues, errors = fetch_all_issues(
+        orgs=working_orgs,
+        include_personal=include_personal,
+    )
+    for issue in all_issues:
+        issue["excerpt"] = extract_excerpt(issue["body"])
 
     # Compute available_minutes now that we have issue durations for completed tracking
     if window_minutes is not None:
@@ -320,6 +258,8 @@ def main() -> None:
         "end_time": end_time_str,
         "window_minutes": window_minutes,
         "available_minutes": available_minutes,
+        "working_orgs": working_orgs,
+        "include_personal": include_personal,
         "pinned": pinned,
         "issues": issues,
         "errors": errors,
