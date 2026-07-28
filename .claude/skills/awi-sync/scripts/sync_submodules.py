@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 """
-/awi-sync — Scan, sync, and report all AWI submodules (direct + nested).
+/awi-sync — Sync and report every repo this operator has on disk.
 
-For each submodule:
-  1. Check if cloned locally
-  2. Remove .gitkeep from populated folders
-  3. Commit any uncommitted changes (git add -A)
-  4. Checkout tracked branch and pull
-  5. Push to remote
+For each repo:
+  1. Check if it is cloned locally
+  2. Commit any uncommitted changes (git add -A)
+  3. Checkout the tracked branch and pull
+  4. Push to remote
 
-After submodules: sync AWI root itself, then mirror drift to awi-core upstream branch.
+Then the AWI root itself.
+
+Discovery comes from the manifests, not from .gitmodules: user-submodules.json
+for orgs and system repos, each org's codebases.json for its code. Nothing here
+is a submodule — see ADR 0009.
 
 Outputs a human-readable report and updates _data/submodules.md.
 """
 
 # ── Standard library imports ──────────────────────────────────────────────────
-import json
 import re
-import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -28,8 +29,8 @@ from typing import Optional
 # ── Load shared path constants ────────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
 
-from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR, ORGANIZATIONS_RELDIR, CURRENT_USER
-from sync_status import collect_core_files, collect_instance_files, md5
+from paths import AWI_ROOT, SUBMODULES_MD, USERS_RELDIR, ORGANIZATIONS_RELDIR
+from manifest import plan
 
 REGISTRY_PATH = SUBMODULES_MD
 
@@ -72,7 +73,6 @@ class SubmoduleResult:
     tracked_branch: str = "main"
     cloned: bool = False
     branch: Optional[str] = None
-    pinned_sha: Optional[str] = None
     upstream: bool = False
     dirty: bool = False
     dirty_files: list = field(default_factory=list)
@@ -93,134 +93,39 @@ def git(args: list, cwd: Path) -> subprocess.CompletedProcess:
     )
 
 
-def get_pinned_sha(repo_root: Path, submodule_path: str) -> Optional[str]:
-    r = git(["ls-files", "--stage", "--", submodule_path], cwd=repo_root)
-    for line in r.stdout.splitlines():
-        if line.startswith("160000"):
-            return line.split()[1][:8]
-    return None
-
-
 def is_valid_git_repo(path: Path) -> bool:
     r = git(["rev-parse", "--git-dir"], cwd=path)
     return r.returncode == 0
 
 
-# ── User config helpers ───────────────────────────────────────────────────────
-
-def read_user_config() -> dict:
-    """
-    Read user-config.json from the current user's directory.
-    Returns an empty dict if current-user.json or user-config.json is missing.
-
-    Schema documented at:
-      _system/_agentic-workflow-integrator/references/user-config-schema.md
-    """
-    if not CURRENT_USER.exists():
-        return {}
-    try:
-        current = json.loads(CURRENT_USER.read_text())
-        user_path = current.get("user", "")
-        config_path = AWI_ROOT / user_path / "user-config.json"
-        if config_path.exists():
-            return json.loads(config_path.read_text())
-    except (json.JSONDecodeError, OSError, KeyError):
-        pass
-    return {}
-
-
-def check_awi_core_write_permission(core_root: Path) -> bool:
-    """
-    Use gh api to verify the authenticated user has push access to awi-core.
-    Returns True if write permission is confirmed, False otherwise.
-    """
-    res = subprocess.run(
-        ["git", "remote", "get-url", "origin"],
-        cwd=core_root,
-        capture_output=True,
-        text=True,
-    )
-    remote_url = res.stdout.strip()
-    if "github.com" in remote_url:
-        repo_slug = remote_url.split("github.com")[-1].lstrip(":/").rstrip(".git")
-    else:
-        return False
-
-    res = subprocess.run(
-        ["gh", "api", f"repos/{repo_slug}", "--jq", ".permissions.push"],
-        capture_output=True,
-        text=True,
-    )
-    return res.returncode == 0 and res.stdout.strip() == "true"
-
-
-# ── Submodule discovery ───────────────────────────────────────────────────────
-
-def parse_gitmodules(path: Path) -> list:
-    if not path.exists():
-        return []
-    modules: list = []
-    current: dict = {}
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("[submodule"):
-            if current:
-                modules.append(current)
-            current = {"name": line.split('"')[1]}
-        elif "=" in line and current is not None:
-            key, _, val = line.partition("=")
-            current[key.strip()] = val.strip()
-    if current:
-        modules.append(current)
-    return modules
-
+# ── Repo discovery ────────────────────────────────────────────────────────────
 
 def scan() -> list:
-    results: list = []
+    """Build the sync list from the manifests.
+
+    `plan()` already returns workspace repos before the codebases that live
+    inside them, which is the order sync needs anyway.
+    """
     make_node_id = make_node_id_factory()
+    repos, warnings = plan(AWI_ROOT)
 
-    awi_modules = parse_gitmodules(AWI_ROOT / ".gitmodules")
-    for m in awi_modules:
-        sub_path = m.get("path", m["name"])
-        abs_path = AWI_ROOT / sub_path
-        name = sub_path.split("/")[-1]
-        node_id = make_node_id(name)
+    for w in warnings:
+        print(f"  ⚠ {w}", file=sys.stderr)
+
+    results: list = []
+    for repo in repos:
+        parent_abs = repo.path.parent.parent if repo.is_codebase else AWI_ROOT
         results.append(SubmoduleResult(
-            name=name,
-            path=sub_path,
-            abs_path=abs_path,
-            parent="AWI",
-            parent_abs=AWI_ROOT,
-            remote_url=m.get("url", ""),
-            node_id=node_id,
-            pinned_sha=get_pinned_sha(AWI_ROOT, sub_path),
-            tracked_branch=m.get("branch", "main"),
-            upstream=m.get("upstream", "false").lower() == "true",
+            name=repo.name,
+            path=str(repo.path.relative_to(AWI_ROOT)),
+            abs_path=repo.path,
+            parent=repo.parent,
+            parent_abs=parent_abs,
+            remote_url=repo.url,
+            node_id=make_node_id(repo.name),
+            tracked_branch=repo.branch,
+            upstream=repo.upstream,
         ))
-
-    for parent in list(results):
-        nested_path = parent.abs_path / ".gitmodules"
-        if not nested_path.exists():
-            continue
-        for m in parse_gitmodules(nested_path):
-            sub_path = m.get("path", m["name"])
-            abs_path = parent.abs_path / sub_path
-            name = sub_path.split("/")[-1]
-            node_id = make_node_id(name)
-            results.append(SubmoduleResult(
-                name=name,
-                path=sub_path,
-                abs_path=abs_path,
-                parent=parent.name,
-                parent_abs=parent.abs_path,
-                remote_url=m.get("url", ""),
-                node_id=node_id,
-                pinned_sha=get_pinned_sha(parent.abs_path, sub_path),
-                tracked_branch=m.get("branch", "main"),
-            ))
-
     return results
 
 
@@ -269,7 +174,7 @@ def sync_one(r: SubmoduleResult) -> SubmoduleResult:
     if not path.exists() or not (path / ".git").exists():
         r.cloned = False
         r.sync_status = "not_cloned"
-        r.error = "Directory missing or not a git repo. Run: git submodule update --init"
+        r.error = "Directory missing or not a git repo. Run: /awi-initialize"
         return r
 
     r.cloned = True
@@ -405,143 +310,6 @@ def sync_root() -> dict:
     return result
 
 
-def find_awi_core_path(awi_root: Path) -> Optional[Path]:
-    for gitmodules in sorted(awi_root.rglob(".gitmodules")):
-        if ".git" in gitmodules.parts:
-            continue
-        current_path = None
-        for line in gitmodules.read_text().splitlines():
-            line = line.strip()
-            if line.startswith("path ="):
-                current_path = line.split("=", 1)[1].strip()
-            elif line.startswith("url =") and "GuidoAmici/awi-core" in line:
-                if current_path:
-                    return gitmodules.parent / current_path
-    return None
-
-
-def mirror_instance_to_awi_core() -> dict:
-    """
-    Mirror AWI instance source files to the awi-core upstream branch.
-
-    Three-state collaborator push logic driven by user-config.json:
-      - collaborator absent or false  → skip silently (status: "skipped")
-      - collaborator true, no gh perm → warning (status: "no_permission")
-      - collaborator true, push fails → error (status: "failed")
-
-    The upstream branch is read from user-config.awi_upstream_branch
-    (defaults to "dev" if absent).
-    """
-    result: dict = {"drift": [], "missing": [], "committed": False,
-                    "pushed": False, "status": "ok", "error": None}
-
-    # ── Collaborator gate ──────────────────────────────────────────────────────
-    user_config = read_user_config()
-    is_collaborator = user_config.get("collaborator", False)
-
-    if not is_collaborator:
-        result["status"] = "skipped"
-        return result
-
-    # ── Find awi-core on disk ──────────────────────────────────────────────────
-    core_root = find_awi_core_path(AWI_ROOT)
-
-    if not core_root or not core_root.is_dir():
-        result["status"] = "failed"
-        result["error"] = "awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules"
-        return result
-
-    # ── Verify write permission via gh api ────────────────────────────────────
-    has_permission = check_awi_core_write_permission(core_root)
-    if not has_permission:
-        result["status"] = "no_permission"
-        result["error"] = "Warning: collaborator flag is set but awi-core write access could not be confirmed"
-        return result
-
-    # ── Determine upstream branch from user config ────────────────────────────
-    upstream_branch = user_config.get("awi_upstream_branch", "dev")
-
-    res = git(["checkout", upstream_branch], cwd=core_root)
-    if res.returncode != 0:
-        result["status"] = "failed"
-        result["error"] = f"Cannot checkout {upstream_branch}: {res.stderr.strip()}"
-        return result
-
-    local_files = collect_instance_files(AWI_ROOT)
-    core_files = collect_core_files(core_root)
-
-    for rel, local_path in sorted(local_files.items()):
-        if rel in core_files:
-            if md5(local_path) != md5(core_files[rel]):
-                result["drift"].append(rel)
-                shutil.copy2(local_path, core_root / rel)
-        else:
-            result["missing"].append(rel)
-            dest = core_root / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(local_path, dest)
-
-    if not result["drift"] and not result["missing"]:
-        return result
-
-    git(["add", "-A"], cwd=core_root)
-    n = len(result["drift"]) + len(result["missing"])
-    res = git(["commit", "-m", f"chore(sync): mirror {n} file(s) from AWI"], cwd=core_root)
-    if res.returncode != 0:
-        result["status"] = "failed"
-        result["error"] = f"awi-core commit failed: {res.stderr.strip()}"
-        return result
-    result["committed"] = True
-
-    res = git(["push", "origin", upstream_branch], cwd=core_root)
-    if res.returncode != 0:
-        result["status"] = "failed"
-        result["error"] = f"Error: push to awi-core failed: {res.stderr.strip()}"
-        return result
-    result["pushed"] = True
-    result["status"] = "synced"
-
-    return result
-
-
-def pull_from_awi_core() -> dict:
-    """
-    Copy awi-core source files into the AWI instance.
-
-    Runs after sync_all() so the awi-core submodule is already up to date.
-    No collaborator gate — all users run this.
-
-    Uses the same file set as mirror_instance_to_awi_core() but in reverse:
-    collect_core_files() → copy to instance paths.
-    """
-    result: dict = {"updated": [], "added": [], "status": "ok", "error": None}
-
-    core_root = find_awi_core_path(AWI_ROOT)
-    if not core_root or not core_root.is_dir():
-        result["status"] = "failed"
-        result["error"] = "awi-core not found — no submodule with url GuidoAmici/awi-core in .gitmodules"
-        return result
-
-    core_files = collect_core_files(core_root)
-    instance_files = collect_instance_files(AWI_ROOT)
-
-    for rel, core_path in sorted(core_files.items()):
-        dest = AWI_ROOT / rel
-        if rel in instance_files:
-            if md5(core_path) != md5(instance_files[rel]):
-                shutil.copy2(core_path, dest)
-                result["updated"].append(rel)
-        else:
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(core_path, dest)
-            result["added"].append(rel)
-
-    if result["updated"] or result["added"]:
-        result["status"] = "synced"
-
-    return result
-
-
 # ── Registry file creation and update ─────────────────────────────────────────
 
 def mermaid_class(r: SubmoduleResult) -> str:
@@ -640,10 +408,10 @@ def build_registry_file(results: list) -> None:
     registry_lines: list = ["", "## Registry", ""]
 
     registry_lines += [
-        "### AWI — direct submodules",
+        "### AWI — workspace repos",
         "",
-        "| Path | Local path | GitHub Repo | Type | Branch | SHA | Clone status | Last synced |",
-        "|---|---|---|---|---|---|---|---|",
+        "| Path | Local path | GitHub Repo | Type | Branch | Clone status | Last synced |",
+        "|---|---|---|---|---|---|---|",
     ]
     for r in awi_subs:
         local_path = str(r.abs_path.relative_to(AWI_ROOT))
@@ -653,27 +421,26 @@ def build_registry_file(results: list) -> None:
             repo_type = "org"
         else:
             repo_type = "dependency"
-        sha_cell   = f"`{r.pinned_sha}`" if r.pinned_sha else "not indexed"
         status     = clone_status_label(r)
         registry_lines.append(
             f"| `{local_path}` | `{local_path}` | {r.remote_url}"
-            f" | {repo_type} |  |  | {status} |  |"
+            f" | {repo_type} |  | {status} |  |"
         )
 
     for parent_name, children in nested_by_parent.items():
         registry_lines += [
             "",
-            f"### {parent_name} — codebase submodules",
+            f"### {parent_name} — codebases",
             "",
-            "| Path | Local path | GitHub Repo | Branch | SHA | Clone status | Last synced |",
-            "|---|---|---|---|---|---|---|",
+            "| Path | Local path | GitHub Repo | Branch | Clone status | Last synced |",
+            "|---|---|---|---|---|---|",
         ]
         for r in children:
             local_path = str(r.abs_path.relative_to(AWI_ROOT))
             status     = clone_status_label(r)
             registry_lines.append(
                 f"| `{r.path}` | `{local_path}` | {r.remote_url}"
-                f" |  |  | {status} |  |"
+                f" |  | {status} |  |"
             )
 
     registry_lines += [
@@ -685,13 +452,14 @@ def build_registry_file(results: list) -> None:
         "| 🟢 cloned · only | single-environment repo (no dev/stg pipeline) |",
         "| 🟢 cloned · dev | checked out on dev branch — codebase repo |",
         "| 🟢 cloned · prod | checked out on prod branch — stable release |",
-        "| 🔴 not cloned | registered but directory empty — **no local backup** |",
-        "| Branch | value from `.gitmodules branch =` (used by `git submodule update --remote`) |",
+        "| 🔴 not cloned | declared in a manifest but not on disk — **no local backup** |",
+        "| Branch | value from the manifest that declares the repo |",
     ]
 
     content = (
-        "# AWI Submodule Map\n\n"
-        "> Update this diagram and registry whenever submodules are added, removed, or restructured.\n\n"
+        "# AWI Repo Map\n\n"
+        "> Generated by /awi-sync from user-submodules.json and each org's "
+        "codebases.json. Edit those, not this file.\n\n"
         + "\n".join(mermaid_lines)
         + "\n"
         + "\n".join(registry_lines)
@@ -709,19 +477,19 @@ def _write_table_row(r: SubmoduleResult) -> None:
     anchor = f"`{local_path}`"
 
     branch_cell = f" `{r.branch or r.tracked_branch}` "
-    sha_cell    = f" `{r.pinned_sha}` " if r.pinned_sha else " not indexed "
     status_cell = f" {clone_status_label(r)} "
 
     synced    = r.sync_status in ("ok", "already_up_to_date", "pulled")
     sync_cell = f" {datetime.now().strftime('%Y-%m-%d %H:%M')} " if synced else None
 
+    # Both tables end with the same three columns, so negative indices hit the
+    # right cells regardless of which one the row belongs to.
     new_lines: list = []
     for line in lines:
         if anchor in line and line.strip().startswith("|"):
             parts = line.split("|")
             if len(parts) >= 8:
-                parts[-5] = branch_cell
-                parts[-4] = sha_cell
+                parts[-4] = branch_cell
                 parts[-3] = status_cell
                 if sync_cell is not None:
                     parts[-2] = sync_cell
@@ -791,15 +559,10 @@ STATUS_LABEL = {
 }
 
 
-def _count_results(results: list, root: dict, mirror: dict, pull: dict) -> tuple:
+def _count_results(results: list, root: dict) -> tuple:
     ok     = sum(1 for r in results if r.sync_status in ("ok", "already_up_to_date", "pulled"))
     failed = sum(1 for r in results if r.sync_status in ("failed", "not_cloned"))
     if root.get("status") == "failed":
-        failed += 1
-    # "skipped" and "no_permission" are not counted as failures
-    if mirror.get("status") == "failed":
-        failed += 1
-    if pull.get("status") == "failed":
         failed += 1
     return ok, failed
 
@@ -820,9 +583,9 @@ def print_mermaid_graph() -> None:
         print(content[start : end + 3])
 
 
-def print_breakdown(results: list, root: dict, mirror: dict, pull: dict) -> None:
+def print_breakdown(results: list, root: dict) -> None:
     print()
-    print("AWI Submodule Sync — Breakdown")
+    print("AWI Sync — Breakdown")
     print("─" * 52)
 
     print("\n  [AWI root]")
@@ -830,7 +593,7 @@ def print_breakdown(results: list, root: dict, mirror: dict, pull: dict) -> None
     label      = STATUS_LABEL.get(root["status"], root["status"])
     branch_str = f" · {root['branch']}" if root["branch"] else ""
     tags       = (" [committed]" if root["committed"] else "") + (" [pushed]" if root["pushed"] else "")
-    print(f"  {icon}  {'my-awi-instance':<36} {label}{branch_str}{tags}")
+    print(f"  {icon}  {'awi-core':<36} {label}{branch_str}{tags}")
     if root["error"]:
         print(f"     → {root['error']}")
 
@@ -852,33 +615,6 @@ def print_breakdown(results: list, root: dict, mirror: dict, pull: dict) -> None
         if r.error:
             print(f"{indent}   → {r.error}")
 
-    # awi-core mirror (instance → awi-core) — collaborator only
-    print("\n  [awi-core mirror ↑]")
-    if mirror["status"] == "skipped":
-        pass  # Non-collaborator: silent skip
-    elif mirror["status"] == "no_permission":
-        print(f"  ⚠  {'awi-core':<36} {mirror['error']}")
-    elif mirror["status"] == "ok":
-        print(f"  ✓  {'awi-core':<36} up to date")
-    elif mirror["status"] == "synced":
-        n_drift   = len(mirror["drift"])
-        n_missing = len(mirror["missing"])
-        tags = (" [committed]" if mirror["committed"] else "") + (" [pushed]" if mirror["pushed"] else "")
-        print(f"  ↑  {'awi-core':<36} {n_drift} drift, {n_missing} missing pushed{tags}")
-    elif mirror["status"] == "failed":
-        print(f"  ✗  {'awi-core':<36} {mirror['error']}")
-
-    # awi-core pull (awi-core → instance) — all users
-    print("\n  [awi-core pull ↓]")
-    if pull["status"] == "ok":
-        print(f"  ✓  {'awi-core':<36} up to date")
-    elif pull["status"] == "synced":
-        n_updated = len(pull["updated"])
-        n_added   = len(pull["added"])
-        print(f"  ↓  {'awi-core':<36} {n_updated} updated, {n_added} added")
-    elif pull["status"] == "failed":
-        print(f"  ✗  {'awi-core':<36} {pull['error']}")
-
     print()
     print("─" * 52)
     print()
@@ -891,35 +627,21 @@ def main() -> None:
 
     results = scan()
 
-    # Always rebuild the registry structure deterministically from .gitmodules,
-    # so the graph/table never drift when submodules are added or removed.
-    # sync_all() then fills per-row status; update_registry() recolors nodes.
+    # Rebuild the registry structure deterministically from the manifests, so the
+    # graph/table never drift when repos are added or removed. sync_all() then
+    # fills per-row status; update_registry() recolors nodes.
     build_registry_file(results)
 
-    # 1. Mirror instance → awi-core (collaborators only, must run before sync_all
-    #    so changes are in awi-core remote before the submodule pull merges them)
-    mirror = mirror_instance_to_awi_core()
-    if mirror["status"] == "no_permission":
-        print(mirror["error"], file=sys.stderr)
-    elif mirror["status"] == "failed" and mirror.get("error"):
-        print(mirror["error"], file=sys.stderr)
-
-    # 2. Sync all submodules (includes git pull on awi-core submodule)
     results = sync_all(results)
     root = sync_root()
     update_registry(results, root=root)
 
-    # 3. Pull awi-core → instance (all users, runs after awi-core submodule is up to date)
-    pull = pull_from_awi_core()
-    if pull["status"] == "failed" and pull.get("error"):
-        print(pull["error"], file=sys.stderr)
-
-    ok, failed = _count_results(results, root, mirror, pull)
+    ok, failed = _count_results(results, root)
     exit_code  = print_summary(ok, failed)
 
     print_mermaid_graph()
     if breakdown or failed > 0:
-        print_breakdown(results, root, mirror, pull)
+        print_breakdown(results, root)
 
     outcome    = "completed" if exit_code == 0 else "errored"
     log_script = Path(__file__).resolve().parents[2] / "shared" / "scripts" / "log_command.py"
