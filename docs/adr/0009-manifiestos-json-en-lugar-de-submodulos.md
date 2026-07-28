@@ -2,6 +2,19 @@
 
 Supersede a [ADR 0001](0001-gitmodules-is-ephemeral.md).
 
+> **Fundamento enmendado por [ADR 0010](0010-referencias-por-nombre-no-por-version.md).** Los tres
+> cargos que este ADR le imputa a los submódulos se adjudicaron después como higiene de
+> configuración, no como fallas de arquitectura. La decisión se conserva; la razón por la que es
+> correcta es otra —AWI no compone un artefacto reproducible y no tiene invariantes
+> transaccionales cross-repo— y está en el 0010.
+>
+> **Corregido en parte por [ADR 0012](0012-contextos-flotan-dependencias-pinean.md).** Sacar el pin
+> de *todas* las entradas fue excesivo: los repos de sistema de terceros lo necesitan.
+>
+> **Condicionado por [ADR 0011](0011-la-composicion-es-una-capa-con-dueno.md).** Esta decisión sólo
+> es correcta si se construye la capa de composición que reemplaza la señal de estado perdida con
+> los gitlinks.
+
 El ADR 0001 resolvió a medias un problema real: `.gitmodules` no puede versionarse en el raíz, porque el grafo de submódulos de un operador no es el de otro. La solución fue generarlo en cada máquina desde `user-submodules.json`. Pero eso dejó `.gitmodules` como un artefacto sintético que git seguía interpretando como configuración de submódulos, y mantuvo dos niveles con reglas distintas: el raíz sin gitlinks, y cada org workspace con gitlinks reales y su propio `.gitmodules` versionado.
 
 Esa asimetría producía tres fallas concretas:
