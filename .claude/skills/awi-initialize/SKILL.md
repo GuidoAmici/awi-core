@@ -1,17 +1,21 @@
 ---
 name: awi-initialize
-description: Initialize all submodules active in the user's user-submodules.json. Regenerates .gitmodules, inits active entries, deinits inactive ones. Usage: /awi-initialize
+description: Clone every repo active in the user's user-submodules.json, plus each org's active codebases. Usage: /awi-initialize
 ---
 
-# /awi-initialize — Initialize Submodules
+# /awi-initialize — Materialise Repos
 
-Reads the current user's `user-config.json` and `user-submodules.json`, regenerates `.gitmodules`,
-initializes every active entry, and deinits any inactive entries still mounted.
+Reads the current user's `user-submodules.json` and each org's `codebases.json`, then clones
+whatever is missing. Nothing here is a submodule — see
+[ADR 0009](../../../docs/adr/0009-manifiestos-json-en-lugar-de-submodulos.md).
 
-Run this after a fresh clone, after switching users, or after toggling submodules on.
+Run this after a fresh clone, after switching users, or after toggling something on.
 
-Config regeneration reads `user-config.json` but never writes to it — that file is owned
-by the user setup/config flow (`/awi-user`).
+Cloning happens in two passes: org workspaces and system repos first, then codebases — an org's
+`codebases.json` only becomes readable once the workspace itself is on disk.
+
+An existing checkout is never touched. Init will not move the operator off the branch they are
+working on; `/awi-sync` owns that.
 
 ## Usage
 
@@ -69,6 +73,28 @@ Which would you like to toggle on? (list names, or n to skip)
 
 ---
 
+### Exit 4 — Actives are fine, but inactive entries are still on disk
+
+The script prints one `MOUNTED_INACTIVE: <name>\t<path>` line per entry.
+
+Everything active was materialised — this is not a failure. These are directories the operator
+has toggled off but that still hold data. **Never delete them automatically**: without a gitlink
+there is nothing to restore them from.
+
+Ask about each one separately:
+
+```
+'<name>' is off but still on disk at <path>.
+Delete it, or leave it? (delete / leave)
+```
+
+- **delete** → confirm the repo has nothing unpushed, then `rm -rf <path>`.
+- **leave** → say nothing more about it.
+
+Log as `completed` either way.
+
+---
+
 ### Exit 3 — No orgs registered at all
 
 Ask:
@@ -84,16 +110,17 @@ No orgs registered. Would you like to:
 
 ---
 
-## Config Regeneration Notes
+## Where the declarations live
 
-`/awi-initialize` is the canonical config regeneration entry point. It:
-- Reads `user-config.json` from the current user's directory (`_data/users/<github-id>/user-config.json`)
-- Uses `awi_upstream_branch` to configure upstream tracking for `/awi-sync`
-- Uses `collaborator` to determine push eligibility in `/awi-sync`
-- Never prompts for or writes to `user-config.json`
+| Manifest | Location | Scope | Declares |
+|---|---|---|---|
+| `user-submodules.json` | `_data/users/<github-id>/` | one operator, private | which orgs and system repos they want, with url/path/branch, and which codebases of each org |
+| `codebases.json` | `_data/organizations/<org>/` | versioned, whole team | which repos make up the org and on what branch |
 
-The same regeneration runs automatically on user switch and logout via `/awi-user`.
-Schema reference: `_system/_agentic-workflow-integrator/references/user-config-schema.md`
+A codebase active in `user-submodules.json` but absent from the org's `codebases.json` is reported
+as a warning, not skipped silently — it usually means a rename or a repo dropped from the org.
+
+The same materialisation runs automatically on user switch via the `gh auth` hook.
 
 ---
 

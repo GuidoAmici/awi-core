@@ -30,10 +30,14 @@ Confidence threshold is 0.5. For less confirmation:
 
 ---
 
-## Submodule issues after folder rename
+## Repos missing after a folder rename
 
-If submodules stop resolving after a path rename:
+AWI repos are plain clones, not submodules — see ADR 0009. If a path rename leaves one missing,
+fix its `path` in `user-submodules.json` (or its entry in the org's `codebases.json`) and re-run:
+
 ```bash
-git submodule sync
-git submodule update --init --recursive
+/awi-initialize
 ```
+
+The old directory is left where it was; move or delete it yourself once you have checked it holds
+nothing unpushed.
