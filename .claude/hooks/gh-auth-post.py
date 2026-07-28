@@ -2,8 +2,12 @@
 """PostToolUse handler for gh auth switch / gh auth login.
 
 After a successful auth change, detects the new GitHub user, updates
-current-user.json, scaffolds a new AWI user if needed, regenerates
-.gitmodules, and reinitialises submodules.
+current-user.json, scaffolds a new AWI user if needed, and materialises whatever
+that user wants on disk.
+
+Nothing here is a submodule — see ADR 0009. The user's repo is cloned like any
+other entry, and re-materialising delegates to /awi-initialize so there is a
+single code path for it.
 """
 
 import json
@@ -15,7 +19,11 @@ from pathlib import Path
 SHARED = Path(__file__).resolve().parents[1] / "skills" / "shared" / "scripts"
 sys.path.insert(0, str(SHARED))
 from paths import AWI_ROOT, USERS_DIR, USER_SUBMODULES_FILE
-from generate_gitmodules import write_gitmodules
+
+INIT_SCRIPT = (
+    Path(__file__).resolve().parents[1]
+    / "skills" / "awi-initialize" / "scripts" / "init_orgs.py"
+)
 
 
 def git(args: list[str], cwd: Path = AWI_ROOT) -> subprocess.CompletedProcess:
@@ -50,33 +58,35 @@ def write_current_user(github_id: str, login: str) -> None:
 
 
 def scaffold_user(github_id: str, login: str) -> None:
-    """Add the new user's my-awi-user repo as a submodule and create a basic profile."""
-    user_path   = f"_data/users/{github_id}"
-    user_url    = f"https://github.com/{login}/my-awi-user.git"
+    """Put the user's my-awi-user repo on disk, creating it on GitHub if needed."""
+    user_dir = AWI_ROOT / f"_data/users/{github_id}"
+    user_url = f"https://github.com/{login}/my-awi-user.git"
 
-    # Check if repo exists on GitHub first
-    check = subprocess.run(
+    exists = subprocess.run(
         ["gh", "repo", "view", f"{login}/my-awi-user"],
         capture_output=True, text=True,
-    )
-    if check.returncode != 0:
-        # Create the repo
+    ).returncode == 0
+
+    if exists:
+        user_dir.parent.mkdir(parents=True, exist_ok=True)
+        rc = git(["clone", "--branch", "only", user_url, str(user_dir)])
+        if rc.returncode != 0:
+            print(f"[AWI] Warning: could not clone {login}/my-awi-user — "
+                  f"{rc.stderr.strip()}", file=sys.stderr)
+            return
+    else:
         subprocess.run(
             ["gh", "repo", "create", f"{login}/my-awi-user",
              "--private", "--description", "AWI user workspace"],
             capture_output=True, text=True,
         )
+        # A repo created this way is empty, so there is no branch to clone from —
+        # build the initial `only` branch locally and push it.
+        user_dir.mkdir(parents=True, exist_ok=True)
+        git(["init", "-b", "only"], cwd=user_dir)
+        git(["remote", "add", "origin", user_url], cwd=user_dir)
 
-    # Register as submodule
-    rc = git(["submodule", "add", "-b", "only", user_url, user_path])
-    if rc.returncode != 0:
-        print(f"[AWI] Warning: could not add user submodule — {rc.stderr.strip()}",
-              file=sys.stderr)
-        return
-
-    # Scaffold minimal profile
-    user_dir = AWI_ROOT / user_path
-    profile  = user_dir / "awi-user-profile.md"
+    profile = user_dir / "awi-user-profile.md"
     if not profile.exists():
         profile.write_text(
             f"---\nlogin: {login}\ngithub-id: {github_id}\n---\n\n# {login}\n"
@@ -91,19 +101,22 @@ def scaffold_user(github_id: str, login: str) -> None:
 
 
 def reinit_submodules(github_id: str) -> None:
-    """Init active + deinit inactive submodules for the given user."""
-    submodules_file = USERS_DIR / github_id / USER_SUBMODULES_FILE
-    if not submodules_file.exists():
-        return
-    raw = json.loads(submodules_file.read_text())
+    """Materialise whatever the new user wants on disk.
 
-    for name, entry in raw.items():
-        path_rel = entry.get("path", "")
-        path_abs = AWI_ROOT / path_rel
-        if entry.get("active", False):
-            git(["submodule", "update", "--init", "--recursive", path_rel])
-        elif path_abs.exists() and any(path_abs.iterdir()):
-            git(["submodule", "deinit", "-f", path_rel])
+    Delegates to /awi-initialize rather than reimplementing it, so the clone and
+    manifest logic has exactly one home.
+    """
+    if not (USERS_DIR / github_id / USER_SUBMODULES_FILE).exists():
+        return
+    rc = subprocess.run(
+        [sys.executable, str(INIT_SCRIPT)],
+        cwd=AWI_ROOT, capture_output=True, text=True,
+    )
+    if rc.stdout.strip():
+        print(rc.stdout.rstrip())
+    if rc.returncode not in (0, 4):
+        print(f"[AWI] Warning: initialise reported errors — {rc.stderr.strip()}",
+              file=sys.stderr)
 
 
 def main() -> None:
@@ -136,14 +149,6 @@ def main() -> None:
         scaffold_user(github_id, login)
 
     write_current_user(github_id, login)
-
-    try:
-        write_gitmodules(AWI_ROOT)
-        print("[AWI] .gitmodules regenerated.")
-    except Exception as e:
-        print(f"[AWI] Warning: could not regenerate .gitmodules — {e}", file=sys.stderr)
-        return
-
     reinit_submodules(github_id)
     print(f"[AWI] Workspace configured for @{login}.")
 

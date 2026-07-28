@@ -13,8 +13,9 @@ Nothing here is urgent — a legacy instance keeps working. Migrate when you wan
 | `origin` | `<user>/my-awi-instance` | `<user or fork>/awi-core` |
 | Where harness changes are made | in the instance, mirrored to core | directly in awi-core |
 | `_data/` | versioned in the instance | ignored, never leaves the machine |
-| `.gitmodules` | versioned | ignored — generated per operator |
+| `.gitmodules` | versioned | gone — nothing is a submodule |
 | Submodule gitlinks | versioned | none |
+| What a repo is made of | gitlinks + `.gitmodules` | `user-submodules.json` + each org's `codebases.json` |
 
 Your history is not lost: `my-awi-instance` stays on GitHub untouched. You stop *using* it, you don't delete it.
 
@@ -75,7 +76,7 @@ git rm --cached -r --quiet _data/organizations/* _data/users/*
 
 ### 3. Save the regular files under `_data/`
 
-**This is the step that bites.** Gitlinks survive step 2, but *regular tracked files* under `_data/` — `current-user.json`, `.abstract.md`, `.overview.md` — do not exist on the awi-core branch, so checkout **deletes them from disk**. Without `current-user.json`, `.gitmodules` generation fails outright.
+**This is the step that bites.** Gitlinks survive step 2, but *regular tracked files* under `_data/` — `current-user.json`, `.abstract.md`, `.overview.md` — do not exist on the awi-core branch, so checkout **deletes them from disk**. Without `current-user.json`, every skill that resolves the manifests fails outright.
 
 List them now:
 
@@ -120,7 +121,7 @@ ls _data/organizations      # your orgs, still on disk
 
 These exist only in legacy instances. Removing them is what awi-core commits `142ccf5`, `b5af8df` and `ab13552` did.
 
-**The mirror.** Delete `.claude/skills/awi-core-sync-status/`, `.claude/hooks/sync-public.sh`, `.claude/config/public-repo-path` and any `public-whitelist`. Keep `.claude/skills/shared/scripts/sync_status.py` — `/awi-sync` imports from it.
+**The mirror.** Delete `.claude/skills/awi-core-sync-status/`, `.claude/hooks/sync-public.sh`, `.claude/config/public-repo-path`, any `public-whitelist`, and `.claude/skills/shared/scripts/sync_status.py`. Once the instance *is* awi-core there is nothing to mirror to, and `/awi-sync` no longer imports from it.
 
 **auto-commit.** Delete `.claude/hooks/auto-commit.{sh,ps1}`. [ADR 0005](adr/0005-solution-package-commit-model.md) replaced per-file auto-commit long ago. Then grep for instructions that still assume it:
 
@@ -144,12 +145,44 @@ Then drop the versioned gitlinks, including the one under `_system/`:
 git rm --cached .gitmodules _system/agency-agents
 ```
 
-A gitlink whose URL lives only in an ignored `.gitmodules` is an orphan pointer: a fresh clone fails with `fatal: No url found for submodule path`. Either both are versioned or neither is — see [ADR 0001](adr/0001-gitmodules-is-ephemeral.md).
+A gitlink whose URL lives only in an ignored `.gitmodules` is an orphan pointer: a fresh clone fails with `fatal: No url found for submodule path`. Either both are versioned or neither is.
+
+### Do the same inside each org workspace
+
+Submodules are gone at *both* levels, not just the root — see [ADR 0009](adr/0009-manifiestos-json-en-lugar-de-submodulos.md). For every repo under `_data/organizations/`:
+
+1. Write a `codebases.json` at the org root, mapping each codebase name to its `url` and `branch`. Take the values from the org's existing `.gitmodules`, and check the actual clones for any that drifted out of it:
+
+   ```bash
+   for cb in codebase/*/; do
+     echo "$(basename $cb) | $(git -C $cb remote get-url origin) | $(git -C $cb branch --show-current)"
+   done
+   ```
+
+2. Drop the gitlinks and the manifest, and ignore the checkouts:
+
+   ```bash
+   git rm --cached $(git ls-files --stage -- codebase | awk '$1=="160000"{print $4}')
+   git rm --cached .gitmodules && rm -f .gitmodules
+   printf 'codebase/*/\n' >> .gitignore     # not codebase/ — keep any .abstract.md there
+   ```
+
+3. Make the clones standalone. A submodule checkout's `.git` is a *file* pointing into the parent's `.git/modules/`; once nothing is a submodule that indirection is a liability. For each `codebase/*/` whose `.git` is a file:
+
+   ```bash
+   gd=$(cd "$cb" && cd "$(sed 's/^gitdir: //' .git)" && pwd)
+   rm "$cb/.git" && mv "$gd" "$cb/.git"
+   git config --file "$cb/.git/config" --unset core.worktree
+   ```
+
+   That last line matters: the moved gitdir still points `core.worktree` at the old location, and git cannot even open the repo to unset it — you have to edit the config file directly.
+
+Verify with `git -C <org> status`: the codebases must not appear at all. If they show up as untracked, the `.gitignore` pattern is wrong and the workspace will swallow the code.
 
 ---
 
 ## Afterwards
 
-`.gitmodules` is regenerated from `_data/users/<github-id>/user-submodules.json` by `/awi-initialize`, so submodules keep working without being versioned. `/awi-core-sync-status` is gone: there is nothing to compare, the instance no longer originates changes.
+`/awi-initialize` clones everything declared in `_data/users/<github-id>/user-submodules.json` plus each org's `codebases.json`. `/awi-core-sync-status` is gone: there is nothing to compare, the instance no longer originates changes.
 
 Harness changes now go straight to awi-core through its normal branch flow. Your `_data/` repos keep their own remotes and are still operated by `/awi-sync`.

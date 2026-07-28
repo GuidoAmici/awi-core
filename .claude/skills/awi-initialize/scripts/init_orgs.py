@@ -1,131 +1,128 @@
 #!/usr/bin/env python3
-"""Initialize AWI submodules for the current user.
+"""Materialise the repos the current operator wants on disk.
 
-Reads user-submodules.json, regenerates .gitmodules, then:
-  - Inits every active entry
-  - Deinits (after commit+push) every inactive entry that's mounted on disk
+Reads user-submodules.json plus each org's codebases.json and clones whatever is
+missing. Nothing here is a submodule: no gitlinks, no .gitmodules, no
+`git submodule` calls. See ADR 0009.
+
+Cloning happens in two passes because an org's codebases.json only becomes
+readable once the org workspace itself is on disk.
+
+An entry that is inactive but still mounted is never deleted — under this model
+that directory is ordinary data, not a submodule checkout, so removing it is a
+plain rm -rf with no gitlink to restore it from. The script reports those and
+lets the operator decide one by one.
 
 Exit codes:
-  0  All active submodules initialized successfully.
-  1  Hard error (commit/push failure, git failure, etc.).
-  2  No submodules active, but inactive ones exist.  Stdout: INACTIVE: <names>
-  3  No submodules registered at all.               Stdout: NO_ORGS
+  0  Everything active is on disk, nothing pending.
+  1  Hard error.
+  2  Nothing active, but inactive entries exist.  Stdout: INACTIVE: <names>
+  3  Nothing registered at all.                   Stdout: NO_ORGS
+  4  Actives are fine, but inactive entries are still mounted.
+     Stdout: MOUNTED_INACTIVE: <name>\t<path> per line.
 """
 
-import json
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
-from paths import AWI_ROOT, USERS_DIR, USER_SUBMODULES_FILE
-from current_user import resolve_github_id
-from generate_gitmodules import write_gitmodules
+from paths import AWI_ROOT
+from manifest import (
+    Repo,
+    active_entries,
+    inactive_entries,
+    is_mounted,
+    load_submodules,
+    materialise_target,
+    plan,
+)
 
 
-# ── Git helpers ───────────────────────────────────────────────────────────────
+def run_pass(repos: list[Repo], errors: list[str]) -> int:
+    """Materialise every repo in `repos`. Returns how many were newly cloned."""
+    cloned = 0
+    for repo in repos:
+        label = repo.name if not repo.is_codebase else f"{repo.parent}/{repo.name}"
+        print(f"  → {label}...", end=" ", flush=True)
+        status, err = materialise_target(repo.path, repo.url, repo.branch)
+        if status == "cloned":
+            print(f"cloned ({repo.branch})")
+            cloned += 1
+        elif status == "present":
+            print("already on disk")
+        else:
+            print("FAILED")
+            print(f"    ✗ {err}", file=sys.stderr)
+            errors.append(label)
+    return cloned
 
-def git(args: list[str], cwd: Path = AWI_ROOT) -> subprocess.CompletedProcess:
-    return subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True)
-
-
-def is_mounted(path: Path) -> bool:
-    """True if the submodule working tree has content."""
-    return path.exists() and any(path.iterdir())
-
-
-def commit_and_push(path: Path, name: str) -> str | None:
-    """Commit any dirty state and push. Returns error string on failure, None on success."""
-    status = git(["status", "--porcelain"], cwd=path)
-    if status.stdout.strip():
-        rc = git(["add", "-A"], cwd=path)
-        if rc.returncode != 0:
-            return f"{name}: git add failed — {rc.stderr.strip()}"
-        rc = git(["commit", "-m", "chore(sync): stage local changes before deinit"], cwd=path)
-        if rc.returncode != 0:
-            return f"{name}: commit failed — {rc.stderr.strip()}"
-
-    rc = git(["push"], cwd=path)
-    if rc.returncode != 0:
-        return f"{name}: push failed — {rc.stderr.strip()}"
-    return None
-
-
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> int:
-    github_id      = resolve_github_id()
-    submodules_file = USERS_DIR / github_id / USER_SUBMODULES_FILE
+    try:
+        raw, _github_id, _user_repo = load_submodules(AWI_ROOT)
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
-    if not submodules_file.exists():
-        print("NO_ORGS")
-        return 3
-
-    raw = json.loads(submodules_file.read_text())
     if not raw:
         print("NO_ORGS")
         return 3
 
-    active   = {k: v for k, v in raw.items() if v.get("active", False)}
-    inactive = {k: v for k, v in raw.items() if not v.get("active", False)}
+    active = active_entries(raw)
+    inactive = inactive_entries(raw)
 
     if not active:
         print(f"INACTIVE: {', '.join(inactive)}")
         return 2
 
-    # Regenerate .gitmodules from user-submodules.json + current-user.json
-    try:
-        write_gitmodules(AWI_ROOT)
-        print(".gitmodules regenerated.\n")
-    except Exception as e:
-        print(f"Error regenerating .gitmodules: {e}", file=sys.stderr)
-        return 1
-
     errors: list[str] = []
 
-    # Deinit inactive entries that are still mounted
-    for name, entry in inactive.items():
-        path = AWI_ROOT / entry.get("path", "")
-        if not is_mounted(path):
-            continue
-        print(f"  deinit {name}...", end=" ", flush=True)
-        err = commit_and_push(path, name)
-        if err:
-            print("FAILED")
-            print(f"    ✗ {err}", file=sys.stderr)
-            errors.append(name)
-            continue
-        rc = git(["submodule", "deinit", "-f", entry["path"]])
-        if rc.returncode != 0:
-            print("FAILED")
-            print(f"    ✗ deinit failed: {rc.stderr.strip()}", file=sys.stderr)
-            errors.append(name)
-        else:
-            print("done")
-
-    if errors:
-        print(f"\n{len(errors)} submodule(s) failed to deinit — aborting init.", file=sys.stderr)
+    # Pass 1 — orgs, system repos and the operator's own repo.
+    try:
+        repos, warnings = plan(AWI_ROOT)
+    except Exception as e:
+        print(f"Error reading manifests: {e}", file=sys.stderr)
         return 1
 
-    # Init active entries
-    names = list(active.keys())
-    print(f"Initializing {len(active)} submodule(s): {', '.join(names)}\n")
+    top = [r for r in repos if not r.is_codebase]
+    print(f"Materialising {len(top)} workspace repo(s):\n")
+    run_pass(top, errors)
 
-    for name, entry in active.items():
-        print(f"  → {name}...", end=" ", flush=True)
-        rc = git(["submodule", "update", "--init", "--recursive", entry["path"]])
-        if rc.returncode == 0:
-            print("done")
-        else:
-            print("FAILED")
-            print(f"    ✗ {rc.stderr.strip()}", file=sys.stderr)
-            errors.append(name)
-
-    if errors:
-        print(f"\n{len(errors)} submodule(s) failed: {', '.join(errors)}")
+    # Pass 2 — codebases. Re-planned, because the org workspaces cloned above
+    # are what carry the codebases.json this pass depends on.
+    try:
+        repos, warnings = plan(AWI_ROOT)
+    except Exception as e:
+        print(f"Error reading manifests: {e}", file=sys.stderr)
         return 1
 
-    print(f"\nAll {len(active)} submodule(s) initialized.")
+    codebases = [r for r in repos if r.is_codebase]
+    if codebases:
+        print(f"\nMaterialising {len(codebases)} codebase(s):\n")
+        run_pass(codebases, errors)
+
+    for w in warnings:
+        print(f"  ⚠ {w}", file=sys.stderr)
+
+    if errors:
+        print(f"\n{len(errors)} repo(s) failed: {', '.join(errors)}", file=sys.stderr)
+        return 1
+
+    total = len(top) + len(codebases)
+    print(f"\nAll {total} repo(s) on disk.")
+
+    # Inactive but still mounted — reported, never removed.
+    mounted = [
+        (name, entry.get("path", ""))
+        for name, entry in inactive.items()
+        if is_mounted(AWI_ROOT / entry.get("path", ""))
+    ]
+    if mounted:
+        print()
+        for name, path in mounted:
+            print(f"MOUNTED_INACTIVE: {name}\t{path}")
+        return 4
+
     return 0
 
 

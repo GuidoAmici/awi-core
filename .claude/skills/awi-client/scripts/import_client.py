@@ -125,7 +125,7 @@ def main():
     client_path = parent / args.name
 
     if not client_path.exists():
-        print(f"Error: {client_path} does not exist. Run 'git submodule add' first.")
+        print(f"Error: {client_path} does not exist. Run /awi-initialize first.")
         raise SystemExit(1)
 
     created = scaffold_missing(client_path, args.name)
