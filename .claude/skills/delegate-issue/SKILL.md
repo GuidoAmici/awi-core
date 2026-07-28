@@ -11,19 +11,19 @@ Never fires without user confirmation.
 
 ## Step 1: Scan
 
-Fetch `ready-for-agent` issues across all active org repos from `_data/users/current-user.json` → user-submodules.json.
+One call covers every active org tracker plus the operator's personal repo — `fetch_issues.py` resolves them from `user-submodules.json`:
 
-For each active repo:
 ```bash
-gh issue list --repo <owner/repo> \
-  --label "ready-for-agent" \
-  --json number,title,labels,comments \
-  --state open
+python3 .claude/skills/shared/scripts/fetch_issues.py --label ready-for-agent --comments
 ```
+
+Parse the JSON: `{"issues": [...], "errors": [...]}`. Surface any `errors` before continuing — an unreachable tracker means its issues are missing from the list, not that it has none.
+
+Each issue carries `number`, `title`, `body`, `labels`, `org` (null for personal issues), `source_repo` and — because of `--comments` — `comments`, which is where Step 2 reads the agent brief. Use `source_repo` for every follow-up `gh` call.
 
 ## Step 2: Validate each issue
 
-For each issue, find the `## Agent Brief` comment. It must contain:
+For each issue, find the `## Agent Brief` comment in its `comments` array (no extra `gh` call — Step 1 already fetched them). It must contain:
 - `**Assigned employee:**` — a key present in `.claude/reference/employees.json`
 - `**Model:**` — opus / sonnet / haiku
 

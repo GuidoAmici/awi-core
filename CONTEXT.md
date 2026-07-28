@@ -26,8 +26,8 @@ _Avoid_: .gitmodules, registro de submódulos
 ### Submodule management
 
 **user-submodules.json**:
-A file in `_data/users/<github-id>/` that lists every git submodule the user wants registered — both org workspaces and system repos. Single source of truth for `.gitmodules` generation.
-_Avoid_: active-orgs.json (deprecated), submodule config
+A file in `_data/users/<github-id>/` that lists every repo the operator wants materialised — org workspaces and system repos, each typed `org-workspace` or `system-repo`, plus which codebases they want inside each org. Single source of truth for what gets cloned, and for where each org's issue tracker lives.
+_Avoid_: active-orgs.json (deleted), submodule config
 
 **Ephemeral `.gitmodules`**:
 The `.gitmodules` file is a local artifact generated from `user-submodules.json` on initialize, user switch, and logout. It is never committed and never mirrored to `awi-core`.
@@ -171,7 +171,7 @@ _Avoid_: user-org relationship, engagement charter, personal charter
 
 ## Flagged ambiguities
 
-- `active-orgs.json` was used to mean what is now **user-submodules.json** — resolved: renamed and expanded to cover system repos alongside orgs. `active-orgs.json` is pending deletion; all reads must migrate to `user-submodules.json`.
+- `active-orgs.json` was used to mean what is now **user-submodules.json** — resolved: renamed and expanded to cover system repos alongside orgs. `active-orgs.json` is deleted; every read now goes through `user-submodules.json`.
 - `workspace_repo` field in the old schema conflicted with `url` expected by `init_orgs.py` — resolved: unified to `url` in the new schema. `workspace_repo` is derived from `url` at runtime, never stored.
-- "toggle" was used for both org-specific and system-repo operations — resolved: `/awi-org-toggle` deprecated in favour of `/awi-submodule-toggle`, which handles all entry types uniformly.
-- "cross-org issues" (issues in the user repo carrying `org:` labels) — resolved: concept eliminated. The user repo holds personal issues only; org-scoped issues live exclusively in each Org Workspace's issue tracker. All `org:`-label filtering logic in issue-fetching scripts must be removed.
+- "toggle" was used for both org-specific and system-repo operations — resolved: `/awi-org-toggle` deleted in favour of `/awi-submodule-toggle`, which handles all entry types uniformly.
+- "cross-org issues" (issues in the user repo carrying `org:` labels) — resolved: concept eliminated. The user repo holds personal issues only; org-scoped issues live exclusively in each Org Workspace's issue tracker. The `org:`-label filtering logic is gone: an issue's org is now the tracker it came from, never a label.
