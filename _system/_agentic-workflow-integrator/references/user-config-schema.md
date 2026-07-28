@@ -1,5 +1,5 @@
 ---
-affects: awi-user, awi-initialize, awi-sync
+affects: awi-user, today
 ---
 
 # user-config.json — Schema Reference
@@ -7,7 +7,7 @@ affects: awi-user, awi-initialize, awi-sync
 Each AWI user has a `user-config.json` file at `_data/users/<github-id>/user-config.json`.
 
 This file is **written at user setup/config time** by the user management skill (`/awi-user`).
-It is **read but never modified** by `/awi-initialize` and `/awi-sync`.
+Everything else reads it and never modifies it.
 
 ---
 
@@ -15,8 +15,7 @@ It is **read but never modified** by `/awi-initialize` and `/awi-sync`.
 
 ```json
 {
-  "awi_upstream_branch": "dev",
-  "collaborator": false
+  "day_start_hour": "00:00:00"
 }
 ```
 
@@ -24,60 +23,23 @@ It is **read but never modified** by `/awi-initialize` and `/awi-sync`.
 
 ## Fields
 
-### `awi_upstream_branch`
+### `day_start_hour`
 
-**Type:** string  
-**Required:** no  
-**Default:** `"dev"` (if absent, scripts fall back to this value)
+**Type:** string, `HH:MM:SS`
+**Required:** no
+**Default:** `"00:00:00"`
 
-The awi-core branch this instance tracks for upstream pulls.
+The time at which a new working day begins. `/today` uses it to resolve the working date: the
+calendar date whose `day_start_hour` most recently passed. Someone who habitually works past
+midnight sets this to, say, `"06:00:00"`, so a 2am session still files under the previous day.
 
-Valid values depend on which branches awi-core maintains:
-
-| Value | Meaning |
-|---|---|
-| `prod` | Stable release branch |
-| `stg` | Staging / pre-release |
-| `dev` | Active development branch |
-
-Set by the user management skill when configuring a new user or changing upstream tracking.
+The working week follows from it too — the week starts Monday at `day_start_hour`.
 
 ---
 
-### `collaborator`
+## Removed fields
 
-**Type:** boolean  
-**Required:** no  
-**Default:** `false` (if absent, treated as non-collaborator)
-
-Whether this user has write access to `awi-core`.
-
-Controls push behavior in `/awi-sync`:
-
-| Value | Behavior |
-|---|---|
-| absent or `false` | Skip push to awi-core silently |
-| `true` (permission confirmed) | Push to `awi_upstream_branch` on awi-core |
-| `true` (permission denied) | Warning: collaborator flag set but write access unconfirmed |
-
-Set by the user management skill, never by `/awi-initialize`.
-
----
-
-## Full Example
-
-```json
-{
-  "awi_upstream_branch": "dev",
-  "collaborator": false
-}
-```
-
-Collaborator with custom branch:
-
-```json
-{
-  "awi_upstream_branch": "dev",
-  "collaborator": true
-}
-```
+`awi_upstream_branch` and `collaborator` configured the instance → awi-core mirror. That mirror is
+gone: the instance *is* awi-core now, so there is nothing to mirror to. Both fields have no reader
+and can be deleted from any config that still carries them. See
+[ADR 0007](../../../docs/adr/0007-awi-core-como-source-of-truth.md).

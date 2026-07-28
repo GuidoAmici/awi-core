@@ -18,15 +18,10 @@ _Avoid_: logged-in user, active account
 The GitHub CLI's currently authenticated account (`gh auth status`). AWI treats this as the source of truth for identity.
 _Avoid_: gh session, CLI user
 
-### AWI Core sync
+### Manifiesto
 
-**Mirror** _(instancia → awi-core)_:
-Operación de escritura hacia awi-core: copia los archivos fuente de la instancia (todo fuera de `_data/`) al repo awi-core local, commitea y pushea. Solo disponible para colaboradores (`collaborator: true` en `user-config.json`). Herramienta de transición — se elimina cuando haya múltiples devs trabajando directamente en awi-core.
-_Avoid_: push, upload, sync-up
-
-**Pull** _(awi-core → instancia)_:
-Operación de lectura desde awi-core: copia los archivos fuente del submodulo awi-core local (ya actualizado por `sync_all`) hacia la instancia. Disponible para todos los usuarios. Corre siempre como parte de `/awi-sync`, después de que el submodulo awi-core fue pullado.
-_Avoid_: download, sync-down, update
+Archivo JSON que declara de qué repos se compone algo. Hay dos, según quién es dueño del dato: `user-submodules.json` (privado de cada operador — qué quiere en disco) y `codebases.json` (versionado en cada org workspace — de qué repos está hecha). Ninguno describe submódulos: todo se materializa por `git clone`. Ver [ADR 0009](docs/adr/0009-manifiestos-json-en-lugar-de-submodulos.md).
+_Avoid_: .gitmodules, registro de submódulos
 
 ### Submodule management
 
