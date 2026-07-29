@@ -1,5 +1,9 @@
 # Revisión integral de awi-core antes de seguir construyendo
 
+> **Cerrado por [ADR 0014](0014-el-problema-era-la-distribucion-no-la-composicion.md).** La revisión
+> se hizo el 2026-07-29 y concluyó que la pregunta «conservar o rehacer» estaba mal planteada: la
+> pieza faltante no era la composición sino la distribución. El 0014 registra el resultado.
+
 Los ADRs [0010](0010-referencias-por-nombre-no-por-version.md), [0011](0011-la-composicion-es-una-capa-con-dueno.md) y [0012](0012-contextos-flotan-dependencias-pinean.md) se escribieron el 2026-07-28 a partir de una única auditoría de arquitectura. Dejan tres decisiones tomadas y ninguna implementada. Antes de implementarlas, decidimos someter awi-core a una revisión integral de su estructura y su funcionamiento, con la pregunta abierta de si conviene **rehacerlo desde la base** usando todo lo acumulado como experiencia.
 
 La razón para frenar acá y no seguir construyendo es que el registro de decisiones muestra un patrón, no incidentes aislados:
