@@ -25,12 +25,13 @@ El 0013 describió un patrón —migraciones a medias que dejan residuo activo�
 | `README.md` documenta auto-commit y el prefijo `cos:`, ambos eliminados | |
 | `employees.json`, 36 entradas, leído por 2 skills, pese al [ADR 0008](0008-agent-discovery-desde-agency-agents.md) | |
 | `pull_from_awi_core()` borrado razonando desde el caso de un solo operador | `ba2323c` |
-| `promote-dev-to-stg.yml` duplica a `dev.yml` y falla en el 100% de los pushes | 4 de 4 corridas |
+| `promote-dev-to-stg.yml` duplica el merge de `dev.yml` y falla en el 100% de los pushes | 4 de 4 corridas |
+| `ci-dev.yml` duplica el job de test de `dev.yml`, con la invocación de pytest rota | nunca se nota |
 | `CLAUDE.md` declara "No auto-commit hook" mientras `/awi-sync` auto-commitea | 73 corridas registradas |
 
 Más la duplicación estructural: cuatro copias de la misma skill de scaffolding, tres de ellas byte-idénticas, y once skills triplicadas entre `.agents/`, `.claude/` y el plugin `mattpocock-skills`.
 
-Y los gates que no gatean: `ci-dev.yml` corre pytest sobre los 33 archivos de script en lugar de sobre `tests/`, lo que termina en error interno y `no tests ran`; los nueve tests que sí existen nunca se ejecutaron; y el workflow sólo dispara en `pull_request` mientras los cambios se pushean directo.
+Los workflows merecen una aclaración, porque la primera lectura de la revisión fue equivocada. **El gate existe y funciona**: `dev.yml` corre `pytest -q tests` y los nueve tests pasan en cada push. Lo que hay son dos duplicados suyos que no aportan nada. `ci-dev.yml` repite el job de test con una invocación que colecta los 33 archivos de script en lugar de `tests/` —termina en error interno y `no tests ran`—, y su inutilidad pasa inadvertida porque `dev.yml` ya cubre el mismo trigger, `push` y `pull_request` sobre `dev`. `promote-dev-to-stg.yml` repite el merge con un token que no puede saltar las reglas de rama, y por eso falla siempre mientras el merge real lo hace `dev.yml`.
 
 ## Lo que se conserva
 
@@ -50,7 +51,7 @@ Las otras dos capas se rehacen. La de skills, porque ahí vive el residuo. La de
 
 **Los compañeros son consumidores del harness, no coautores.** `/awi-update` hace reset duro sobre los archivos del harness y deja `_data/` intacto. Sin merge no hay conflicto, y no hay conflicto que mostrarle a alguien que no sabe git. Es la frontera de propiedad del 0011 aplicada a personas en lugar de a repos.
 
-**Una sola rama de distribución.** Se colapsan `dev`, `stg` y `prod`. El gate es real y barato: los nueve tests que ya existen y nunca corrieron.
+**Una sola rama de distribución.** Se colapsan `dev`, `stg` y `prod`. El gate no hay que construirlo: son los nueve tests que `dev.yml` ya corre, reapuntados a la rama única. Se eliminan los dos workflows duplicados.
 
 **`/awi-sync` se depreca.** Nació para reapuntar submódulos, que ya no existen. Lo reemplaza la IA coordinando el ciclo: pull de los repos de org al inicio de sesión, commit y push sugeridos al cerrar o en cortes lógicos, mensajes redactados por la IA, y consulta al usuario ante conflicto de datos.
 
