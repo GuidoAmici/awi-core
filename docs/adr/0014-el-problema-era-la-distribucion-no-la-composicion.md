@@ -53,6 +53,10 @@ Las otras dos capas se rehacen. La de skills, porque ahí vive el residuo. La de
 
 **Una sola rama de distribución.** Se colapsan `dev`, `stg` y `prod`. El gate no hay que construirlo: son los nueve tests que `dev.yml` ya corre, reapuntados a la rama única. Se eliminan los dos workflows duplicados.
 
+> **Enmendado por [ADR 0015](0015-dos-ramas-porque-el-gate-vive-en-el-servidor.md).** Son dos ramas,
+> no una: con una sola, el gate no puede impedir que un commit rojo llegue a las instancias, porque
+> tiran de la punta. `dev` para trabajar, `main` para distribuir. El resto de este ADR no cambia.
+
 **`/awi-sync` se depreca.** Nació para reapuntar submódulos, que ya no existen. Lo reemplaza la IA coordinando el ciclo: pull de los repos de org al inicio de sesión, commit y push sugeridos al cerrar o en cortes lógicos, mensajes redactados por la IA, y consulta al usuario ante conflicto de datos.
 
 **El juicio va en instrucciones, la mecánica en código.** Cuándo pullear, cuándo sugerir commit, cómo nombrarlo y si preguntar es juicio, y vive en `INSTRUCTIONS.md`. Pullear, abortar limpio ante conflicto, pushear y reportar es mecánica determinística, y vive en código con tests. La razón es empírica: `log_command` se invoca por instrucción en 22 archivos `SKILL.md` y el registro subcuenta —29 skills sin una sola aparición en 272 invocaciones—, así que sabemos que las instrucciones se cumplen a veces. Para un log, "a veces" alcanza. Para traer el contexto de otro operador, "a veces" significa trabajar sobre datos viejos sin enterarse.

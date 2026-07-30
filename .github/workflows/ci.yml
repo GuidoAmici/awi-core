@@ -1,20 +1,25 @@
-name: CI — test y Release PR en main
+name: CI — test, promoción a main y Release PR
 
-# Único pipeline de awi-core. Antes eran cuatro workflows sobre un esquema de
-# tres ramas (dev → stg → prod) que congelaba la distribución: prod, la rama por
-# defecto que recibe cualquiera que clona, sólo avanzaba al mergear a mano un PR
-# de release, y ese PR sólo se generaba si el token de la GitHub App estaba
-# configurado. Ver ADR 0014.
+# Dos ramas: dev es donde se trabaja, main es lo que reciben las instancias.
+# main sólo avanza cuando los tests pasan, así que un commit rojo no puede
+# llegarle a nadie. Ver ADR 0014 y 0015.
 #
-# Ahora: main es lo único que existe. Los tests corren en cada push y cada PR.
-# release-please acumula su PR de release contra main; cortar versión es un acto
-# deliberado y no está en el camino de la distribución.
+# Antes eran cuatro workflows sobre dev → stg → prod, y la promoción tenía dos
+# eslabones manuales o condicionales en serie dentro del camino de distribución:
+# había que mergear a mano un PR de release-please, y ese PR sólo se generaba si
+# el token de la GitHub App estaba configurado. Resultado: prod, que es lo que
+# recibe cualquiera que clona, quedó 11 commits atrás y CHANGELOG.md nunca
+# existió.
+#
+# Acá la promoción no depende de ningún secreto opcional: main no está cubierta
+# por el ruleset del repo, así que el GITHUB_TOKEN alcanza. Y no hay ningún
+# `if: has_app` que la saltee en silencio — si el push falla, el job falla.
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: write
@@ -22,7 +27,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -42,15 +47,33 @@ jobs:
           pip install pytest
           pytest -q tests
 
+  promote:
+    name: Promover dev → main
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fast-forward puro: main queda idéntica a un commit de dev que pasó los
+      # tests, sin commit de merge. Si no puede ser fast-forward, el push se
+      # rechaza y el job falla — que es lo que queremos, porque significa que
+      # alguien escribió en main por fuera de esta promoción.
+      - name: Fast-forward main al commit testeado
+        run: git push origin ${{ github.sha }}:refs/heads/main
+
   release-please:
     name: Release PR
     needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      # Apunta a dev, no a main: así el bump de versión y la entrada de
+      # CHANGELOG.md viajan aguas abajo con el resto de los cambios. Apuntándolo
+      # a main, sus commits quedarían sólo ahí y divergirían de dev.
       - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target-branch: main
+          target-branch: dev
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
