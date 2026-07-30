@@ -1,0 +1,58 @@
+[
+  {
+    "eje": "control de acceso por cliente",
+    "afirmacion": "git no puede impedir que quien clona un repo lea una parte de él",
+    "reproduce": true,
+    "evidencia": "sparse-checkout esconde cliente-b del árbol (en disco: False), pero basta volver a incluirlo para obtener su contenido: lo leyó. sparse-checkout es comodidad, no permiso.",
+    "brecha": "diseño — la unidad de permiso de git es el repo, no la ruta ni la fila"
+  },
+  {
+    "eje": "escritura concurrente",
+    "afirmacion": "dos operadores que editan el mismo dato producen un conflicto que alguien resuelve a mano",
+    "reproduce": true,
+    "evidencia": "el push de B se rechazó (exit 1) y el pull --rebase dejó conflicto (exit 1). Sin resolución manual, el cambio de B no llega.",
+    "brecha": "diseño para el dato estructurado — dos filas distintas del mismo archivo son un conflicto de texto. Para archivos separados por autor no hay brecha."
+  },
+  {
+    "eje": "escritura concurrente en archivos distintos",
+    "afirmacion": "también hace falta resolución manual cuando cada uno escribe su propio archivo",
+    "reproduce": false,
+    "evidencia": "pull --rebase --autostash: exit 0; push: exit 0. Los dos cambios convivieron sin que nadie resolviera nada.",
+    "brecha": "ninguna — es el caso que el ciclo de contexto ya cubre"
+  },
+  {
+    "eje": "capacidad de consulta",
+    "afirmacion": "git no puede responder una consulta sobre el contenido sin leer todo",
+    "reproduce": true,
+    "evidencia": "filtrar 200 registros exigió abrir y parsear los 200 archivos (4 ms). No hay índice: el costo es lineal en el total, no en el resultado. Con 200k registros esto no escala.",
+    "brecha": "diseño — git indexa por ruta y por contenido-hash, nunca por valor de un campo. Un índice externo sería otro sustrato adentro."
+  },
+  {
+    "eje": "auditoría por registro",
+    "afirmacion": "git no puede decir quién cambió un registro y cuándo",
+    "reproduce": false,
+    "evidencia": "`git blame` atribuye cada línea a su autor (2 líneas atribuidas) y `git log -L 2,2:` devuelve las 2 revisiones por las que pasó esa línea, con su diff. Si un registro es una línea, la auditoría por registro existe y es más completa que la de una tabla sin triggers: incluye el antes y el después, no sólo el hecho del cambio.",
+    "brecha": "ninguna, si el registro es una línea o un archivo. La brecha aparece si un registro es una fila de una tabla con muchas columnas cambiando independientemente."
+  },
+  {
+    "eje": "latencia de propagación",
+    "afirmacion": "git no puede propagar un cambio en tiempo casi real",
+    "reproduce": false,
+    "evidencia": "el viaje completo commit → push → pull sobre un remoto local tardó 51 ms y el cambio llegó (True). Contra un remoto en internet son segundos. Lo que falta no es velocidad: es que **alguien dispare el pull**. Hoy lo dispara el ciclo de contexto al abrir sesión.",
+    "brecha": "del mecanismo de sincronización, no del almacenamiento. Un watcher o un pull periódico lo cierra sin cambiar dónde viven los datos."
+  },
+  {
+    "eje": "trabajo sin conexión",
+    "afirmacion": "git permite trabajar y versionar sin ninguna conexión",
+    "reproduce": true,
+    "evidencia": "commit sin remoto configurado: exit 0, historial completo disponible localmente (1 commit). Una base remota no da esto sin una capa de sincronización propia.",
+    "brecha": "ninguna — es una capacidad que un cambio de sustrato pondría en riesgo"
+  },
+  {
+    "eje": "invariante del ADR 0011",
+    "afirmacion": "la pertenencia de una ruta a un repo es conocible sin ejecutar git",
+    "reproduce": false,
+    "evidencia": "subir por los padres buscando `.git` resuelve el dueño de `_data/organizations/newhaze/algo.md` a `newhaze` sin invocar git. El invariante se sostiene hoy: es una propiedad del filesystem, no de git.",
+    "brecha": "ninguna hoy. Se caería si un dato deja de tener ruta — que es exactamente lo que pasa si vive en una fila de una tabla."
+  }
+]

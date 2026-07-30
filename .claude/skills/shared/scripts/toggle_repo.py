@@ -67,6 +67,19 @@ def _leer(ruta: Path) -> dict:
         raise RepoDesconocido(f"no existe el manifiesto {ruta}: ¿corriste /awi-user?") from e
 
 
+def _entradas(datos: dict) -> dict:
+    """Las entradas del manifiesto, que viven en la raíz del JSON.
+
+    Es el esquema que lee `manifest.active_entries()`, y es lo que decide qué se
+    materializa. Se saltean las claves de metadatos —las que empiezan con `_`— y
+    cualquier valor que no sea un objeto.
+    """
+    return {
+        k: v for k, v in datos.items()
+        if not k.startswith("_") and isinstance(v, dict) and "url" in v
+    }
+
+
 def _escribir(ruta: Path, datos: dict) -> None:
     ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -77,7 +90,7 @@ def listar(awi_root: Path) -> list[Entrada]:
     datos = _leer(ruta)
     entradas: list[Entrada] = []
 
-    for nombre, cfg in datos.get("submodules", {}).items():
+    for nombre, cfg in _entradas(datos).items():
         destino = awi_root / cfg.get("path", "")
         entradas.append(
             Entrada(
@@ -129,10 +142,10 @@ def togglear(awi_root: Path, nombre: str, activo: bool) -> Entrada:
     entrada = _resolver(listar(awi_root), nombre)
 
     if entrada.org:
-        cfg = datos["submodules"][entrada.org].setdefault("codebases", {})
+        cfg = datos[entrada.org].setdefault("codebases", {})
         cfg.setdefault(entrada.nombre, {})["active"] = activo
     else:
-        datos["submodules"][entrada.nombre]["active"] = activo
+        datos[entrada.nombre]["active"] = activo
 
     _escribir(ruta, datos)
     return Entrada(

@@ -38,10 +38,19 @@ class Repo:
     path: Path  # absolute
     parent: str  # "AWI" for top-level entries, else the org name
     upstream: bool = False  # read-only mirror of a third-party repo: never push
+    #: Commit or tag to materialise at, instead of the branch tip. Only meaningful
+    #: for a dependency — a repo a third party can change without warning. A
+    #: shared context floats on purpose, because its value is being up to date.
+    #: See ADR 0012.
+    rev: str | None = None
 
     @property
     def is_codebase(self) -> bool:
         return self.parent != "AWI"
+
+    @property
+    def is_pinned(self) -> bool:
+        return self.rev is not None
 
 
 # ── user-submodules.json ──────────────────────────────────────────────────────
@@ -120,16 +129,29 @@ def is_mounted(path: Path) -> bool:
     return path.exists() and any(path.iterdir())
 
 
-def materialise_target(path: Path, url: str, branch: str) -> tuple[str, str | None]:
+def materialise_target(
+    path: Path, url: str, branch: str, rev: str | None = None
+) -> tuple[str, str | None]:
     """Clone `url` into `path` unless it is already there. Returns (status, error).
 
-    status is "cloned", "present" or "failed".
+    status is "cloned", "present", "drifted" or "failed".
 
     An existing checkout is left exactly as it is — materialising must never move
     the operator off the branch they are working on. context_sync.py owns that.
+
+    With `rev`, the repo is pinned: it materialises at that commit or tag instead
+    of the branch tip, and an existing checkout sitting somewhere else reports
+    "drifted" rather than being silently corrected. Fixing drift is a deliberate
+    act, not a side effect of materialising. See ADR 0012.
     """
     if is_repo(path):
-        return "present", None
+        if rev is None:
+            return "present", None
+        return ("present", None) if _at_rev(path, rev) else (
+            "drifted",
+            f"{path} is pinned to {rev} but sits elsewhere — "
+            f"`git -C {path} checkout {rev}` to align, deliberately",
+        )
 
     if is_mounted(path):
         return "failed", (
@@ -145,7 +167,32 @@ def materialise_target(path: Path, url: str, branch: str) -> tuple[str, str | No
     )
     if rc.returncode != 0:
         return "failed", rc.stderr.strip()
+
+    if rev is not None:
+        co = subprocess.run(
+            ["git", "-C", str(path), "checkout", "--quiet", rev],
+            capture_output=True, text=True,
+        )
+        if co.returncode != 0:
+            return "failed", f"cloned but could not check out {rev}: {co.stderr.strip()}"
     return "cloned", None
+
+
+def _at_rev(path: Path, rev: str) -> bool:
+    """True if HEAD resolves to the same commit as `rev`.
+
+    Compares resolved commits, not strings: a tag and its commit are the same
+    pin, and reporting drift because one is spelled as a tag would be noise.
+    """
+    def resolve(what: str) -> str | None:
+        r = subprocess.run(
+            ["git", "-C", str(path), "rev-parse", "--verify", "--quiet", f"{what}^{{commit}}"],
+            capture_output=True, text=True,
+        )
+        return r.stdout.strip() or None
+
+    head, target = resolve("HEAD"), resolve(rev)
+    return bool(head and target and head == target)
 
 
 # ── Resolution ────────────────────────────────────────────────────────────────
@@ -199,6 +246,11 @@ def plan(awi_root: Path) -> tuple[list[Repo], list[str]]:
 
     top: list[Repo] = []
     for name, entry in active.items():
+        # `rev` sólo aplica a un system-repo, que es una dependencia. Un org
+        # workspace es contexto compartido y flota en la punta a propósito:
+        # pinearlo sería congelar lo que su valor exige que esté al día.
+        # Ver ADR 0012.
+        es_dependencia = entry_type(entry) == "system-repo"
         top.append(
             Repo(
                 name=name,
@@ -207,6 +259,7 @@ def plan(awi_root: Path) -> tuple[list[Repo], list[str]]:
                 path=awi_root / entry["path"],
                 parent="AWI",
                 upstream=entry.get("upstream", False),
+                rev=entry.get("rev") if es_dependencia else None,
             )
         )
 

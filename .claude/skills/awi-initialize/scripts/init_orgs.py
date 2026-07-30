@@ -44,12 +44,17 @@ def run_pass(repos: list[Repo], errors: list[str]) -> int:
     for repo in repos:
         label = repo.name if not repo.is_codebase else f"{repo.parent}/{repo.name}"
         print(f"  → {label}...", end=" ", flush=True)
-        status, err = materialise_target(repo.path, repo.url, repo.branch)
+        status, err = materialise_target(repo.path, repo.url, repo.branch, repo.rev)
         if status == "cloned":
-            print(f"cloned ({repo.branch})")
+            print(f"cloned ({repo.rev or repo.branch})")
             cloned += 1
         elif status == "present":
-            print("already on disk")
+            print("already on disk" + (f" at {repo.rev}" if repo.is_pinned else ""))
+        elif status == "drifted":
+            # Un repo pinneado en otro commit es drift: se reporta y no se
+            # corrige en silencio. Alinearlo es un acto deliberado (ADR 0012).
+            print("DRIFT")
+            print(f"    ⚠ {err}", file=sys.stderr)
         else:
             print("FAILED")
             print(f"    ✗ {err}", file=sys.stderr)

@@ -197,17 +197,19 @@ def registrar(
     except json.JSONDecodeError as e:
         raise ScaffoldFallido(f"{manifiesto} no es JSON válido: {e}") from e
 
-    entradas = datos.setdefault("submodules", {})
-    if nombre in entradas:
+    # Las entradas van en la raíz del JSON, no envueltas en una clave. Es como
+    # las lee `manifest.active_entries()`, que es lo que decide qué se
+    # materializa: un envoltorio las volvería invisibles para el sistema.
+    if nombre in datos:
         return False
 
-    entradas[nombre] = {
+    datos[nombre] = {
         "url": url,
         "path": f"{ORGANIZATIONS_RELDIR}/{nombre}",
         "branch": branch,
         "type": tipo,
         "active": True,
-        "codebases": [],
+        "codebases": {},
     }
     manifiesto.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return True

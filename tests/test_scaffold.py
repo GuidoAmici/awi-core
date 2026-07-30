@@ -113,7 +113,7 @@ def test_el_titulo_del_claude_md_sale_del_nombre(tmp_path):
 
 def manifiesto(tmp_path, contenido=None):
     f = tmp_path / "user-submodules.json"
-    f.write_text(json.dumps(contenido if contenido is not None else {"submodules": {}}))
+    f.write_text(json.dumps(contenido if contenido is not None else {}))
     return f
 
 
@@ -122,7 +122,7 @@ def test_registrar_agrega_la_entrada(tmp_path):
 
     assert scaffold.registrar("newhaze", "https://github.com/x/newhaze.git", m)
 
-    entrada = json.loads(m.read_text())["submodules"]["newhaze"]
+    entrada = json.loads(m.read_text())["newhaze"]
     assert entrada["url"] == "https://github.com/x/newhaze.git"
     assert entrada["path"].endswith("newhaze")
     assert entrada["active"] is True
@@ -135,7 +135,7 @@ def test_registrar_es_idempotente(tmp_path):
 
     assert not scaffold.registrar("newhaze", "https://github.com/x/otra.git", m)
 
-    entradas = json.loads(m.read_text())["submodules"]
+    entradas = json.loads(m.read_text())
     assert len(entradas) == 1
     assert entradas["newhaze"]["url"].endswith("newhaze.git"), "no debe pisar la url"
 
@@ -160,7 +160,7 @@ def test_scaffold_con_url_hace_las_dos_cosas(tmp_path):
     r = scaffold.scaffold("newhaze", tmp_path / "orgs", "https://github.com/x/n.git", m)
 
     assert r.creado and r.registrado
-    assert "newhaze" in json.loads(m.read_text())["submodules"]
+    assert "newhaze" in json.loads(m.read_text())
 
 
 # ── Toggle por manifiesto ─────────────────────────────────────────────────────
@@ -174,22 +174,21 @@ def instancia(tmp_path):
         "github-id": "42481462", "login": "test",
     }))
     (raiz / "_data/users/42481462/user-submodules.json").write_text(json.dumps({
-        "submodules": {
-            "newhaze": {
-                "url": "https://github.com/x/newhaze.git",
-                "path": "_data/organizations/newhaze",
-                "branch": "main", "type": "org-workspace", "active": True,
-                "codebases": {
-                    "newhaze-learn": {"active": True},
-                    "newhaze-web": {"active": False},
-                },
+        "_comment": "las entradas viven en la raíz; esto es metadato y se saltea",
+        "newhaze": {
+            "url": "https://github.com/x/newhaze.git",
+            "path": "_data/organizations/newhaze",
+            "branch": "main", "type": "org-workspace", "active": True,
+            "codebases": {
+                "newhaze-learn": {"active": True},
+                "newhaze-web": {"active": False},
             },
-            "afin": {
-                "url": "https://github.com/x/afin.git",
-                "path": "_data/organizations/afin",
-                "branch": "main", "type": "org-workspace", "active": False,
-            },
-        }
+        },
+        "afin": {
+            "url": "https://github.com/x/afin.git",
+            "path": "_data/organizations/afin",
+            "branch": "main", "type": "org-workspace", "active": False,
+        },
     }))
     return raiz
 
@@ -220,7 +219,7 @@ def test_activar_una_org_lo_refleja_en_el_manifiesto(instancia):
 
     assert e.activo
     datos = json.loads((instancia / "_data/users/42481462/user-submodules.json").read_text())
-    assert datos["submodules"]["afin"]["active"] is True
+    assert datos["afin"]["active"] is True
 
 
 def test_desactivar_un_codebase_lo_refleja_en_el_manifiesto(instancia):
@@ -229,7 +228,7 @@ def test_desactivar_un_codebase_lo_refleja_en_el_manifiesto(instancia):
 
     assert not e.activo
     datos = json.loads((instancia / "_data/users/42481462/user-submodules.json").read_text())
-    assert datos["submodules"]["newhaze"]["codebases"]["newhaze-learn"]["active"] is False
+    assert datos["newhaze"]["codebases"]["newhaze-learn"]["active"] is False
 
 
 def test_un_codebase_se_resuelve_por_nombre_si_no_es_ambiguo(instancia):
@@ -252,7 +251,7 @@ def test_un_nombre_inexistente_lista_las_opciones_validas(instancia):
 def test_un_nombre_ambiguo_pide_la_forma_completa(instancia):
     datos_path = instancia / "_data/users/42481462/user-submodules.json"
     datos = json.loads(datos_path.read_text())
-    datos["submodules"]["afin"]["codebases"] = {"newhaze-learn": {"active": True}}
+    datos["afin"]["codebases"] = {"newhaze-learn": {"active": True}}
     datos_path.write_text(json.dumps(datos))
 
     with pytest.raises(tr.RepoDesconocido, match="ambiguo"):
