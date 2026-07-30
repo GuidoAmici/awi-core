@@ -53,7 +53,13 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 es obligatorio. Con la profundidad 1 por defecto, el
+      # runner no tiene la ascendencia de main y `git push <sha>:refs/heads/main`
+      # se rechaza con "fetch first" aunque el fast-forward sea posible: git no
+      # puede probar la relación que el servidor exige.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Fast-forward puro: main queda idéntica a un commit de dev que pasó los
       # tests, sin commit de merge. Si no puede ser fast-forward, el push se
