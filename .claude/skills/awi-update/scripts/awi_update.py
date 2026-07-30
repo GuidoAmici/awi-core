@@ -133,21 +133,23 @@ def main() -> None:
         die(f"{AWI_ROOT} no es un repo git.")
 
     branch = current_branch()
-    if branch == WORK_BRANCH:
-        die(
-            f"esta instancia está en '{WORK_BRANCH}', la rama de desarrollo del harness.\n"
-            f"  /awi-update es para instancias consumidoras, que siguen '{DISTRIBUTION_BRANCH}'.\n"
-            f"  Un reset duro acá borraría trabajo del harness sin pushear.",
-            code=2,
-        )
+    consuming = branch == DISTRIBUTION_BRANCH
 
     print("Buscando actualizaciones…")
     if git("fetch", "origin", "--tags", "--quiet").returncode != 0:
         die("no se pudo contactar el remoto. ¿Hay conexión?")
 
-    target = f"origin/{DISTRIBUTION_BRANCH}"
+    # La rama decide el ref *y* la operación. Reset duro sólo en la rama de
+    # distribución, donde no hay trabajo local legítimo. En cualquier otra,
+    # fast-forward: no puede destruir nada, y si divergió falla y lo dice.
+    # Cambiar sólo el ref y seguir reseteando rompería el trabajo del
+    # mantenedor igual — el ref no es lo que hace daño, la operación sí.
+    target = f"origin/{DISTRIBUTION_BRANCH}" if consuming else f"origin/{branch}"
     if git("rev-parse", "--verify", "--quiet", target).returncode != 0:
-        die(f"el remoto no tiene la rama '{DISTRIBUTION_BRANCH}'.")
+        die(
+            f"el remoto no tiene '{target}'."
+            + ("" if consuming else f" La rama '{branch}' es local: no hay nada que traer.")
+        )
 
     before, after = out("rev-parse", "HEAD"), out("rev-parse", target)
     v_before, v_after = version_at("HEAD"), version_at(target)
@@ -155,22 +157,30 @@ def main() -> None:
     dirty = local_changes()
     lag = promotion_lag()
 
-    if not commits and branch == DISTRIBUTION_BRANCH:
+    if not consuming:
+        print(f"  Estás en '{branch}', no en '{DISTRIBUTION_BRANCH}': fast-forward, sin reset.")
+
+    if not commits:
         print(f"✓ Ya estás al día — versión {v_before}.")
     else:
-        if branch != DISTRIBUTION_BRANCH:
-            print(f"  Esta instancia está en '{branch}'; se cambia a '{DISTRIBUTION_BRANCH}'.")
-        if commits:
-            version_note = f"{v_before} → {v_after}" if v_before != v_after else f"{v_after} (sin cambio de versión)"
-            print(f"\n{len(commits)} cambio(s) para traer — {version_note}:")
-            describe(commits)
-        if dirty:
+        version_note = f"{v_before} → {v_after}" if v_before != v_after else f"{v_after} (sin cambio de versión)"
+        print(f"\n{len(commits)} cambio(s) para traer — {version_note}:")
+        describe(commits)
+
+    if dirty:
+        if consuming:
             print(f"\n  ⚠ {len(dirty)} archivo(s) del harness modificados localmente se van a descartar:")
-            for f in dirty[:10]:
-                print(f"    · {f}")
-            if len(dirty) > 10:
-                print(f"    · … y {len(dirty) - 10} más")
-            print("    El harness lo mantiene awi-core; si necesitás un cambio, pedilo.")
+        else:
+            print(f"\n  ⚠ {len(dirty)} archivo(s) con cambios sin commitear:")
+        for f in dirty[:10]:
+            print(f"    · {f}")
+        if len(dirty) > 10:
+            print(f"    · … y {len(dirty) - 10} más")
+        print(
+            "    El harness lo mantiene awi-core; si necesitás un cambio, pedilo."
+            if consuming
+            else "    Commiteálos o guardálos antes: el fast-forward no corre con el árbol sucio."
+        )
 
     if lag:
         print(
@@ -183,12 +193,21 @@ def main() -> None:
         print("\n(--check: no se modificó nada.)")
         return
 
-    if not commits and branch == DISTRIBUTION_BRANCH and not dirty:
+    if not commits and not (dirty and consuming):
         return
 
-    if branch != DISTRIBUTION_BRANCH:
-        git("checkout", DISTRIBUTION_BRANCH, check=True)
-    git("reset", "--hard", target, check=True)
+    if consuming:
+        git("reset", "--hard", target, check=True)
+    else:
+        r = git("merge", "--ff-only", target)
+        if r.returncode != 0:
+            die(
+                f"no se pudo hacer fast-forward de '{branch}' a '{target}':\n"
+                f"  {r.stderr.strip()}\n"
+                f"  Tu rama divergió del remoto, o el árbol está sucio. No se tocó nada:\n"
+                f"  resolvelo con git y volvé a correr."
+            )
+
     print(f"\n✓ Harness actualizado a {version_at('HEAD')} ({out('rev-parse', '--short', 'HEAD')}).")
     print("  Tus datos en _data/ no se tocaron.")
 
