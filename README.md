@@ -11,7 +11,7 @@ A git-tracked Obsidian vault designed for Claude Code. Natural language in, orga
 **AWI** is a system factory — it serves two roles simultaneously:
 
 1. **Personal OS** — your own agenda, planning, and daily rhythm live here
-2. **Workspace factory** — use `/initialize <name>` to spin up a self-contained `<name>-workspace` repo for any company or client, with its own agenda, wiki, and codebase
+2. **Workspace factory** — use `/awi-org <name>` to spin up a self-contained org workspace repo for any company or client, with its own agenda, documentation, and codebases
 
 Each workspace follows the same structure and is operated by the same skills. AWI is the engine that runs all of them.
 
@@ -155,7 +155,7 @@ scratch outside the versioned tree, and reports back into the issue.
 | `/delegate <task>` | Fork terminal for autonomous work | `/delegate write the quarterly report` |
 | `/awi-user-create <username>` | Create a new vault user | `/awi-user-create whyto` |
 | `/awi-user-login <username>` | Load user profile for session | `/awi-user-login whyto` |
-| `/initialize <name>` | Scaffold a new `<name>-workspace` repo | `/initialize <org-name>` |
+| `/awi-org <name>` | Scaffold a new org workspace repo | `/awi-org <org-name>` |
 | `/wrap-session` | End-of-session ritual | `/wrap-session` |
 
 ---

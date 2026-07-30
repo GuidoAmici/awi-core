@@ -30,6 +30,6 @@ Tres componentes, todos construibles sobre `plan()` de `manifest.py`, que ya dev
 ## Consecuencias
 
 - La decisión del ADR 0009 sólo es correcta si se construye la capa 3. Este ADR es la condición de validez de aquél.
-- `.ignore` en la raíz (`!_data/`) y en cada org (`!codebase/*/`), con scaffolding en `/awi-org` y `/awi-client`. Es un artefacto derivado: una línea por frontera de repo, generable por el mismo código que crea la frontera.
+- `.ignore` en la raíz (`!_data/`) y en cada org (`!codebase/*/`), con scaffolding en `/awi-org` (que absorbió a `/awi-client` en el PRD 4). Es un artefacto derivado: una línea por frontera de repo, generable por el mismo código que crea la frontera.
 - El mapa de fronteras es generado, nunca escrito a mano. Un mapa mantenido a mano miente en cuanto alguien togglea un codebase.
 - Ninguno de los tres componentes está implementado. Ver [ADR 0013](0013-revision-integral-de-awi-core.md) — la implementación queda deliberadamente diferida hasta la revisión integral.

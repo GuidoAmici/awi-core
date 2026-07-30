@@ -23,7 +23,7 @@ SYSTEM_DIRS = [
 CLIENTS_ABSTRACT = """\
 One submodule per company or personal context.
 Each client has agenda/, documentation/, and codebase/.
-Use /new-client <name> to add a client.
+Use /awi-org <name> to add an organization.
 """
 
 CLAUDE_MD = """\
@@ -36,7 +36,7 @@ CLAUDE_MD = """\
 ## Claude Code-specific
 
 - No auto-commit hook: commit your own work at logical task boundaries using Conventional Commits with scope (not after every Write/Edit). Don't leave finished work uncommitted.
-- Skills available: `/awi-introduction`, `/awi-initialize`, `/new-client`, `/awi-user-create`, `/awi-user-login`, `/today`, `/week`, `/new`, `/history`, `/delegate`.
+- Skills available: `/awi-introduction`, `/awi-initialize`, `/awi-org`, `/awi-user-create`, `/awi-user-login`, `/today`, `/week`, `/new`, `/history`, `/delegate-issue`.
 - Get current date: `bash .claude/hooks/get-datetime.sh full`.
 """
 
@@ -82,7 +82,7 @@ awi/
 
 Each `_clients/<name>/` is a **separate git repo** registered as a submodule of AWI.
 
-Use `/new-client <name>` to scaffold a new client repo and register it.
+Use `/awi-org <name>` to scaffold a new org workspace and register it in the manifest.
 """
 
 
@@ -123,7 +123,7 @@ def init_awi(path: Path = Path(".")):
     print("  _clients/    ← client repos go here (one submodule each)")
     print()
     print("Next steps:")
-    print("  1. /new-client <name>")
+    print("  1. /awi-org <name>")
     print("  2. /awi-user-create <username>")
 
 
