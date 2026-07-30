@@ -15,9 +15,9 @@ How living reference knowledge is maintained alongside active work.
 | **Active work** | `_documentation/_agenda/` | Constantly — tasks complete, projects evolve |
 | **Reference knowledge** | `_documentation/_context/<name>-wiki/` | On decision — only when something permanently changes |
 
-The wiki is a submodule: a separate git repo tracked at a fixed commit inside this one. It is the source of truth for stable facts about the client, product, and codebase.
+The wiki is a separate git repo, cloned into place — not tracked at a fixed commit from a parent, because there are no gitlinks anywhere. It is the source of truth for stable facts about the client, product, and codebase.
 
-In the workspace model, each `<name>-workspace` repo owns its own wiki submodule at `_documentation/_context/wiki/`.
+Each org workspace owns its wiki as a separate clone at `documentation/wiki/`.
 
 ---
 
@@ -41,7 +41,7 @@ Every output that changes something permanent must:
 
 1. List affected wiki files in the `affects:` frontmatter field
 2. Actually update those wiki files (or flag them as pending)
-3. Commit the wiki submodule pointer update in the parent repo
+3. Push the wiki repo — there is no pointer in a parent to update
 
 ```yaml
 # In the output file:
@@ -69,7 +69,7 @@ The AI reads these before complex tasks. Keep them current. When a preference or
 
 ---
 
-## Wiki submodule operations
+## Operating on the wiki repo
 
 ```bash
 # Update wiki to latest
@@ -78,8 +78,8 @@ cd _documentation/_context/<name>-wiki && git pull
 # After editing wiki files, commit the pointer in parent repo
 cd <workspace-root>
 git add _documentation/_context/<name>-wiki
-git commit -m "cos: update wiki pointer"
+git commit -m "docs(wiki): actualizar"
 
-# Initialize wiki submodule on fresh clone
-git submodule update --init _documentation/_context/<name>-wiki
+# Materialise the wiki on a fresh clone
+git clone <url> <workspace-root>/documentation/wiki
 ```

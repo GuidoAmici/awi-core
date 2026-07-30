@@ -1,7 +1,7 @@
 {
   "version": 1,
   "_nota": "Vocabulario que describe mecanismos eliminados. Lo consume vocab_check.py a través del mismo motor que las reglas de material sensible (.claude/skills/shared/scripts/sensitive_scan.py): otro conjunto de reglas, el mismo motor. Existe porque las dos instancias de deriva que la revisión integral encontró mientras trabajaba —INSTRUCTIONS.md explicando el protocolo de .gitmodules, y delegation.md apuntando a un script inexistente— se encontraron por casualidad, al pasar por ahí para otra cosa. Ver PRD 3 (issue #82).",
-  "_excepciones": "Todas las reglas excluyen docs/adr/, CHANGELOG.md y los documentos que narran una migración: un ADR tiene que poder decir «submódulo» cuando explica por qué se eliminaron, y prohibírselo destruiría el registro. Además, ninguna regla dispara en una línea que contenga _Evitar_, que es exactamente donde el término prohibido debe figurar en CONTEXT.md.",
+  "_excepciones": "Todas las reglas excluyen docs/adr/, CHANGELOG.md y los documentos que narran una migración: un ADR tiene que poder decir «submódulo» cuando explica por qué se eliminaron, y prohibírselo destruiría el registro. Además, ninguna regla dispara en una línea que contenga _Evitar_, que es exactamente donde el término prohibido debe figurar en CONTEXT.md. docs/migrate-from-my-awi-instance.md también, por la misma razón: su trabajo es narrar qué había antes y qué hay ahora.",
   "categorias": {
     "vocabulario-eliminado": {
       "bloquea": true
@@ -43,7 +43,8 @@
         "^tests/",
         "^_system/agency-agents/",
         "^\\.claude/skills/shared/scripts/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -59,7 +60,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -75,7 +77,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -91,7 +94,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -107,7 +111,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -123,7 +128,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -139,7 +145,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -155,7 +162,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -171,7 +179,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     },
@@ -187,7 +196,8 @@
         "^\\.claude/rules/",
         "^tests/",
         "^_system/agency-agents/",
-        "^CONTEXT\\.md$"
+        "^CONTEXT\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$"
       ],
       "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
     }

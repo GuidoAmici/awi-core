@@ -6,7 +6,7 @@ Every meaningful folder has up to two context files:
 - **`.overview.md` (L1)** — 1–2 paragraphs with structure, key files, and rules. Read when working within that path.
 - **L2** — the actual content files already in the folder.
 
-**Workspace submodule context** lives in the workspace repo's own `CLAUDE.md`.
+**The context of an org workspace** lives in that repo's own `CLAUDE.md`: it is a separate clone with its own root.
 
 When navigating any folder: read `.abstract.md` → `.overview.md` → then content files. Never dive into content files cold.
 
@@ -15,4 +15,4 @@ When navigating any folder: read `.abstract.md` → `.overview.md` → then cont
 Before writing or complex tasks, check the active workspace's `documentation/` for:
 - `writing-style.md` — Voice and tone
 - `business-profile.md` — Operator context
-- `wiki/` or submodule — Company/personal wiki
+- `wiki/` — Company/personal wiki, its own cloned repo

@@ -1,6 +1,6 @@
 ---
 name: awi-user
-description: Unified user management. View current user, switch users, log in/out, create new users. Manages my-awi-user GitHub repo as submodule under _data/users/<github-id>/.
+description: Unified user management. View current user, switch users, log in/out, create new users. Materialises the my-awi-user GitHub repo by clone under _data/users/<github-id>/.
 allowed-tools: Read, Write, Bash, Glob, AskUserQuestion
 model: sonnet
 ---
@@ -62,13 +62,16 @@ Show submenu:
 
 ### 2a — Switch to Logged User
 
-Find inactive user submodules — entries in `.gitmodules` under `_data/users/` that are NOT the current user:
+Find the other users already materialised — the directories under `_data/users/`
+that hold a cloned repo and are not the current user:
 
 ```bash
-grep 'path = _data/users/' .gitmodules | grep -v 'path = _data/users/current-user'
+for d in _data/users/*/; do
+  [ -d "$d/.git" ] && basename "$d"
+done
 ```
 
-Filter out the current `<github-id>`. Present available logins extracted from `.gitmodules` URLs.
+Filter out the current `<github-id>`. Present the available logins.
 
 If none found: "No other users registered. Use 2b to log in."
 
@@ -76,9 +79,10 @@ If none found: "No other users registered. Use 2b to log in."
 1. Run Sync Procedure for current user.
 2. Run Deactivate Procedure for current user.
 
-**Activate selected user:**
+**Activate selected user** — materialise their repo if it is not already there:
 ```bash
-git submodule update --init _data/users/<new-id>
+[ -d _data/users/<new-id>/.git ] \
+  || git clone https://github.com/<new-login>/my-awi-user.git _data/users/<new-id>
 ```
 
 Update `_data/users/current-user.json` (see format below). Load and display session primer from `_data/users/<new-id>/awi-user-profile.md`.
@@ -109,15 +113,13 @@ Update `_data/users/current-user.json` (see format below). Load and display sess
 
 5. **If repo exists:**
    ```bash
-   git submodule add -b only https://github.com/<login>/my-awi-user.git _data/users/<id>
-   git submodule update --init _data/users/<id>
+   git clone -b only https://github.com/<login>/my-awi-user.git _data/users/<id>
    ```
 
    **If repo does not exist:**
    ```bash
    gh repo create <login>/my-awi-user --private --description "AWI user data"
-   git submodule add -b only https://github.com/<login>/my-awi-user.git _data/users/<id>
-   git submodule update --init _data/users/<id>
+   git clone -b only https://github.com/<login>/my-awi-user.git _data/users/<id>
    ```
    Then create initial `_data/users/<id>/awi-user-profile.md`:
    ```markdown
@@ -133,7 +135,7 @@ Update `_data/users/current-user.json` (see format below). Load and display sess
 
    ## Long-term patterns
    ```
-   Commit and push this file inside the submodule:
+   Commit and push this file inside the user's own repo:
    ```bash
    cd _data/users/<id> && git add -A && git commit -m "init: awi-user-profile" && git push origin only && cd -
    ```
@@ -198,9 +200,9 @@ If push fails: warn operator and ask whether to proceed anyway. Never proceed si
 
 Makes the user's local data inaccessible without deleting the GitHub repo:
 
-1. Deinit submodule (removes local checkout, keeps `.gitmodules` entry for later reactivation):
+1. Remove the local clone. The GitHub repo is untouched, so logging back in
+   re-materialises it:
    ```bash
-   git submodule deinit _data/users/<github-id>
    rm -rf _data/users/<github-id>
    ```
 
@@ -217,8 +219,8 @@ deactivating the current user (logout).
 python3 .claude/skills/awi-initialize/scripts/init_orgs.py
 ```
 
-This regenerates `.gitmodules` from the new user's `user-submodules.json` without prompting
-or writing to `user-config.json`. See `/awi-initialize` for full regeneration flow and exit codes.
+This materialises what the new user's `user-submodules.json` declares, without
+prompting or writing to `user-config.json`. See `/awi-initialize` for full regeneration flow and exit codes.
 
 ---
 

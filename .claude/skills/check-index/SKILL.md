@@ -23,10 +23,10 @@ find _clients -mindepth 1 -maxdepth 3 -type d | sort
 ### 2. Skip rules
 
 Do NOT flag as missing for:
-- Git submodule roots inside `_clients/<name>/codebase/` or `_clients/<name>/documentation/` — they have their own indexes
+- Roots of separately cloned repos inside `_data/organizations/<name>/codebase/` or `_data/organizations/<name>/documentation/` — they have their own indexes
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders (check at runtime)
-- Uninitialized submodule paths (empty directories)
+- Paths of repos that are declared but not materialised (empty directories)
 
 ### 3. For each folder, check
 

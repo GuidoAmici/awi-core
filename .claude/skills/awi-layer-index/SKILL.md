@@ -34,10 +34,10 @@ find _data/organizations -mindepth 1 -maxdepth 3 -type d | sort
 ```
 
 **Skip rules — do NOT flag or write for:**
-- Git submodule roots inside `_data/organizations/<name>/codebase/` or `_data/organizations/<name>/documentation/` — they have their own indexes
+- Roots of separately cloned repos inside `_data/organizations/<name>/codebase/` or `_data/organizations/<name>/documentation/` — they have their own indexes
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders (check at runtime)
-- Uninitialized submodule paths (empty directories)
+- Paths of repos that are declared but not materialised (empty directories)
 
 ---
 
@@ -104,18 +104,18 @@ Only for folders with 3+ subfolders or non-obvious rules:
 
 ### Codebase app pointer stubs
 
-Each app submodule in `_data/organizations/<name>/codebase/` gets `.abstract.md` as a pointer stub:
+Each codebase cloned into `_data/organizations/<name>/codebase/` gets `.abstract.md` as a pointer stub:
 
 ```
 Context: _data/organizations/<name>/documentation/<app>.md
 ```
 
-Discover app submodule folders at runtime:
+Discover the cloned codebase folders at runtime:
 ```bash
-git submodule status | awk '{print $2}' | grep "^_data/organizations/"
+for d in _data/organizations/*/codebase/*/; do [ -d "$d/.git" ] && echo "$d"; done
 ```
 
-### Workspace submodule roots
+### Roots of cloned repos
 
 Each `_data/organizations/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If initialized (content present), index it. If bare pointer, skip.
 

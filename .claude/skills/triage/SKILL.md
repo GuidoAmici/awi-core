@@ -73,7 +73,7 @@ Show counts and a one-line summary per issue. Let the maintainer pick.
    Do not proceed to step 5 until both outputs exist.
 
 5. **Apply the outcome:**
-   - `ready-for-agent` — post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)) including `**Assigned employee:**`, `**Model:**`, and `**ADR:**` (path to the ADR written during the grill). This label may only be applied after a completed grill session.
+   - `ready-for-agent` — post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)) including `**Assigned agent:**`, `**Model:**`, and `**ADR:**` (path to the ADR written during the grill). This label may only be applied after a completed grill session.
    - `ready-for-human` — same structure as an agent brief, but note why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `needs-info` — post triage notes (template below).
    - `wontfix` (bug) — polite explanation, then close.

@@ -1,11 +1,11 @@
 ---
 name: new-client
-description: Scaffold a new client repo with agenda/, documentation/, and codebase/ structure, then register as a submodule under _data/entities/<name>/. Usage: /new-client <name>
+description: Scaffold a new client repo with agenda/, documentation/, and codebase/ structure, then register it in the manifest under _data/organizations/<name>/. Usage: /new-client <name>
 ---
 
 # /new-client — Add a Client
 
-Creates a new standalone git repo for a company or client and registers it as a submodule under `_data/entities/<name>/`.
+Creates a new standalone git repo for a company or client and registers it in the manifest under `_data/entities/<name>/`.
 
 ## Usage
 
@@ -75,20 +75,23 @@ Should I create a GitHub repo for <name>? (y/n)
 
 ---
 
-### Step 5 — Register as submodule in AWI
+### Step 5 — Register in the manifest
 
 Only if GitHub repo was created:
 
+Registrar la entrada en el manifiesto del operador y materializarla por clone:
+
 ```bash
-git submodule add --force https://github.com/GuidoAmici/<name>.git _data/entities/<name>
-git commit -m "chore(<name>): add client submodule"
+git clone https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
 ```
+
+Y agregar la entrada a `user-submodules.json` con su `url`, `path` y `branch`.
 
 If no GitHub repo, note that submodule registration can be done later.
 
 ---
 
-### Step 6 — Ask about wiki/documentation submodule
+### Step 6 — Ask about the wiki/documentation repo
 
 ```
 Does <name> have a wiki or documentation repo? (y/n)
@@ -96,8 +99,8 @@ Does <name> have a wiki or documentation repo? (y/n)
 
 - **Yes** → ask for the GitHub URL, then:
   ```bash
-  git -C _data/entities/<name> submodule add <url> documentation/wiki
-  git -C _data/entities/<name> commit -m "chore(<name>): add wiki submodule"
+  git clone <url> _data/organizations/<name>/documentation/wiki
+  Then declare it in the org's `codebases.json`.
   ```
 - **No** → skip. Can be added later.
 
@@ -112,10 +115,10 @@ Output:
 Structure:
   _data/entities/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
   _data/entities/<name>/documentation/  ← wiki, context files
-  _data/entities/<name>/codebase/       ← app submodules go here
+  _data/organizations/<name>/codebase/  ← each codebase is cloned here
 
 Next steps:
-  1. Add codebase app repos: git submodule add <url> _data/entities/<name>/codebase/<app>
+  1. Add codebase repos: declare them in the org's `codebases.json`, then clone them into `_data/organizations/<name>/codebase/<app>`
   2. /awi-user-login <username>
 ```
 

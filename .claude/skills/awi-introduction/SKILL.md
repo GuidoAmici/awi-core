@@ -65,7 +65,7 @@ AWI works by organizing everything into two folders:
 Each organization has:
   agenda/         tasks, projects, daily plans
   documentation/  notes, wiki, writing style
-  codebase/       app repos (as submodules)
+  codebase/       app repos (each a separate clone)
 
 You interact through slash commands like /today, /week, /awi-org.
 Claude handles the filing. You handle the thinking.

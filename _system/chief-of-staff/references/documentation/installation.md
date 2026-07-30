@@ -30,7 +30,7 @@ Download from [obsidian.md/download](https://obsidian.md/download). Free for per
 ```bash
 git clone https://github.com/GuidoAmici/awi.git
 cd awi
-git submodule update --init --recursive
+# Nothing here is a submodule: /awi-initialize clones what the manifest declares
 ```
 
 ## Step 4: Open as Obsidian Vault
@@ -115,16 +115,16 @@ awi/
 │   └── _context/                    # LLM context (private)
 │       ├── writing-style.md
 │       ├── business-profile.md
-│       └── workspaces/              # Wiki submodules
+│       └── workspaces/              # Each wiki its own clone
 │
-├── _codebase/                       # Application repos (submodules)
+├── _codebase/                       # Application repos (each its own clone)
 │
 └── .claude/
     ├── settings.json                # Permissions and hooks config
     ├── reference/
-    │   └── employees.json           # Delegation targets
+    │   └── (agent personas are discovered from _system/agency-agents/)
     ├── hooks/
-    │   ├── auto-commit.sh
+    │   ├── git/pre-commit           # blocks sensitive material
     │   └── stop-sound.sh
     └── skills/
         ├── new/

@@ -1,11 +1,11 @@
 ---
 name: initialize
-description: Scaffold a new workspace repo for a company or client. Creates a separate git repo with agenda/, documentation/, and codebase/ structure, then registers it as a submodule under _workspace/<name>/. Usage: /initialize <name>
+description: Scaffold a new workspace repo for a company or client. Creates a separate git repo with agenda/, documentation/, and codebase/ structure, then registers it in the manifest under _data/organizations/<name>/. Usage: /initialize <name>
 ---
 
 # /initialize — Scaffold a Workspace
 
-Creates a new standalone git repo for a company or client and registers it as a submodule under `_workspace/<name>/`.
+Creates a new standalone git repo for a company or client and registers it in the manifest under `_workspace/<name>/`.
 
 ## Usage
 
@@ -34,7 +34,7 @@ Check ARGUMENTS.
 
 ### Step 2 — Determine target path
 
-The new repo will be created as a sibling of the AWI root, then registered as a submodule.
+The new repo is created on GitHub, then cloned into place and declared in the manifest.
 
 Default target: `../<name>` (sibling of current AWI root).
 
@@ -86,18 +86,19 @@ Should I create a GitHub repo for <name>? (y/n)
 
 ---
 
-### Step 5 — Register as submodule in AWI
+### Step 5 — Register in the manifest and materialise
 
 ```bash
-git submodule add https://github.com/GuidoAmici/<name>.git _workspace/<name>
-git commit -m "chore(<name>): add workspace submodule"
+git clone https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
 ```
+
+Y agregar la entrada a `user-submodules.json` con su `url`, `path` y `branch`.
 
 If no GitHub repo was created, skip this step and note that the submodule registration can be done later once the repo is published.
 
 ---
 
-### Step 6 — Ask about wiki/documentation submodule
+### Step 6 — Ask about the wiki/documentation repo
 
 ```
 Does <name> have a wiki or documentation repo? (y/n)
@@ -105,8 +106,8 @@ Does <name> have a wiki or documentation repo? (y/n)
 
 - **Yes** → ask for the GitHub URL, then:
   ```bash
-  git -C _workspace/<name> submodule add <url> documentation/wiki
-  git -C _workspace/<name> commit -m "chore(<name>): add wiki submodule"
+  git clone <url> _data/organizations/<name>/documentation/wiki
+  Then declare it in the org's `codebases.json`.
   ```
 - **No** → skip. Can be added later.
 
@@ -121,9 +122,9 @@ Output:
 Structure:
   _workspace/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
   _workspace/<name>/documentation/  ← wiki, context files
-  _workspace/<name>/codebase/       ← app submodules go here
+  _data/organizations/<name>/codebase/  ← each codebase is cloned here
 
 Next steps:
-  1. Add codebase app repos: git submodule add <url> _workspace/<name>/codebase/<app>
+  1. Add codebase repos: declare them in the org's `codebases.json`, then clone them into `_data/organizations/<name>/codebase/<app>`
   2. /awi-user-login <username>
 ```

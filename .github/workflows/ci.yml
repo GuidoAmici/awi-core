@@ -63,6 +63,14 @@ jobs:
           PYTHONPATH=.claude/skills/shared/scripts \
             python3 .claude/skills/shared/scripts/history_audit.py --rev 'HEAD^{tree}'
 
+      # Las dos instancias de deriva que la revisión integral encontró se
+      # encontraron por casualidad, al pasar por ahí para otra cosa. Esto existe
+      # para que la próxima no dependa de la casualidad. Ver PRD 3 (issue #82).
+      - name: Deriva de vocabulario
+        run: |
+          PYTHONPATH=.claude/skills/shared/scripts \
+            python3 .claude/skills/shared/scripts/vocab_check.py --raiz .
+
   promote:
     name: Promover dev → main
     needs: test

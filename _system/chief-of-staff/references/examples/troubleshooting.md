@@ -8,7 +8,7 @@
    ```
 2. Verify hook is executable:
    ```bash
-   chmod +x .claude/hooks/auto-commit.sh
+   chmod +x .claude/hooks/git/pre-commit
    ```
 3. Confirm file is under `_data/organizations/`, `_data/users/`, or `_system/` (hook ignores other paths)
 

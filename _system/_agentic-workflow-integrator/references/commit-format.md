@@ -9,8 +9,8 @@ docs(newhaze): add BDR-0001 pricing de pHmetro
 feat(afin): login con Supabase
 fix(newhaze): corregir margen de growshop en la lista #27
 chore(sync): stage local changes
-chore: bump submódulos
-refactor(awi): simplificar sync_submodules
+chore(sync): materializar los repos nuevos del manifiesto
+refactor(awi): simplificar el ciclo de contexto
 ```
 
 ## Tipos
@@ -20,7 +20,7 @@ refactor(awi): simplificar sync_submodules
 | `feat` | nueva capacidad/feature |
 | `fix` | corrección de un error |
 | `docs` | contenido del vault, wikis, BDR/ADR, notas, daily/weekly |
-| `chore` | mantenimiento: sync, bumps, scaffolding, init/deinit, mover/renombrar |
+| `chore` | mantenimiento: sync, bumps, scaffolding, activar/desactivar, mover/renombrar |
 | `refactor` | reestructurar sin cambiar comportamiento |
 | `perf` · `test` · `build` · `ci` · `style` · `revert` | uso estándar de Conventional Commits |
 
@@ -28,7 +28,7 @@ refactor(awi): simplificar sync_submodules
 
 El scope es **opcional pero recomendado**. Suele ser:
 
-- el **slug de la org/cliente** (`newhaze`, `afin`) — mapea a los submódulos,
+- el **slug de la org/cliente** (`newhaze`, `afin`) — mapea a las entradas del manifiesto,
 - `awi` para el sistema/vault,
 - `sync` para operaciones de sincronización automáticas.
 

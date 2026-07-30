@@ -9,8 +9,8 @@ Walks `_system/` and all `_clients/<name>/` subtrees, ensuring all folders have 
 
 ## When to run
 
-- After renaming, moving, or restructuring folders inside `_system/` or `_clients/`
-- After adding new workspace submodules or app submodules
+- After renaming, moving, or restructuring folders inside `_system/` or `_data/organizations/`
+- After materialising a new org workspace or codebase
 - When context files feel stale or out of sync with actual contents
 
 ## Context files defined
@@ -21,7 +21,7 @@ Walks `_system/` and all `_clients/<name>/` subtrees, ensuring all folders have 
 | `.overview.md` | L1 | Markdown with heading, folder map table, taxonomy/rules | Top-level and mid-level folders with structure worth explaining |
 
 **Skip** `.abstract.md` / `.overview.md` for:
-- Folders that are git submodule roots (they have their own `CLAUDE.md` / `_index.md`)
+- Folders that are the root of a separately cloned repo (they have their own `CLAUDE.md` / `_index.md`)
 - `node_modules/`, `.git/`, `.claude/`
 - Folders with only a single file and no subfolders
 
@@ -80,24 +80,30 @@ Only for folders that benefit from structural explanation (typically 3+ subfolde
 - Only include a **Conventions** section if there are real rules to document
 - Keep it under ~30 lines
 
-### 5. Workspace submodule roots — skip internals
+### 5. Roots of cloned repos — skip internals
 
 Each `_clients/<name>/` is a git submodule root. Do NOT descend into uninitialized submodules. If the submodule is initialized (content present), you may index it. If it's a bare pointer, skip.
 
-Wiki and codebase app submodules inside `_clients/<name>/documentation/` or `_clients/<name>/codebase/` are also git submodule roots — skip writing context files inside them. The parent folder's `.overview.md` should mention them in its folder map.
+The wiki and each codebase inside `_data/organizations/<name>/` are separate
+cloned repos with their own indexes. Skip writing context files inside them: what
+belongs to this tree is only the pointer stub at their root, and the parent
+folder's `.overview.md` should mention them in its folder map.
+cloned repos with their own indexes. Skip their internals: what belongs to this
+tree is only the pointer stub at their root.
 
 ### 6. Codebase app pointer stubs
 
-Each app submodule in `_clients/<name>/codebase/` must have `.abstract.md` as a pointer stub redirecting to the context file in `_clients/<name>/documentation/`.
+Each codebase cloned into `_data/organizations/<name>/codebase/` must have
+`.abstract.md` as a pointer stub redirecting to the context inside it.
 
 **Stub format:**
 ```
 Context: _clients/<name>/documentation/<app>.md
 ```
 
-**Discover app submodule folders at runtime:**
+**Discover the cloned codebase folders at runtime:**
 ```bash
-git submodule status | awk '{print $2}' | grep "^_clients/"
+for d in _data/organizations/*/codebase/*/; do [ -d "$d/.git" ] && echo "$d"; done
 ```
 
 ### 7. After writing all files

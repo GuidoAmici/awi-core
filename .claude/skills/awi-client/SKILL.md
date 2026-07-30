@@ -1,6 +1,6 @@
 ---
 name: awi-client
-description: Add a client to AWI — create from scratch or import an existing GitHub repo. Scaffolds agenda/, documentation/, codebase/ structure and registers as submodule under _data/organizations/<name>/. Usage: /awi-client <name>
+description: Add a client to AWI — create from scratch or import an existing GitHub repo. Scaffolds agenda/, documentation/, codebase/ structure and registers it in the manifest under _data/organizations/<name>/. Usage: /awi-client <name>
 ---
 
 # /awi-client — Add a Client
@@ -81,16 +81,21 @@ Create a GitHub repo for <name>? (y/n)
   git -C _data/organizations/<name> remote add origin https://github.com/GuidoAmici/<name>.git
   git -C _data/organizations/<name> push -u origin main
   ```
-- **No** → skip. Submodule registration will be skipped too (needs remote URL).
+- **No** → skip. Registering it in the manifest is skipped too (needs a remote URL).
 
-### A3 — Register as submodule
+### A3 — Register in the manifest
 
 Only if GitHub repo was created:
 
+Registrar la entrada en el manifiesto del operador y materializarla por clone.
+No hay ningún submódulo que agregar: `_data/` está en `.gitignore` y nada de lo
+que vive ahí se versiona desde la raíz.
+
 ```bash
-git submodule add --force https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
-git commit -m "chore(<name>): add client submodule"
+git clone https://github.com/GuidoAmici/<name>.git _data/organizations/<name>
 ```
+
+Y agregar la entrada a `user-submodules.json` con su `url`, `path` y `branch`.
 
 ---
 
@@ -110,12 +115,16 @@ If `<name>` cannot be confirmed from the URL, ask:
 Use "<name>" as the local folder name? (y / enter different name)
 ```
 
-### B2 — Add as submodule
+### B2 — Register in the manifest
+
+Materialise it by clone. There is no submodule to add: `_data/` is in
+`.gitignore` and nothing under it is versioned from the root.
 
 ```bash
-git submodule add <url> _data/organizations/<name>
-git submodule update --init _data/organizations/<name>
+git clone <url> _data/organizations/<name>
 ```
+
+Then add the entry to `user-submodules.json` with its `url`, `path` and `branch`.
 
 ### B3 — Scaffold missing AWI structure
 
@@ -136,10 +145,10 @@ Output:
 
   _data/organizations/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
   _data/organizations/<name>/documentation/  ← context files, topic folders
-  _data/organizations/<name>/codebase/       ← app submodules go here
+  _data/organizations/<name>/codebase/       ← each codebase is cloned here
 
 Next steps:
-  - Add codebase repos: git submodule add <url> _data/organizations/<name>/codebase/<app>
+  - Add codebase repos: declare them in the org's `codebases.json`, then clone them into `_data/organizations/<name>/codebase/<app>`
   - /awi-user-login <username>
 ```
 

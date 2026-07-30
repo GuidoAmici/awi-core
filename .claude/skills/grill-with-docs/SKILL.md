@@ -103,11 +103,19 @@ Covers: does this solve a real problem? who is it for? is it needed or just inte
 
 Covers: urgency, effort estimate, quick win vs. big feature, dependencies.
 
-Closes by recommending an `assigned-employee` from `.claude/reference/employees.json`. Read the taglines to shortlist; propose one. The maintainer confirms before phase 3 opens.
+Closes by recommending an agent persona. Shortlist by searching the tree:
+
+```bash
+python3 .claude/skills/shared/scripts/agent_personas.py <término>
+```
+
+It prints name, category and tagline. Propose one; the maintainer confirms before
+phase 3 opens.
 
 ### Phase 3 — Quality specs (`assigned-employee`)
 
-Load the confirmed employee's `.md` from the path in `employees.json`. Speak as that agent for the rest of the session.
+Load the confirmed persona's `.md` — `agent_personas.py --resolver <nombre>` gives
+the path. Speak as that agent for the rest of the session.
 
 Covers: acceptance criteria, scope boundaries, key interfaces, edge cases.
 

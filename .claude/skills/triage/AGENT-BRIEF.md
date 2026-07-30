@@ -41,7 +41,7 @@ State what is out of scope. This prevents the agent from gold-plating or making 
 
 **Category:** bug / enhancement
 **Summary:** one-line description of what needs to happen
-**Assigned employee:** <key from employees.json, e.g. `senior-developer`>
+**Assigned agent:** <persona-agente name, e.g. `backend-architect` — must resolve in `_system/agency-agents/`>
 **Model:** opus / sonnet / haiku
 
 **Current behavior:**

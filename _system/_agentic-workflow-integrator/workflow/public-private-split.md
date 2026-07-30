@@ -15,7 +15,7 @@ There is **one canonical repo**: `awi-core`, and it is public. An AWI instance i
 | Lives in `awi-core` (public) | Lives outside it (private) |
 |---|---|
 | Skills (`.claude/skills/`) | `_data/` — every user profile and org workspace |
-| Hooks (`.claude/hooks/`) | `.gitmodules` — generated per operator |
+| Hooks (`.claude/hooks/`) | `user-submodules.json` — the manifest, private per operator |
 | System docs (`_system/`) | Anything naming a client or containing their data |
 | Root docs (`CLAUDE.md`, `INSTRUCTIONS.md`, ADRs) | |
 
@@ -29,7 +29,7 @@ By `.gitignore` — not by a sync script, and not by merge strategy:
 
 ```gitignore
 _data/                      # every instance's private data
-.gitmodules                 # generated from user-submodules.json
+user-submodules.json        # the manifest: what this operator materialises
 _system/agency-agents/      # materialised by /awi-initialize
 ```
 
@@ -56,7 +56,7 @@ They are declared in `_data/users/<github-id>/user-submodules.json` and operated
 
 1. Fork or clone `awi-core`
 2. Run `/awi-introduction` — links the GitHub account and creates the `my-awi-user` repo
-3. Run `/awi-initialize` — generates `.gitmodules` from `user-submodules.json` and clones each active submodule
+3. Run `/awi-initialize` — clones every repo the manifest declares active
 
 No sync path to configure: there is no second repo to mirror to.
 

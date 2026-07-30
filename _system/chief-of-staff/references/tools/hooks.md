@@ -8,7 +8,7 @@ Configured in `.claude/settings.json`. Three hooks are active:
 
 Triggers after every `Write` or `Edit` operation on vault content.
 
-**Script:** `.claude/hooks/auto-commit.sh` (bash) / `.claude/hooks/auto-commit.ps1` (PowerShell fallback)
+**Script:** `.claude/hooks/git/pre-commit` — blocks sensitive material before it enters the history. There is no hook that commits for you.
 
 **Behavior:**
 - Only commits files under `_data/organizations/` or `_system/`
@@ -17,9 +17,9 @@ Triggers after every `Write` or `Edit` operation on vault content.
 
 **Commit format:**
 ```
-cos: new task - task-name
-cos: update person - guido
-cos: new chief-of-staff - file-formats
+docs(agenda): nueva tarea — task-name
+docs(agenda): actualizar persona — guido
+docs(chief-of-staff): nuevo file-formats
 ```
 
 **Filter all activity:**
@@ -32,7 +32,7 @@ git log --grep="cos:"
    ```json
    "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
    ```
-2. Verify hook is executable: `chmod +x .claude/hooks/auto-commit.sh`
+2. Verify the hook is executable: `chmod +x .claude/hooks/git/pre-commit`
 3. Confirm file is under `_data/organizations/` or `_system/`
 
 ---

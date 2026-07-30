@@ -7,17 +7,17 @@ Every action = a commit. Git is the database.
 ## Commit Format
 
 ```
-cos: <action> - <description>
+type(scope): subject
 ```
 
 | Pattern | Meaning |
 |---------|---------|
-| `cos: new task - name` | Created task |
-| `cos: update project - name` | Modified project |
-| `cos: complete task - name` | Marked complete |
-| `cos: daily plan for YYYY-MM-DD` | Created daily note |
-| `cos: daily review for YYYY-MM-DD` | End of day review |
-| `cos: update person - guido` | Updated person file |
+| `docs(agenda): nueva tarea — name` | Created task |
+| `docs(agenda): actualizar proyecto — name` | Modified project |
+| `docs(agenda): completar tarea — name` | Marked complete |
+| `docs(agenda): plan diario YYYY-MM-DD` | Created daily note |
+| `docs(agenda): revisión diaria YYYY-MM-DD` | End of day review |
+| `docs(agenda): update person — guido` | Updated person file |
 
 Filter all Chief of Staff activity: `git log --grep="cos:"`
 

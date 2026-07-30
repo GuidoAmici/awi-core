@@ -4,24 +4,30 @@ Delegate work to specialized AI employees running in separate terminal sessions.
 
 ---
 
-## What Are AI Employees?
+## Qué es una persona-agente
 
-AI employees are separate Claude Code repositories with specialized skills. Each lives in its own repo. The Chief of Staff orchestrates them via tasks in the AWI vault.
+Una definición de agente con nombre, descubierta desde `_system/agency-agents/`.
+El archivo del agente es su prompt de sistema, su directorio es su categoría, y
+el `description` de su frontmatter es el tagline con el que se rutea.
 
-Current employees: see `.claude/reference/employees.json`
+No hay registro que configurar: agregar una persona-agente es agregar un archivo.
 
----
+```bash
+# todas, o filtradas por nombre, categoría o tagline
+python3 .claude/skills/shared/scripts/agent_personas.py [término]
 
-## Configure Employee Paths
+# sólo las categorías, con cuántas tiene cada una
+python3 .claude/skills/shared/scripts/agent_personas.py --categorias
 
-Edit `.claude/reference/employees.json`:
-
-```json
-{
-  "gemini-website": "~/projects/<org-name>-website",
-  "gemini-learn": "~/projects/<org-name>-learn"
-}
+# la ruta de una, o un error que nombra las parecidas
+python3 .claude/skills/shared/scripts/agent_personas.py --resolver backend-architect
 ```
+
+El registro escrito a mano que esto reemplaza tenía 36 entradas, y dos estaban
+rotas: una apuntaba a un archivo inexistente y otra listaba un playbook como si
+fuera un agente. Un registro a mano sobre un árbol de 292 archivos que un tercero
+puede cambiar sin aviso está desactualizado por construcción. Ver
+[ADR 0008](../../../../docs/adr/0008-agent-discovery-desde-agency-agents.md).
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: delegate-issue
-description: Scan for ready-for-agent issues and dispatch them to background agents. Only issues that completed a grill session (reflected by ready-for-agent label + Assigned employee in brief) are eligible.
+description: Scan for ready-for-agent issues and dispatch them to background agents. Only issues that completed a grill session (reflected by ready-for-agent label + Assigned agent in brief) are eligible.
 ---
 
 # Delegate Issue
@@ -24,12 +24,13 @@ Each issue carries `number`, `title`, `body`, `labels`, `org` (null for personal
 ## Step 2: Validate each issue
 
 For each issue, find the `## Agent Brief` comment in its `comments` array (no extra `gh` call — Step 1 already fetched them). It must contain:
-- `**Assigned employee:**` — a key present in `.claude/reference/employees.json`
+- `**Assigned agent:**` — a persona-agente that resolves in `_system/agency-agents/`:
+  `python3 .claude/skills/shared/scripts/agent_personas.py --resolver <nombre>`
 - `**Model:**` — opus / sonnet / haiku
 
 If either field is missing, skip the issue and warn:
 ```
-⚠ #42 skipped — agent brief missing Assigned employee or Model. Re-run /triage to complete it.
+⚠ #42 skipped — agent brief missing Assigned agent or Model. Re-run /triage to complete it.
 ```
 
 ## Step 3: Present dispatch list
@@ -52,11 +53,11 @@ Wait for user input before proceeding.
 
 For each confirmed issue:
 
-1. **Load employee persona:**
+1. **Load the agent persona** — resolved from the tree, not from a registry:
+   ```bash
+   python3 .claude/skills/shared/scripts/agent_personas.py --resolver <nombre>
    ```
-   path = employees.json[assigned_employee]["path"]
-   ```
-   Read the full `.md` file at that path.
+   It prints the path, or fails naming the closest matches. Read that `.md` whole.
 
 2. **Extract agent brief** from the issue comment (the `## Agent Brief` block).
 
@@ -78,7 +79,7 @@ For each confirmed issue:
 
    Call the `Agent` tool with:
    - `description`: `"issue-<number>: <short title>"`
-   - `prompt`: the built prompt (full employee persona + task)
+   - `prompt`: the built prompt (full agent persona + task)
    - `model`: model from brief — `opus` / `sonnet` / `haiku`
    - `run_in_background`: `true`
 
