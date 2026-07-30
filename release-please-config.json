@@ -8,7 +8,18 @@
       "include-component-in-tag": false,
       "bump-minor-pre-major": true,
       "draft": false,
-      "prerelease": false
+      "prerelease": false,
+      "changelog-sections": [
+        { "type": "feat", "section": "Características" },
+        { "type": "fix", "section": "Correcciones" },
+        { "type": "refactor", "section": "Refactorizaciones" },
+        { "type": "perf", "section": "Rendimiento" },
+        { "type": "ci", "section": "Integración continua" },
+        { "type": "chore", "section": "Mantenimiento" },
+        { "type": "docs", "section": "Documentación" },
+        { "type": "test", "section": "Tests" },
+        { "type": "style", "section": "Estilo", "hidden": true }
+      ]
     }
   }
 }
