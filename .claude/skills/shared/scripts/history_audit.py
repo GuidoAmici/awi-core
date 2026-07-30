@@ -65,18 +65,43 @@ def _git(repo: Path, *args: str, entrada: str | None = None) -> str:
 
 
 def rutas_por_objeto(repo: Path, refs: tuple[str, ...] = ("--all",)) -> dict[str, set[str]]:
-    """oid → rutas con las que ese objeto apareció alguna vez.
+    """oid → todas las rutas con las que ese objeto apareció alguna vez.
 
-    Un mismo blob puede haber vivido en varias rutas; interesan todas, porque la
-    purga opera sobre rutas.
+    Dos fuentes, porque ninguna alcanza sola.
+
+    `rev-list --objects` **deduplica objetos**: un blob que vivió en dos rutas se
+    imprime una sola vez, con una de ellas. Eso hace que una regla de ruta pierda
+    la otra, y no es teórico — pasó. El blob vacío aparecía con una única ruta, y
+    `.claude/tmp/delegates/skill-quality-audit/output.log` sobrevivió a la primera
+    purga por eso: la ruta nunca entró al inventario.
+
+    `log --raw` da el par (blob, ruta) de cada cambio, que es como un archivo
+    entra al historial, así que cubre todas las rutas. Se usan las dos y se unen:
+    la primera aporta los objetos alcanzables que ningún cambio nombra, la
+    segunda las rutas que la primera colapsó.
     """
-    salida = _git(repo, "rev-list", "--objects", *refs)
     mapa: dict[str, set[str]] = {}
-    for linea in salida.splitlines():
+
+    for linea in _git(repo, "rev-list", "--objects", *refs).splitlines():
         oid, _, ruta = linea.partition(" ")
-        if not ruta:
-            continue  # commit o tree raíz: no tiene ruta
-        mapa.setdefault(oid, set()).add(ruta)
+        if ruta:  # los commits y el tree raíz no tienen ruta
+            mapa.setdefault(oid, set()).add(ruta)
+
+    # --raw imprime `:<modo_viejo> <modo_nuevo> <oid_viejo> <oid_nuevo> <estado>\tRUTA`.
+    # Interesan los dos oids: el nuevo es lo que el cambio agregó, el viejo es lo
+    # que había antes en esa misma ruta.
+    vacio = "0" * 40
+    crudo = _git(repo, "log", "--raw", "--no-renames", "--no-abbrev", "--format=", *refs)
+    for linea in crudo.splitlines():
+        if not linea.startswith(":") or "\t" not in linea:
+            continue
+        meta, _, ruta = linea.partition("\t")
+        campos = meta.split()
+        if len(campos) < 5:
+            continue
+        for oid in (campos[2], campos[3]):
+            if oid != vacio and not oid.startswith(vacio[:20]):
+                mapa.setdefault(oid, set()).add(ruta)
     return mapa
 
 

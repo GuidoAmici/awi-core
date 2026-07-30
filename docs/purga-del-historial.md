@@ -101,6 +101,39 @@ auditoría con las mismas reglas** que la motivaron. Si queda algo en una ruta q
 la purga declaró haber limpiado, falla ruidosamente. Una purga que no se verifica
 con el criterio que la motivó no es una purga, es una esperanza.
 
+### Lo que la primera ejecución real enseñó
+
+Dos defectos que sólo aparecieron al correrlo contra el repositorio de verdad, y
+que están como test de regresión:
+
+**`rev-list --objects` deduplica objetos.** Un blob que vivió en dos rutas se
+imprime una sola vez, con una de ellas, así que una regla de ruta pierde la otra.
+`.claude/tmp/delegates/skill-quality-audit/output.log` —un archivo vacío, y el
+blob vacío lo comparten muchos— sobrevivió a la primera purga porque su ruta
+nunca entró al inventario. El inventario ahora combina `rev-list --objects` con
+`log --raw`, que da el par (blob, ruta) de cada cambio.
+
+**Verificar sólo contra la lista de rutas purgadas es circular.** Una ruta que el
+inventario nunca vio quedaba aprobada por no estar en la lista — que es
+exactamente cómo el defecto anterior pasó desapercibido. La verificación ahora
+replanifica sobre el resultado: cualquier ruta que el plan volvería a señalar es
+residuo, incluso si nunca estuvo en la lista.
+
+**`refs/pull/*`.** Un clon `--mirror` de GitHub trae las refs de los pull
+requests, que son de sólo lectura del lado del servidor y hacen fallar el
+`push --mirror`. Hay que borrarlas del espejo antes de purgar:
+
+```bash
+for r in $(git -C espejo.git for-each-ref --format='%(refname)' 'refs/pull/*'); do
+  git -C espejo.git update-ref -d "$r"
+done
+```
+
+**`dev` está protegida contra force-push.** `main`, los tags y la rama de
+release-please se actualizaron sin problema; `dev` fue rechazada por su branch
+protection (`allow_force_pushes: false`). Hay que desactivarlo en
+Settings → Branches → dev, empujar, y volver a activarlo.
+
 ### Después
 
 1. **Rotar** la credencial de la cuenta de prueba que estuvo expuesta

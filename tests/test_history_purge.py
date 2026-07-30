@@ -125,6 +125,19 @@ def test_la_verificacion_falla_si_no_se_purgo(sucio, reglas):
     assert residuo, "verificar aprobó un repo que nadie purgó"
 
 
+def test_la_verificacion_no_aprueba_una_ruta_que_nunca_estuvo_en_la_lista(sucio, reglas):
+    """La segunda regresión de la primera purga real.
+
+    Verificar sólo contra la lista de rutas purgadas es circular: una ruta que el
+    inventario nunca vio queda aprobada por no estar en la lista. Replanificar
+    sobre el resultado es lo que rompe la circularidad.
+    """
+    residuo = hp.verificar(sucio, reglas, purgadas=["una/ruta/que/no/existe"])
+
+    assert residuo, "aprobó un repo lleno de material con una lista vacía de rutas"
+    assert any(h.ruta.startswith(".claude/tmp/") for h in residuo)
+
+
 @filter_repo
 def test_lo_legitimo_sobrevive(sucio, tmp_path, reglas):
     r = hp.purgar(sucio, tmp_path / "espejo.git", reglas)

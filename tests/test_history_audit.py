@@ -119,6 +119,43 @@ def test_encuentra_material_en_una_rama_no_mergeada(tmp_path, reglas):
     assert ".env" in reporte.rutas()
 
 
+def test_un_blob_compartido_reporta_todas_sus_rutas(tmp_path, reglas):
+    """La regresión de la primera purga real.
+
+    `rev-list --objects` deduplica objetos: dos rutas con contenido idéntico son
+    un solo blob y se imprimen una sola vez, con una de las rutas. Por eso
+    `.claude/tmp/delegates/skill-quality-audit/output.log` —un archivo vacío, y
+    el blob vacío lo comparten muchos— sobrevivió a la primera purga: su ruta
+    nunca entró al inventario.
+
+    El orden importa para reproducirlo: `rev-list` recorre de HEAD hacia atrás,
+    así que si el blob aparece primero con una ruta legítima en HEAD, la ruta
+    sensible del commit viejo nunca se imprime — ya vio el objeto.
+    """
+    repo = repo_limpio(tmp_path)
+
+    tmp = repo / ".claude/tmp"
+    tmp.mkdir(parents=True)
+    (tmp / "vacio.log").write_text("")
+    (tmp / "copia.md").write_text("contenido compartido\n")
+    git(repo, "add", "-Af")
+    git(repo, "commit", "-qm", "scratch del delegado")
+
+    git(repo, "rm", "-r", "-q", "--cached", ".claude/tmp")
+    (repo / ".gitignore").write_text(".claude/tmp/\n")
+    # En HEAD, los mismos blobs con rutas legítimas: son los que rev-list ve
+    # primero, y con eso da el objeto por resuelto.
+    (repo / "placeholder.md").write_text("")
+    (repo / "nota.md").write_text("contenido compartido\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "desversionar el scratch")
+
+    rutas = ha.auditar(repo, reglas).rutas()
+
+    assert ".claude/tmp/vacio.log" in rutas, "se perdió la ruta del blob vacío"
+    assert ".claude/tmp/copia.md" in rutas, "se perdió la ruta del blob duplicado"
+
+
 def test_el_reporte_incluye_el_limite_de_la_purga(tmp_path, reglas):
     """Un reporte vacío sin esta advertencia se lee como «ya no existe»."""
     repo = repo_limpio(tmp_path)

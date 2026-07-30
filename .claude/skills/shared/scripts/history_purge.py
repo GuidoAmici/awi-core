@@ -102,15 +102,29 @@ def espejar(origen: Path, destino: Path) -> Path:
 
 
 def verificar(espejo: Path, reglas: list[ss.Regla], purgadas: list[str]) -> list[ss.Hallazgo]:
-    """Residuo: hallazgos que sobreviven en las rutas que se purgaron.
+    """Residuo: lo que sobrevivió y no debería.
 
-    Restringido a las rutas purgadas a propósito. Si el operador dejó afuera un
-    hallazgo por contenido, la auditoría lo sigue reportando y está bien: no es
-    residuo de esta purga.
+    Dos criterios, y el segundo existe porque el primero solo no alcanzó.
+
+    El primero es lo obvio: hallazgos en las rutas que la purga declaró haber
+    limpiado. Restringido a esas rutas a propósito — si el operador dejó afuera
+    un hallazgo por contenido, la auditoría lo sigue reportando y está bien.
+
+    El segundo es replanificar sobre el resultado: **cualquier** ruta que el plan
+    volvería a señalar es residuo, incluso si nunca estuvo en la lista. Con sólo
+    el primer criterio, una ruta que el inventario nunca vio salía aprobada por
+    no estar en la lista, que es circular. Pasó en la primera purga real:
+    `rev-list --objects` deduplica blobs, una ruta de `.claude/tmp/` quedó fuera
+    del inventario, sobrevivió, y la verificación la aprobó.
     """
     reporte = ha.auditar(espejo, reglas)
     purgadas_set = set(purgadas)
-    return [h for h in reporte.hallazgos if h.ruta in purgadas_set]
+    en_lista = [h for h in reporte.hallazgos if h.ruta in purgadas_set]
+
+    resto = ss.Reporte([h for h in reporte.hallazgos if h.ruta not in purgadas_set])
+    fuera_de_lista = [h for h in resto.hallazgos if h.ruta in set(planificar(resto).por_ruta)]
+
+    return en_lista + fuera_de_lista
 
 
 def purgar(
