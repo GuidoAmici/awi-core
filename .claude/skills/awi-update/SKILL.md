@@ -21,7 +21,16 @@ Existe porque antes no había ninguna forma de que la instancia de un compañero
 
 Lo que **nunca** se toca: todo `_data/` — perfiles de usuario, workspaces de org y los repos clonados adentro. Está en `.gitignore`, así que el reset no lo alcanza.
 
-Lo que **sí** se descarta: cambios locales en archivos del harness. El script los lista antes de descartarlos, así que nada desaparece en silencio.
+**Nada se destruye, ni siquiera en el reset.** El harness termina idéntico a lo publicado, pero el trabajo local no se paga con eso: se rescata antes de tocar el árbol.
+
+| Trabajo local | Va a | Se recupera con |
+|---|---|---|
+| Commits que no están arriba | rama `respaldo/<rama>-<fecha>` | `git branch --list 'respaldo/*'` |
+| Cambios sin commitear, incluidos archivos nuevos | stash `awi-update <fecha>` | `git stash list` |
+
+Si un rescate falla, la skill aborta sin tocar nada: perder trabajo en silencio es peor que no actualizar.
+
+Esto importa sobre todo en máquinas que estuvieron meses sin actualizarse, donde es probable que haya algo local que nadie recuerda. Y cubre el caso que el historial no puede descartar: de 1949 commits en awi-core ninguno es de un colaborador, pero el historial sólo ve lo commiteado — una edición local sin commitear es invisible ahí.
 
 ## La rama decide la operación, no sólo el ref
 
