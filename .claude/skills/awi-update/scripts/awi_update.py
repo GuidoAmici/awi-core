@@ -72,8 +72,14 @@ def version_at(ref: str) -> str:
 
 
 def local_changes() -> list[str]:
-    """Archivos del harness modificados localmente, que el reset va a descartar."""
-    return [ln[3:] for ln in out("status", "--porcelain", "--untracked-files=no").splitlines() if ln]
+    """Archivos del harness modificados localmente, que el reset va a descartar.
+
+    No pasa por out(): en --porcelain la primera columna es significativa y un
+    .strip() sobre el stdout completo se come el espacio inicial de la primera
+    línea, corriendo el nombre del archivo un carácter.
+    """
+    raw = git("status", "--porcelain", "--untracked-files=no").stdout
+    return [ln[3:] for ln in raw.splitlines() if ln.strip()]
 
 
 def incoming(old: str, new: str) -> list[tuple[str, str, str]]:
