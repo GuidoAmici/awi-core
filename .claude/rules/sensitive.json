@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "_nota": "Definición única de «qué es material sensible». La consumen la auditoría del historial (history_audit.py), el hook de pre-commit y la verificación post-purga, a través del motor en .claude/skills/shared/scripts/sensitive_scan.py. Agregar un patrón acá no requiere tocar el motor. Categorías válidas: credencial, material-de-cliente, ruido-operativo. Ver PRD 1 (issue #80) y ADR 0014.",
+  "_excepciones": "Toda regla de contenido excluye tres árboles. .claude/rules/ porque este archivo contiene los patrones que busca. tests/ porque sus fixtures plantan credenciales a propósito. _system/agency-agents/ porque es un clon de terceros y sus documentos son catálogos de patrones a detectar: enumerar '-----BEGIN RSA PRIVATE KEY-----' como cosa a buscar no es tener una clave privada. Excluir es la contracara necesaria de reglas amplias — un hook que se saltea siempre no protege de nada.",
+  "reglas": [
+    {
+      "nombre": "clave-privada",
+      "categoria": "credencial",
+      "descripcion": "Bloque PEM de clave privada.",
+      "remedio": "Sacar el archivo del commit, rotar la clave y guardarla en Doppler.",
+      "contenido": "-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----",
+      "excepto_rutas": [
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "token-de-proveedor",
+      "categoria": "credencial",
+      "descripcion": "Token con el formato reconocible de un proveedor (GitHub, OpenAI, Supabase, AWS, Slack, JWT).",
+      "remedio": "Rotar el token en el proveedor y tomarlo del entorno, nunca del árbol.",
+      "contenido": "\\b(?:gh[pousr]_[A-Za-z0-9]{30,}|sk-(?:ant-)?[A-Za-z0-9_-]{24,}|sbp_[a-f0-9]{36,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{12,}|eyJ[A-Za-z0-9_-]{12,}\\.[A-Za-z0-9_-]{12,}\\.[A-Za-z0-9_-]{12,})",
+      "excepto_rutas": [
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "cadena-de-conexion",
+      "categoria": "credencial",
+      "descripcion": "URI de servicio con usuario y contraseña embebidos.",
+      "remedio": "Componer la cadena en tiempo de ejecución desde variables de entorno.",
+      "contenido": "(?i)\\b(?:postgres(?:ql)?|mysql|mongodb(?:\\+srv)?|redis|amqps?)://[^\\s:@/]+:[^\\s:@/]{3,}@",
+      "excepto_contenido": "(?i)(?:\\$\\{|\\$[A-Z_]{3,}|<[^>]*>|:(?:password|passwd|pass|secret|token|x{3,}|\\*{3,})@|\\b(?:usuario|user|username):(?:clave|pass)@)",
+      "excepto_rutas": [
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "asignacion-de-secreto",
+      "categoria": "credencial",
+      "descripcion": "Asignación de un secreto a un valor literal. Mencionar la palabra en prosa no alcanza: exige la forma clave = valor. Sin \\b inicial a propósito, porque el nombre real suele venir prefijado (db_password, SUPABASE_SERVICE_ROLE_KEY).",
+      "remedio": "Mover el valor a Doppler y leerlo del entorno.",
+      "contenido": "(?i)(?:password|passwd|pwd|secret|api[_-]?key|apikey|access[_-]?token|auth[_-]?token|service[_-]?role[_-]?key|anon[_-]?key|client[_-]?secret)\\b\\s*[:=]\\s*[\"']?[^\\s\"'#,;{}$<>()]{8,}",
+      "excepto_contenido": "(?i)(?:\\$\\{|\\$[A-Z_]{3,}|<[^>]*>|\\byour|\\bexample|\\bejemplo|\\bchangeme|\\bplaceholder|\\bredact|\\bdummy|\\bfake|\\bsample|\\btu[_-]|\\b(?:none|null|true|false)\\b|x{6,}|\\*{4,}|\\.{4,}|_{4,}|os\\.environ|process\\.env|getenv|Deno\\.env|ENV\\[|System\\.getenv|secrets\\.[A-Za-z]|doppler)",
+      "excepto_rutas": [
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "archivo-de-entorno",
+      "categoria": "credencial",
+      "descripcion": "Archivo .env versionado. Su razón de existir es guardar secretos.",
+      "remedio": "Versionar sólo .env.example con los nombres de las variables y valores vacíos.",
+      "ruta": "(?:^|/)\\.env(?:\\.[A-Za-z0-9_-]+)?$",
+      "excepto_rutas": [
+        "\\.env\\.(?:example|sample|template|dist)$"
+      ]
+    },
+    {
+      "nombre": "scratch-de-delegado",
+      "categoria": "material-de-cliente",
+      "descripcion": "Directorio de scratch de los agentes delegados. Es donde quedan sus logs completos, que incluyen el código y las auditorías de los clientes sobre los que trabajaron. Nunca se versiona.",
+      "remedio": "El scratch de un delegado vive fuera del árbol versionado; .claude/tmp/ está en .gitignore desde 8334bed.",
+      "ruta": "^\\.claude/tmp/"
+    },
+    {
+      "nombre": "log-de-delegado",
+      "categoria": "material-de-cliente",
+      "descripcion": "Log o prompt de una corrida de delegado, en cualquier ubicación. Complementa a scratch-de-delegado para el caso de que el directorio se mueva.",
+      "remedio": "Mantener las corridas de delegados fuera del árbol versionado.",
+      "ruta": "(?:^|/)delegates/[^/]+/(?:output\\.log|prompt\\.txt|status\\.json)$"
+    },
+    {
+      "nombre": "informe-de-auditoria",
+      "categoria": "material-de-cliente",
+      "descripcion": "Recuento de hallazgos con severidades — la forma de un informe de auditoría de seguridad sobre el código de un cliente.",
+      "remedio": "El informe pertenece al repo del cliente o a su tracker, no a awi-core.",
+      "contenido": "(?i)\\b\\d+\\s+(?:critical|cr[ií]tic[oa]s?)\\b.{0,60}?\\b\\d+\\s+(?:high|alt[oa]s?)\\b",
+      "excepto_rutas": [
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "volcado-de-datos",
+      "categoria": "material-de-cliente",
+      "descripcion": "Volcado de base con filas adentro. Las filas son datos de un cliente.",
+      "remedio": "Versionar sólo migraciones y esquema; los datos se quedan en la base.",
+      "ruta": "\\.(?:sql|dump)$",
+      "contenido": "(?i)^\\s*(?:INSERT\\s+INTO|COPY\\s+\\S+\\s+FROM\\s+stdin)",
+      "excepto_rutas": [
+        "^tests/",
+        "^_system/agency-agents/"
+      ]
+    },
+    {
+      "nombre": "script-descartable",
+      "categoria": "ruido-operativo",
+      "descripcion": "Script de un solo uso en un directorio de scratch. No es sensible por sí mismo, pero es el vehículo con el que llegó casi todo lo demás.",
+      "remedio": "Correrlo desde el directorio de scratch de la sesión, fuera del repo.",
+      "ruta": "(?i)(?:^|/)(?:scratch|throwaway|descartable)/[^/]*\\.(?:ps1|sh|py|js|mjs)$"
+    },
+    {
+      "nombre": "mensaje-de-commit-suelto",
+      "categoria": "ruido-operativo",
+      "descripcion": "Archivo con el texto de un mensaje de commit. Es un artefacto del proceso, no del proyecto.",
+      "remedio": "Pasar el mensaje por -m o por el editor de git.",
+      "ruta": "(?:^|/)commit_msg(?:\\.txt)?$"
+    },
+    {
+      "nombre": "artefacto-de-respaldo",
+      "categoria": "ruido-operativo",
+      "descripcion": "Copia de respaldo dejada por un editor o por una edición manual.",
+      "remedio": "Borrarla; git ya es el respaldo.",
+      "ruta": "\\.(?:bak|orig|rej|swp)$"
+    }
+  ]
+}
