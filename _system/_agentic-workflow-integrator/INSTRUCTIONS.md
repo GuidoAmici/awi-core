@@ -1,6 +1,6 @@
 # Agentic Workflow Integrator (AWI)
 
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, submodules) and scaffolds `_data/organizations/<name>/` entries for personal and company contexts. Each entity follows the same `agenda/` + `documentation/` + `codebase/` structure.
+A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs) and `_data/` (users, org workspaces) and scaffolds `_data/organizations/<name>/` entries for personal and company contexts. Each entity follows the same `agenda/` + `documentation/` + `codebase/` structure.
 
 Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
 
@@ -49,30 +49,41 @@ The comment must state:
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
-## Submodule Changes
+## Contexto compartido
 
-`_data/submodules.md` is the source of truth for the submodule graph and registry. Read it before any submodule operation. Update it after every operation.
+Los repos de contexto —las orgs, sus codebases y el repo del propio operador— los editan **varias personas**. Traer y publicar los cambios es responsabilidad tuya, no del operador: la idea es que nadie tenga que saber git para trabajar acompañado.
 
-### Operations that require an update
+La mecánica está en `context_sync.py`; el juicio de cuándo usarla es esto. No reimplementes la mecánica con comandos de git sueltos — el script existe porque un `pull --rebase` mal manejado deja repos a medias, y eso ya pasó.
 
-Add · remove · init · update · path change · URL change · branch change · toggle active/inactive
-
-### Safety protocol — before changing a path in `.gitmodules`
-
-**Always run this check first:**
+### Al abrir la sesión — traer, sin preguntar
 
 ```bash
-git -C <current-local-path> status
+python3 .claude/skills/shared/scripts/context_sync.py pull
 ```
 
-If output shows uncommitted changes: commit or stash before touching `.gitmodules`. Changing `path =` moves where git looks — any uncommitted work at the old path is orphaned and unrecoverable.
+Corrélo **siempre** al empezar, antes de leer o escribir contexto, y sin pedir permiso: trabajar sobre datos viejos es peor que la interrupción. Es rápido y no destruye nada.
 
-### After any submodule operation
+### Durante la sesión y al cerrarla — publicar, con mensajes de verdad
 
-1. Run `git submodule status` (and nested if applicable)
-2. Update the Mermaid graph node style to reflect new state (`safe` / `warning` / `danger`)
-3. Update the Registry table: Clone status, Local path, Pinned SHA, Branch tracked
-4. Show the updated graph to the user
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py status
+python3 .claude/skills/shared/scripts/context_sync.py push --repo <nombre> --message "<mensaje>"
+```
+
+En cortes lógicos y al cerrar, mirá `status` y **ofrecé** publicar lo que haya. Publicar sí se ofrece; traer no se pregunta.
+
+**Redactá vos el mensaje de cada repo, uno por repo.** En [Conventional Commits](references/commit-format.md), describiendo lo que cambió de verdad. Nunca un mensaje genérico repetido: el historial compartido de estos repos es una pared de `chore(sync): stage local changes` porque el sync viejo usaba una constante, y eso lo vuelve inservible para saber qué pasó.
+
+### Cuando un repo reporta `conflicto`
+
+Significa que los cambios del operador y los de otra persona se pisan. **El repo quedó como estaba** — el script nunca lo deja a mitad de una operación.
+
+No lo resuelvas por tu cuenta: decidir qué versión del trabajo de otra persona sobrevive no es tuyo. Mostrale al operador qué repo es y qué se toca, y preguntale cómo seguir. El resto de los repos sí se sincronizó, así que la sesión puede continuar.
+
+### Qué no entra en este ciclo
+
+- **El harness.** Se actualiza con `/awi-update`, que es otra cosa: ahí el operador es consumidor y no coautor.
+- **Los repos `upstream`.** Son dependencias, no contexto ([ADR 0012](../../docs/adr/0012-contextos-flotan-dependencias-pinean.md)), y su política de versionado es distinta.
 
 ## Structure
 
@@ -80,14 +91,13 @@ If output shows uncommitted changes: commit or stash before touching `.gitmodule
 awi/
   .claude/                          - Claude Code config: skills, hooks, reference, settings
   _data/                            - Runtime data (not framework docs)
-    users/                          - One submodule per user (<github-id>/)
+    users/                          - One cloned repo per user (<github-id>/)
       current-user.json             - Points to active user's folder
-    organizations/                  - One submodule per org/company
+    organizations/                  - One cloned repo per org/company
       <name>/
         agenda/                     - Tasks, projects, people, daily, outputs, etc.
         documentation/              - Writing style, business profile, personal wiki
-        codebase/                   - Code repos (submodules)
-    submodules.md                   - Submodule graph and registry
+        codebase/                   - Code repos (cloned, declared in codebases.json)
   _system/                          - AWI framework (public)
     agentic-workflow-integrator/
       INSTRUCTIONS.md               - This file — single source of truth
@@ -105,7 +115,7 @@ awi/
       workflow/                     - COS workflow documentation
 ```
 
-Each `_data/organizations/<name>/` is a **separate git repo** registered as a submodule of AWI.
+Each `_data/organizations/<name>/` is a **separate git repo**, declared in `user-submodules.json` and materialised by `git clone`. Nothing in AWI is a submodule — see [ADR 0009](../../docs/adr/0009-manifiestos-json-en-lugar-de-submodulos.md).
 
 Use `/awi-org <name>` to scaffold a new organization repo and register it.
 
@@ -151,7 +161,7 @@ See [routing-rules.md](routing-rules.md) for people vs. user-profile-inference r
 
 ## Delegating to Subagents
 
-The employee personas under `_system/agency-agents/` come from a **third-party upstream** (`msitarzewski/agency-agents`). They are pulled in read-only — **never edit them locally**. Local edits create drift that blocks `git submodule update --remote` and silently reverts on the next sync.
+The employee personas under `_system/agency-agents/` come from a **third-party upstream** (`msitarzewski/agency-agents`). They are pulled in read-only — **never edit them locally**. Local edits create drift that the next sync discards silently: the repo is materialised by `git clone` and refreshed with a hard reset to upstream.
 
 Those personas are written against **a stack that is not ours**. `engineering-senior-developer.md`, for instance, describes itself as mastering Laravel/Livewire/FluxUI, while our codebases are Next.js + React + TypeScript + Supabase (or Python, or others). The roster is shared across every org, so no persona can be correct for all of them.
 

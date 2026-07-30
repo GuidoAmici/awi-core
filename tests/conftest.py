@@ -1,16 +1,12 @@
-"""Pytest setup: make the skill script packages importable.
+"""Pytest setup: hacer importables los scripts compartidos.
 
-The awi-sync scripts use flat imports (`from paths import ...`,
-`from sync_status import ...`), so both script dirs must be on sys.path.
+Los scripts usan imports planos (`from paths import ...`, `from manifest import
+...`), así que su directorio tiene que estar en sys.path.
 """
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-for rel in (
-    ".claude/skills/shared/scripts",
-    ".claude/skills/awi-sync/scripts",
-):
-    p = ROOT / rel
-    if p.is_dir():
-        sys.path.insert(0, str(p))
+SHARED = ROOT / ".claude/skills/shared/scripts"
+if SHARED.is_dir():
+    sys.path.insert(0, str(SHARED))

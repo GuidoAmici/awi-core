@@ -185,4 +185,4 @@ Verify with `git -C <org> status`: the codebases must not appear at all. If they
 
 `/awi-initialize` clones everything declared in `_data/users/<github-id>/user-submodules.json` plus each org's `codebases.json`. `/awi-core-sync-status` is gone: there is nothing to compare, the instance no longer originates changes.
 
-Harness changes now go straight to awi-core through its normal branch flow. Your `_data/` repos keep their own remotes and are still operated by `/awi-sync`.
+Harness changes now go straight to awi-core through its normal branch flow, and instances receive them with `/awi-update`. Your `_data/` repos keep their own remotes and are operated by the shared-context cycle (`context_sync.py`) — `/awi-sync` was deprecated, see ADR 0014.

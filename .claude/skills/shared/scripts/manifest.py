@@ -126,7 +126,7 @@ def materialise_target(path: Path, url: str, branch: str) -> tuple[str, str | No
     status is "cloned", "present" or "failed".
 
     An existing checkout is left exactly as it is — materialising must never move
-    the operator off the branch they are working on. /awi-sync owns that.
+    the operator off the branch they are working on. context_sync.py owns that.
     """
     if is_repo(path):
         return "present", None

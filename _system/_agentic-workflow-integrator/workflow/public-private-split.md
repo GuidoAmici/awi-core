@@ -48,7 +48,7 @@ Each org workspace and each user profile is its **own git repo**, cloned inside 
 | `_data/users/<github-id>/` | the operator's `my-awi-user` |
 | `_data/organizations/<name>/` | that org's `<name>-workspace` |
 
-They are declared in `_data/users/<github-id>/user-submodules.json` and operated by `/awi-sync`. Because awi-core versions no gitlink for them, they are ordinary nested repos as far as it is concerned.
+They are declared in `_data/users/<github-id>/user-submodules.json` and operated by the shared-context cycle (`context_sync.py`, driven from INSTRUCTIONS.md). Because awi-core versions no gitlink for them, they are ordinary nested repos as far as it is concerned.
 
 ---
 

@@ -19,7 +19,6 @@ USERS_RELDIR                  = "_data/users"
 USER_PROFILE_INFERENCE_SUBDIR = "agenda/user-profile-inference"  # relative to user root (_data/users/<github-id>/), not AWI root
 USER_SUBMODULES_FILE   = "user-submodules.json"
 ORGANIZATIONS_RELDIR   = "_data/organizations"
-SUBMODULES_MD_RELPATH  = "_data/submodules.md"
 
 SYSTEM_AWI_RELDIR      = "_system/agentic-workflow-integrator"
 SYSTEM_COS_REFS_RELDIR = "_system/chief-of-staff/references"
@@ -30,7 +29,6 @@ USERS_DIR        = AWI_ROOT / USERS_RELDIR
 CURRENT_USER     = USERS_DIR / "current-user.json"
 
 ORGANIZATIONS_DIR = AWI_ROOT / ORGANIZATIONS_RELDIR
-SUBMODULES_MD    = AWI_ROOT / SUBMODULES_MD_RELPATH
 
 SYSTEM_AWI_DIR      = AWI_ROOT / SYSTEM_AWI_RELDIR
 SYSTEM_COS_REFS_DIR = AWI_ROOT / SYSTEM_COS_REFS_RELDIR

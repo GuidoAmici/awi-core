@@ -148,9 +148,7 @@ Update `_data/users/current-user.json` (see format below). Load and display sess
    }
    ```
 
-7. Update `_data/submodules.md` to add/reflect the new user submodule entry.
-
-8. Display session primer from `awi-user-profile.md`.
+7. Display session primer from `awi-user-profile.md`.
 
 ---
 
@@ -206,7 +204,6 @@ Makes the user's local data inaccessible without deleting the GitHub repo:
    rm -rf _data/users/<github-id>
    ```
 
-2. Update `_data/submodules.md` to mark user as inactive.
 
 ---
 

@@ -15,7 +15,7 @@ Cloning happens in two passes: org workspaces and system repos first, then codeb
 `codebases.json` only becomes readable once the workspace itself is on disk.
 
 An existing checkout is never touched. Init will not move the operator off the branch they are
-working on; `/awi-sync` owns that.
+working on; the shared-context cycle owns that (see `context_sync.py`).
 
 ## Usage
 
