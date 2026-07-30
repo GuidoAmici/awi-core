@@ -23,6 +23,15 @@ Lo que **nunca** se toca: todo `_data/` — perfiles de usuario, workspaces de o
 
 Lo que **sí** se descarta: cambios locales en archivos del harness. El script los lista antes de descartarlos, así que nada desaparece en silencio.
 
+## La rama decide la operación, no sólo el ref
+
+| Estás en | Operación | Destructivo |
+|---|---|---|
+| `main` (distribución) | `reset --hard origin/main` | Sí, por diseño — ahí no hay trabajo local legítimo |
+| Cualquier otra | `merge --ff-only origin/<rama>` | **No, por construcción** |
+
+Esto importa por dos razones. En la instancia del mantenedor, que trabaja en `dev`, un reset borraría commits sin pushear; el fast-forward no puede. Y si la instancia de un compañero termina en `dev` por accidente, obtiene una operación segura en lugar de un merge con conflictos — que es justo lo que esta skill existe para que nadie vea.
+
 ---
 
 ## Steps
@@ -56,8 +65,7 @@ python3 .claude/skills/shared/scripts/log_command.py awi-update completed
 | Código | Qué pasó | Qué hacer |
 |---|---|---|
 | `0` | Actualizado, o ya estaba al día | Seguir |
-| `1` | Error de git o de red | Leer el mensaje. Si es de red, reintentar; si es de git, escalar al operador |
-| `2` | Rechazado: la instancia está en `dev` | **No forzar.** Es una instancia de desarrollo del harness y un reset borraría trabajo sin pushear |
+| `1` | No se pudo: remoto inalcanzable, rama divergida o árbol sucio | Nada se tocó. Si es de red, reintentar. Si la rama divergió, mostrale el mensaje al operador — traerla requeriría decidir qué versión gana, y esa decisión no es de esta skill |
 
 ## Si el diagnóstico avisa que la promoción está colgada
 

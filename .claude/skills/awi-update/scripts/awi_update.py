@@ -10,14 +10,18 @@ mostrarle a alguien que no usa git.
 `_data/` está en .gitignore, así que el reset nunca toca datos privados: perfiles
 de usuario, workspaces de org y los repos clonados adentro quedan intactos.
 
+La rama decide el ref *y* la operación. En `main` es reset duro. En cualquier
+otra rama es `merge --ff-only`, que no puede destruir nada: si divergió o el
+árbol está sucio, falla y lo explica. Cambiar sólo el ref y seguir reseteando
+rompería el trabajo del mantenedor igual — el ref no hace daño, la operación sí.
+
 Uso:
     python3 awi_update.py            # reporta y actualiza
     python3 awi_update.py --check    # sólo reporta, no toca nada
 
 Códigos de salida:
     0  actualizado, o ya al día
-    1  error de git o de red
-    2  rechazado — esta instancia es de desarrollo del harness
+    1  no se pudo — remoto inalcanzable, rama divergida o árbol sucio
 """
 
 import argparse
@@ -57,8 +61,20 @@ def out(*args: str) -> str:
 
 
 def die(msg: str, code: int = 1) -> None:
+    sys.stdout.flush()  # sin esto el error aparece antes del reporte que lo explica
     print(f"✗ {msg}", file=sys.stderr)
     sys.exit(code)
+
+
+def quiet_stderr(text: str) -> str:
+    """Descartar las líneas `hint:` de git.
+
+    Le dicen al operador que corra `git rebase` o `git merge --no-ff` — es
+    exactamente el detalle de git que /awi-update existe para no mostrar.
+    """
+    return "\n".join(
+        f"  {ln.strip()}" for ln in text.splitlines() if ln.strip() and not ln.startswith("hint:")
+    )
 
 
 def current_branch() -> str:
@@ -202,10 +218,11 @@ def main() -> None:
         r = git("merge", "--ff-only", target)
         if r.returncode != 0:
             die(
-                f"no se pudo hacer fast-forward de '{branch}' a '{target}':\n"
-                f"  {r.stderr.strip()}\n"
-                f"  Tu rama divergió del remoto, o el árbol está sucio. No se tocó nada:\n"
-                f"  resolvelo con git y volvé a correr."
+                f"no se pudo traer '{branch}' sin riesgo. No se tocó nada.\n\n"
+                f"{quiet_stderr(r.stderr)}\n\n"
+                f"  Tu rama tiene commits que el remoto no tiene, o el árbol está sucio.\n"
+                f"  Traerla requeriría decidir qué versión gana, y eso no lo decide\n"
+                f"  esta skill. Resolvelo y volvé a correr."
             )
 
     print(f"\n✓ Harness actualizado a {version_at('HEAD')} ({out('rev-parse', '--short', 'HEAD')}).")
