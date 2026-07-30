@@ -15,6 +15,13 @@ otra rama es `merge --ff-only`, que no puede destruir nada: si divergió o el
 árbol está sucio, falla y lo explica. Cambiar sólo el ref y seguir reseteando
 rompería el trabajo del mantenedor igual — el ref no hace daño, la operación sí.
 
+**Nada se destruye, ni siquiera en el reset.** Antes de tocar el árbol, todo
+trabajo local se rescata: lo no commiteado a un stash con nombre, los commits
+locales a una rama `respaldo/`. El reset produce el resultado correcto —el
+harness idéntico a lo publicado, sin conflictos— pero no hace falta pagarlo con
+trabajo perdido. Importa sobre todo en máquinas que estuvieron meses sin
+actualizarse, donde es probable que haya algo local que nadie recuerda.
+
 Uso:
     python3 awi_update.py            # reporta y actualiza
     python3 awi_update.py --check    # sólo reporta, no toca nada
@@ -129,6 +136,38 @@ def describe(commits: list[tuple[str, str, str]]) -> None:
             print(f"    · {line}")
 
 
+def rescue(branch: str, target: str, dirty: bool) -> list[str]:
+    """Poner a salvo todo trabajo local antes de una operación destructiva.
+
+    El reset produce el resultado correcto —el harness idéntico a lo publicado,
+    sin conflictos que mostrar— pero no hace falta pagarlo con trabajo perdido.
+    Dos rescates, porque son dos clases distintas de trabajo:
+
+      · no commiteado  → stash con nombre y fecha
+      · commits locales → rama respaldo/<rama>-<fecha>
+
+    Devuelve las líneas a reportar. Si algún rescate falla, aborta: perder
+    trabajo en silencio es peor que no actualizar.
+    """
+    stamp = subprocess.run(["date", "+%Y%m%d-%H%M"], capture_output=True, text=True).stdout.strip()
+    rescued = []
+
+    ahead = git("rev-list", "--count", f"{target}..HEAD").stdout.strip()
+    if ahead.isdigit() and int(ahead) > 0:
+        backup = f"respaldo/{branch}-{stamp}"
+        if git("branch", backup, "HEAD").returncode != 0:
+            die(f"no se pudo respaldar {ahead} commit(s) local(es) en '{backup}'. No se tocó nada.")
+        rescued.append(f"{ahead} commit(s) local(es) → rama '{backup}'")
+
+    if dirty:
+        r = git("stash", "push", "--include-untracked", "-m", f"awi-update {stamp}")
+        if r.returncode != 0:
+            die(f"no se pudo guardar los cambios sin commitear. No se tocó nada:\n{quiet_stderr(r.stderr)}")
+        rescued.append(f"cambios sin commitear → stash 'awi-update {stamp}' (verlos con: git stash list)")
+
+    return rescued
+
+
 def promotion_lag() -> int | None:
     """Cuántos commits de `dev` no llegaron a `main` todavía.
 
@@ -185,7 +224,7 @@ def main() -> None:
 
     if dirty:
         if consuming:
-            print(f"\n  ⚠ {len(dirty)} archivo(s) del harness modificados localmente se van a descartar:")
+            print(f"\n  {len(dirty)} archivo(s) del harness modificados localmente, se guardan en un stash:")
         else:
             print(f"\n  ⚠ {len(dirty)} archivo(s) con cambios sin commitear:")
         for f in dirty[:10]:
@@ -213,6 +252,8 @@ def main() -> None:
         return
 
     if consuming:
+        for line in rescue(branch, target, bool(dirty)):
+            print(f"  ↪ Rescatado: {line}")
         git("reset", "--hard", target, check=True)
     else:
         r = git("merge", "--ff-only", target)
