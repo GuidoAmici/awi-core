@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "bash",
+      "args": [".claude/hooks/github-mcp-server.sh"],
+      "type": "stdio"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--read-only"],
+      "type": "stdio"
+    }
+  }
+}

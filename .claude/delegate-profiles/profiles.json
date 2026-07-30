@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "_nota": "Con qué arranca un delegado. La política vive acá y el lanzador la consume: agregar un perfil no requiere tocar delegate_run.py. El perfil por defecto es `minimo` y es el más restrictivo — un despacho que no elige obtiene el mínimo, y ampliar acceso es un acto explícito. Ver PRD 2 (issue #81).",
+  "_por_que_strict": "Todo perfil pasa --strict-mcp-config. Sin él, la configuración MCP del operador se SUMA a la que se pasa, y pasar una configuración mínima no quitaría nada. Es la pieza que corta la herencia de doppler, supabase, mercadopago y gmail.",
+  "_por_que_se_conserva_skip_permissions": "Quitar --dangerously-skip-permissions rompe la ejecución en background: el delegado se cuelga en el primer prompt de permisos porque no hay nadie para aprobarlo, y un delegado que no corre desatendido no sirve de nada. El objetivo no es quitar el flag sino que lo que habilita sea un conjunto chico y declarado. Saltear permisos sobre un servidor de issues es defendible; saltearlos sobre doce con credenciales de producción no.",
+  "perfiles": {
+    "minimo": {
+      "descripcion": "Lee y escribe issues. Nada más. Es el perfil de la enorme mayoría de las tareas delegadas: leer un brief, trabajar sobre el repo del árbol de trabajo, y reportar en el issue.",
+      "mcp_config": ".claude/delegate-profiles/mcp-minimo.json",
+      "servidores": ["github"],
+      "flags": ["--dangerously-skip-permissions"],
+      "timeout_s": 2700
+    },
+    "con-base": {
+      "descripcion": "Agrega supabase. Sólo para una tarea que necesita consultar la base, y elegirlo es una decisión del operador que queda registrada en status.json.",
+      "mcp_config": ".claude/delegate-profiles/mcp-con-base.json",
+      "servidores": ["github", "supabase"],
+      "flags": ["--dangerously-skip-permissions"],
+      "timeout_s": 2700
+    },
+    "solo-lectura": {
+      "descripcion": "Ningún servidor MCP. Para una tarea de análisis que sólo lee el árbol de trabajo y produce un informe. No puede escribir en ningún issue, así que reporta por su log.",
+      "mcp_config": ".claude/delegate-profiles/mcp-vacio.json",
+      "servidores": [],
+      "flags": ["--dangerously-skip-permissions"],
+      "timeout_s": 1800
+    }
+  }
+}
