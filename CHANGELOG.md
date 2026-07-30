@@ -4,7 +4,22 @@ Las versiones `0.3.0` en adelante se reconstruyeron retroactivamente el 2026-07-
 
 ## [0.7.0](https://github.com/GuidoAmici/awi-core/compare/v0.6.0...v0.7.0) (2026-07-29)
 
-La revisión integral que abría el ADR 0013. Reencuadra el problema de dominio —la pieza faltante era la distribución, no la composición— y ejecuta la limpieza que no dependía de decidir el sustrato.
+La revisión integral que abría el ADR 0013, y la fase 1 completa. Reencuadra el problema de dominio —la pieza faltante era la distribución, no la composición— y construye el canal que nunca existió.
+
+**Lo que cambia para quien opera una instancia:** `/awi-update` trae el harness sin necesidad de saber git, y el contexto compartido se sincroniza solo al abrir la sesión. `/awi-sync` ya no existe.
+
+### Características
+
+* `/awi-update` para que las instancias reciban el harness ([9fb94e7](https://github.com/GuidoAmici/awi-core/commit/9fb94e7))
+* la rama decide la operación, no sólo el ref — reset en `main`, fast-forward en el resto ([bb4895a](https://github.com/GuidoAmici/awi-core/commit/bb4895a))
+* rescatar el trabajo local en vez de destruirlo, a un stash o a una rama `respaldo/` ([273d443](https://github.com/GuidoAmici/awi-core/commit/273d443))
+* reemplazar `/awi-sync` por el ciclo de contexto coordinado ([89b56af](https://github.com/GuidoAmici/awi-core/commit/89b56af))
+* tope de reloj por delegate, y documentar el mecanismo real ([9f4b575](https://github.com/GuidoAmici/awi-core/commit/9f4b575))
+
+### Correcciones
+
+* no strippear el stdout de `git status --porcelain` ([18773f1](https://github.com/GuidoAmici/awi-core/commit/18773f1))
+* ordenar la salida de error y esconder los `hint` de git ([af1970e](https://github.com/GuidoAmici/awi-core/commit/af1970e))
 
 ### Refactorizaciones
 
@@ -13,15 +28,20 @@ La revisión integral que abría el ADR 0013. Reencuadra el problema de dominio 
 ### Integración continua
 
 * eliminar los dos workflows que duplican a `dev.yml` ([50610a1](https://github.com/GuidoAmici/awi-core/commit/50610a1))
+* colapsar los cuatro workflows en uno solo ([5ad5fe9](https://github.com/GuidoAmici/awi-core/commit/5ad5fe9))
+* promover `dev` → `main` sólo al verde ([18f8b4a](https://github.com/GuidoAmici/awi-core/commit/18f8b4a))
 
 ### Mantenimiento
 
 * desversionar el scratch de agente y corregir el residuo del `.gitignore` ([8334bed](https://github.com/GuidoAmici/awi-core/commit/8334bed))
+* reconstruir el changelog retroactivamente y fijar la versión ([70f03c8](https://github.com/GuidoAmici/awi-core/commit/70f03c8))
 
 ### Documentación
 
 * cerrar el 0013 — el problema era la distribución, no la composición ([93b01f4](https://github.com/GuidoAmici/awi-core/commit/93b01f4))
 * corregir el 0014 — el gate de tests existe y funciona ([4b29955](https://github.com/GuidoAmici/awi-core/commit/4b29955))
+* enmendar el 0014 — el repo sigue público por restricción de plataforma ([0b8027c](https://github.com/GuidoAmici/awi-core/commit/0b8027c))
+* ADR 0015 — dos ramas, porque el gate de distribución vive en el servidor ([18f8b4a](https://github.com/GuidoAmici/awi-core/commit/18f8b4a))
 * reapuntar `/grill-me` al plugin en `bdr-template` ([634da2a](https://github.com/GuidoAmici/awi-core/commit/634da2a))
 
 ## [0.6.0](https://github.com/GuidoAmici/awi-core/compare/v0.5.0...v0.6.0) (2026-07-28)
