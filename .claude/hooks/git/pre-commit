@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Hook de git: bloquea material sensible antes de que entre al historial.
+#
+# No tiene lógica propia a propósito — todo lo decidible vive en Python, que se
+# testea. Acá sólo está el puente con git. Ver PRD 1 (issue #80).
+set -euo pipefail
+
+raiz="$(git rev-parse --show-toplevel)"
+exec python3 "$raiz/.claude/skills/shared/scripts/staged_scan.py" --hook --repo "$raiz"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Hook de git: registra el commit que no pasó por el escaneo.
+#
+# `git commit --no-verify` no ejecuta el pre-commit, así que el pre-commit no
+# puede registrar su propio salteo. Este hook compara el árbol del commit con el
+# que el pre-commit aprobó: si nadie lo aprobó, fue salteado y queda anotado.
+#
+# Nunca falla: es telemetría de un commit que ya se hizo.
+set -uo pipefail
+
+raiz="$(git rev-parse --show-toplevel)"
+python3 "$raiz/.claude/skills/shared/scripts/staged_scan.py" \
+  --registrar-salteo --repo "$raiz" || true

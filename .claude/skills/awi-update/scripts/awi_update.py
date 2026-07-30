@@ -269,6 +269,30 @@ def main() -> None:
     print(f"\n✓ Harness actualizado a {version_at('HEAD')} ({out('rev-parse', '--short', 'HEAD')}).")
     print("  Tus datos en _data/ no se tocaron.")
 
+    install_git_hooks()
+
+
+def install_git_hooks() -> None:
+    """Apuntar core.hooksPath a los hooks versionados de AWI.
+
+    Va acá porque `core.hooksPath` es config local: los hooks viajan con el
+    harness, pero la config que los activa no viaja con un clone. /awi-update ya
+    es el camino por el que el harness llega a una instancia, así que es el lugar
+    donde la prevención de material sensible se enciende sin que el operador
+    tenga que saber que existe. Ver PRD 1 (issue #80).
+
+    Nunca corta la actualización: el harness ya quedó actualizado.
+    """
+    try:
+        import staged_scan
+
+        estado = staged_scan.instalar(AWI_ROOT)
+    except Exception as e:  # noqa: BLE001 — el update ya terminó bien
+        print(f"  ⚠ No se pudieron activar los hooks de git: {e}")
+        return
+    if "ya instalado" not in estado:
+        print(f"  ✓ Hooks de git activados — {estado}")
+
 
 if __name__ == "__main__":
     main()

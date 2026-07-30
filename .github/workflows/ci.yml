@@ -34,11 +34,17 @@ jobs:
     name: shellcheck + pytest
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 porque la auditoría de material sensible recorre el
+      # historial completo. Con el clon superficial que trae el default, no
+      # tendría nada que auditar y reportaría «limpio».
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: shellcheck
         run: |
           sudo apt-get update && sudo apt-get install -y shellcheck
           find .claude/hooks -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning
+          shellcheck -S warning .claude/hooks/git/pre-commit .claude/hooks/git/post-commit
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -46,6 +52,16 @@ jobs:
         run: |
           pip install pytest
           pytest -q tests
+
+      # Detecta una regresión en el gate y no meses después. Corre sobre HEAD y
+      # no sobre --all a propósito: mientras el historial no esté purgado, --all
+      # falla siempre por los 173 objetos que el PRD 1 viene a sacar, y un gate
+      # que está rojo por algo conocido deja de ser una señal. Cuando la purga
+      # se ejecute, esto pasa a --all. Ver issue #87.
+      - name: Auditoría de material sensible
+        run: |
+          PYTHONPATH=.claude/skills/shared/scripts \
+            python3 .claude/skills/shared/scripts/history_audit.py --rev 'HEAD^{tree}'
 
   promote:
     name: Promover dev → main
