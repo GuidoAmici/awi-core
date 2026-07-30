@@ -1,0 +1,56 @@
+name: CI — test y Release PR en main
+
+# Único pipeline de awi-core. Antes eran cuatro workflows sobre un esquema de
+# tres ramas (dev → stg → prod) que congelaba la distribución: prod, la rama por
+# defecto que recibe cualquiera que clona, sólo avanzaba al mergear a mano un PR
+# de release, y ese PR sólo se generaba si el token de la GitHub App estaba
+# configurado. Ver ADR 0014.
+#
+# Ahora: main es lo único que existe. Los tests corren en cada push y cada PR.
+# release-please acumula su PR de release contra main; cortar versión es un acto
+# deliberado y no está en el camino de la distribución.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: shellcheck + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          find .claude/hooks -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: pytest
+        run: |
+          pip install pytest
+          pytest -q tests
+
+  release-please:
+    name: Release PR
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
