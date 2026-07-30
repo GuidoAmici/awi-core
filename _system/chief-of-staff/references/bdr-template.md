@@ -84,7 +84,7 @@ Qué hay que monitorear. Qué se rompe si la decisión resulta equivocada.
 
 ## Notas de uso en AWI
 
-- Para redactar un BDR podés correr `/grill-me` antes: te fuerza a resolver cada
+- Para redactar un BDR podés correr `/mattpocock-skills:grilling` antes: te fuerza a resolver cada
   rama de la decisión, y de ahí sale el contenido de *Alternativas descartadas*.
 - Una decisión estratégica suele empezar como un doc suelto en
   `documentation/operaciones/` o `documentation/empresa/` (ej. una estrategia de
