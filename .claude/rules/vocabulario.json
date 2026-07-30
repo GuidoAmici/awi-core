@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "_nota": "Vocabulario que describe mecanismos eliminados. Lo consume vocab_check.py a través del mismo motor que las reglas de material sensible (.claude/skills/shared/scripts/sensitive_scan.py): otro conjunto de reglas, el mismo motor. Existe porque las dos instancias de deriva que la revisión integral encontró mientras trabajaba —INSTRUCTIONS.md explicando el protocolo de .gitmodules, y delegation.md apuntando a un script inexistente— se encontraron por casualidad, al pasar por ahí para otra cosa. Ver PRD 3 (issue #82).",
+  "_excepciones": "Todas las reglas excluyen docs/adr/, CHANGELOG.md y los documentos que narran una migración: un ADR tiene que poder decir «submódulo» cuando explica por qué se eliminaron, y prohibírselo destruiría el registro. Además, ninguna regla dispara en una línea que contenga _Evitar_, que es exactamente donde el término prohibido debe figurar en CONTEXT.md.",
+  "categorias": {
+    "vocabulario-eliminado": {
+      "bloquea": true
+    },
+    "vocabulario-dudoso": {
+      "bloquea": false
+    }
+  },
+  "reglas": [
+    {
+      "nombre": "submodulo",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "Nada en AWI es un submódulo desde el ADR 0009: todo se materializa por git clone. El lookbehind de - y _ deja pasar los identificadores que se llaman así (user-submodules.json, awi-submodule-toggle): el nombre de un archivo no es vocabulario de dominio.",
+      "remedio": "Decir «repo materializado», «clone» o «entrada del manifiesto».",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?i:(?<![-_a-z])subm[oó]dulos?\\b|(?<![-_a-z])submodules?\\b).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^docs/purga-del-historial\\.md$",
+        "^docs/migrate-from-my-awi-instance\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "gitmodules",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "El generador de .gitmodules ya no existe. El archivo está en .gitignore como guardia: uno que aparezca es un bug a notar.",
+      "remedio": "Hablar del manifiesto: user-submodules.json o codebases.json.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:\\.gitmodules\\b|\\bgitlinks?\\b).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.gitignore$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^\\.claude/skills/shared/scripts/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "comando-de-submodulo",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "`git submodule` no se ejecuta en ninguna parte de AWI.",
+      "remedio": "Materializar con git clone; ver manifest.materialise_target().",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*git\\s+submodule\\s+(?:update|deinit|add|init|sync).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "deinit",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "«Deinit» era desactivar un submódulo. Desactivar hoy no borra ni vacía nada.",
+      "remedio": "Decir «desactivar».",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*\\bdeinit\\b.*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "employees-json",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "El registro employees.json se eliminó; las personas-agente se descubren desde _system/agency-agents/ (ADR 0008).",
+      "remedio": "Descubrir personas-agente desde _system/agency-agents/.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*employees\\.json.*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "awi-sync",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "/awi-sync se eliminó: dejaba repos a mitad de un rebase fallido. Lo reemplazó el ciclo de contexto (context_sync.py).",
+      "remedio": "Hablar del ciclo de contexto.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:/awi-sync\\b|sync_submodules).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "ramas-de-distribucion-viejas",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "El camino de distribución era dev → stg → prod. Hoy son dos ramas: dev y main (ADR 0015).",
+      "remedio": "La rama de distribución es main; se trabaja en dev.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:\\borigin/(?:stg|prod)\\b|\\brama\\s+(?:stg|prod)\\b|\\bbranch\\s+(?:stg|prod)\\b).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "auto-commit",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "El hook de auto-commit se eliminó. Prometerlo hace que el trabajo quede sin commitear.",
+      "remedio": "Commitear a mano en los límites lógicos de tarea.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:auto-commit|auto_commit|commit autom[aá]tico).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "prefijo-cos",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "El prefijo de commit `cos:` se reemplazó por Conventional Commits con scope.",
+      "remedio": "Usar Conventional Commits: tipo(scope): asunto.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:\\bcos:\\s|prefijo\\s+`?cos`?).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "active-orgs",
+      "categoria": "vocabulario-eliminado",
+      "descripcion": "active-orgs.json se renombró y amplió a user-submodules.json.",
+      "remedio": "Usar user-submodules.json.",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*active-orgs\\.json.*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    },
+    {
+      "nombre": "employee-como-persona-agente",
+      "categoria": "vocabulario-dudoso",
+      "descripcion": "«Employee» era el término del registro eliminado. Advierte y no bloquea, porque puede aparecer legítimamente al hablar de personas.",
+      "remedio": "Decir «persona-agente».",
+      "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:\\bAssigned employee\\b|\\bemployee\\s+persona\\b|\\bemployees?\\s+registry\\b).*$",
+      "excepto_rutas": [
+        "^docs/adr/",
+        "^CHANGELOG\\.md$",
+        "^\\.claude/rules/",
+        "^tests/",
+        "^_system/agency-agents/",
+        "^CONTEXT\\.md$"
+      ],
+      "excepto_contenido": "(?i)(?:\\b(?:no|not|nada|ning[uú]n[ao]?|nunca|never|nothing|neither)\\b|\\bya no\\b|\\bdej[oó] de\\b|\\bse elimin|\\beliminad[oa]|\\bresuelto\\b|\\bdeleted\\b|\\bremoved\\b|\\bgone\\b|\\breemplaz|\\bobsolet|\\bplain clones?\\b)"
+    }
+  ],
+  "_negacion": "Toda regla excluye las líneas que niegan el mecanismo. «Nada acá es un submódulo» y «No auto-commit hook» son afirmaciones correctas sobre el estado actual: prohibirlas obligaría a no poder decir que algo no existe. Por eso cada patrón termina en .*$ — el motor evalúa la excepción contra lo que la regla matcheó, así que la regla tiene que matchear la línea entera para que una negación al final de la línea cuente. El precio es que una negación en la misma línea que una afirmación real la tapa; es el precio de que las reglas reconozcan contexto histórico."
+}

@@ -26,17 +26,27 @@ from pathlib import Path
 # La categoría gobierna la severidad. No es una lista plana porque una password
 # de una cuenta de prueba y la auditoría de seguridad del código de un cliente
 # no merecen la misma respuesta.
+#
+# Un archivo de reglas puede declarar sus propias categorías con su severidad,
+# que es lo que permite usar este motor para algo que no es material sensible —
+# el verificador de vocabulario prohibido del PRD 3 (issue #82) lo hace. Si no
+# las declara, se asumen éstas.
 CREDENCIAL = "credencial"
 MATERIAL_DE_CLIENTE = "material-de-cliente"
 RUIDO_OPERATIVO = "ruido-operativo"
 
-CATEGORIAS = (CREDENCIAL, MATERIAL_DE_CLIENTE, RUIDO_OPERATIVO)
+#: categoría → si bloquea (frente a sólo advertir).
+CATEGORIAS_SENSIBLES = {
+    CREDENCIAL: True,
+    MATERIAL_DE_CLIENTE: True,
+    RUIDO_OPERATIVO: False,
+}
+CATEGORIAS = tuple(CATEGORIAS_SENSIBLES)
+BLOQUEANTES = frozenset(c for c, b in CATEGORIAS_SENSIBLES.items() if b)
 
-#: Categorías que el hook bloquea. Sobre el resto, advierte.
-BLOQUEANTES = frozenset({CREDENCIAL, MATERIAL_DE_CLIENTE})
-
-#: Reglas por defecto, relativas a la raíz de AWI.
+#: Archivos de reglas, relativos a la raíz de AWI.
 REGLAS_SENSIBLES = ".claude/rules/sensitive.json"
+REGLAS_VOCABULARIO = ".claude/rules/vocabulario.json"
 
 #: Un blob más grande que esto no se escanea por contenido. El historial completo
 #: se recorre en CI en cada push: el motor tiene que ser barato.
@@ -55,6 +65,8 @@ class Regla:
     categoria: str
     descripcion: str
     remedio: str
+    #: Lo declara la categoría en el archivo de reglas, no el código.
+    bloquea: bool = True
     ruta: re.Pattern | None = None
     contenido: re.Pattern | None = None
     #: Rutas donde la regla no aplica. Necesario y no cosmético: los fixtures de
@@ -89,14 +101,11 @@ class Hallazgo:
     regla: str
     categoria: str
     remedio: str
+    bloquea: bool = True
     linea: int | None = None
     evidencia: str = ""
     #: Contexto del consumidor: un blob del historial trae su commit acá.
     origen: str = ""
-
-    @property
-    def bloquea(self) -> bool:
-        return self.categoria in BLOQUEANTES
 
     def __str__(self) -> str:
         donde = f"{self.ruta}:{self.linea}" if self.linea else self.ruta
@@ -107,13 +116,17 @@ class Hallazgo:
 @dataclass
 class Reporte:
     hallazgos: list[Hallazgo] = field(default_factory=list)
+    #: Las categorías del conjunto de reglas usado, en orden de declaración. Van
+    #: en el reporte y no derivadas de los hallazgos, para que una categoría sin
+    #: hallazgos aparezca en cero en vez de desaparecer.
+    categorias: tuple[str, ...] = CATEGORIAS
 
     @property
     def bloqueantes(self) -> list[Hallazgo]:
         return [h for h in self.hallazgos if h.bloquea]
 
     def por_categoria(self) -> dict[str, int]:
-        conteo = {c: 0 for c in CATEGORIAS}
+        conteo = {c: 0 for c in self.categorias}
         for h in self.hallazgos:
             conteo[h.categoria] = conteo.get(h.categoria, 0) + 1
         return conteo
@@ -156,6 +169,14 @@ def cargar_reglas(archivo: str | Path) -> list[Regla]:
     if not isinstance(entradas, list) or not entradas:
         raise ReglasInvalidas(f"{archivo} no declara ninguna regla en «reglas»")
 
+    categorias = crudo.get("categorias") or CATEGORIAS_SENSIBLES
+    if not isinstance(categorias, dict):
+        raise ReglasInvalidas(f"{archivo}: «categorias» tiene que ser un objeto")
+    severidad = {
+        nombre: bool(cfg.get("bloquea", True)) if isinstance(cfg, dict) else bool(cfg)
+        for nombre, cfg in categorias.items()
+    }
+
     reglas: list[Regla] = []
     vistos: set[str] = set()
     for cruda in entradas:
@@ -167,10 +188,10 @@ def cargar_reglas(archivo: str | Path) -> list[Regla]:
         vistos.add(nombre)
 
         categoria = cruda.get("categoria")
-        if categoria not in CATEGORIAS:
+        if categoria not in severidad:
             raise ReglasInvalidas(
                 f"regla «{nombre}»: categoría «{categoria}» desconocida; "
-                f"las válidas son {', '.join(CATEGORIAS)}"
+                f"las válidas son {', '.join(severidad)}"
             )
 
         ruta = _compilar(cruda.get("ruta"), "ruta", nombre)
@@ -184,6 +205,7 @@ def cargar_reglas(archivo: str | Path) -> list[Regla]:
                 categoria=categoria,
                 descripcion=cruda.get("descripcion", ""),
                 remedio=cruda.get("remedio", ""),
+                bloquea=severidad[categoria],
                 ruta=ruta,
                 contenido=contenido,
                 excepto_rutas=tuple(
@@ -220,7 +242,7 @@ def escanear(entradas, reglas: list[Regla]) -> Reporte:
     `ruta`, alcanza la ruta — y es la única clase de regla que puede decidir
     sobre una entrada cuyo contenido no se pudo leer.
     """
-    reporte = Reporte()
+    reporte = Reporte(categorias=tuple(dict.fromkeys(r.categoria for r in reglas)))
     for entrada in entradas:
         contenido = entrada.contenido
         if contenido is not None and (
@@ -237,6 +259,7 @@ def escanear(entradas, reglas: list[Regla]) -> Reporte:
                         regla=regla.nombre,
                         categoria=regla.categoria,
                         remedio=regla.remedio,
+                        bloquea=regla.bloquea,
                         origen=getattr(entrada, "origen", ""),
                     )
                 )
@@ -255,6 +278,7 @@ def escanear(entradas, reglas: list[Regla]) -> Reporte:
                         regla=regla.nombre,
                         categoria=regla.categoria,
                         remedio=regla.remedio,
+                        bloquea=regla.bloquea,
                         linea=n,
                         evidencia=_redactar(linea, m, regla.categoria),
                         origen=getattr(entrada, "origen", ""),

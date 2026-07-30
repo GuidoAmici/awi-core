@@ -21,7 +21,7 @@ Each workspace follows the same structure and is operated by the same skills. AW
 - **Plans your day** — Aggregates due tasks, overdue items, and active projects into a daily plan
 - **Reviews progress** — Compares planned vs actual at end of day, updates statuses, identifies patterns
 - **Delegates work** — Forks new terminal sessions to work on tasks autonomously across repos
-- **Tracks everything** — Changes are committed at logical task boundaries with a `cos:` prefix for easy filtering
+- **Tracks everything** — Changes are committed at logical task boundaries using [Conventional Commits with scope](_system/_agentic-workflow-integrator/references/commit-format.md), which is what makes the changelog generatable
 
 ---
 
@@ -60,10 +60,14 @@ Download from [obsidian.md/download](https://obsidian.md/download). Free for per
 ### Step 3: Clone the Repository
 
 ```bash
-git clone https://github.com/GuidoAmici/awi.git
+git clone https://github.com/GuidoAmici/awi-core.git awi
 cd awi
-git submodule update --init --recursive
 ```
+
+Nothing in AWI is a git submodule — everything is materialised by `git clone`
+from the manifests. Run `/awi-initialize` once you are logged in and it will
+clone every repo your manifest declares. See
+[ADR 0009](docs/adr/0009-manifiestos-json-en-lugar-de-submodulos.md).
 
 ### Step 4: Open as Obsidian Vault
 
@@ -103,31 +107,35 @@ When done, log in:
 
 ---
 
-## Setting Up AI Employees (Cross-Repo Delegation)
+## Delegation
 
-The real power comes from delegating work to specialized AI employees.
+Work with the scope of one issue can be handed to a **delegate**: an agent
+process that runs unattended, with a wall clock cap of 45 minutes.
 
-### What Are AI Employees?
+### Agent personas
 
-AI employees are separate Claude Code repositories with specialized skills. Each lives in its own repo. AWI orchestrates all of them via tasks created in the vault.
+A delegate adopts an **agent persona** — a named agent definition discovered from
+`_system/agency-agents/`. The agent's file is its system prompt and its place in
+the tree is its category. There is no registry to configure: adding a persona
+means adding a file. See
+[ADR 0008](docs/adr/0008-agent-discovery-desde-agency-agents.md).
 
-### Configure Employee Paths
-
-Edit `.claude/reference/employees.json`:
-
-```json
-{
-  "head-of-content": "~/Documents/GitHub/head-of-content"
-}
+```bash
+ls _system/agency-agents/            # the categories
+ls _system/agency-agents/engineering # the personas in one category
 ```
 
-### Delegate Work
+### Dispatching
+
+Only a **grilled issue** is eligible: one that completed a grill session, carries
+`ready-for-agent`, and names its agent persona in its Agent Brief.
 
 ```
-/delegate head-of-content: research YouTube content for AI productivity niche
+/delegate-issue
 ```
 
-A separate Claude instance spawns in a new terminal, working in the employee's repo. When done, the task file updates with output locations and a notification plays.
+It lists what is eligible and confirms before firing. Each delegate keeps its
+scratch outside the versioned tree, and reports back into the issue.
 
 ---
 
@@ -161,7 +169,7 @@ When you use `/new`, the system:
 3. **Extracts** due dates, tags, names
 4. **Links** entities via `[[wiki-style]]` links
 5. **Writes** files to the appropriate folder under `_documentation/_agenda/`
-6. **Commits** at logical task boundaries with a `cos:` prefix
+6. **Commits** at logical task boundaries, in Conventional Commits format
 
 ### Classification Rules
 
@@ -246,10 +254,15 @@ The system uses hooks configured in `.claude/settings.json`:
 
 ### Commits
 
-There is no auto-commit hook. The agent commits at logical task boundaries with a `cos:` prefix and a clear message — not after every `Write`/`Edit`.
+There is no hook that commits for you. The agent commits at logical task
+boundaries with a clear message — not after every `Write`/`Edit`.
 
-- Use the `cos:` prefix so vault activity stays filterable
-- Filter all activity: `git log --grep="cos:"`
+The format is [Conventional Commits with scope](_system/_agentic-workflow-integrator/references/commit-format.md):
+`type(scope): subject`. It is not a style preference — the messages are the raw
+material of `CHANGELOG.md`, which release-please generates from them.
+
+- Filter by area: `git log --grep="^docs(newhaze)"`
+- Everything but chores: `git log --invert-grep --grep="^chore"`
 
 ### Stop Sound Hook
 
@@ -259,36 +272,46 @@ Plays notification sound when a delegated task completes. Only triggers when `CL
 
 ## Directory Structure
 
+Every directory under `_data/` is a **separately cloned repo**, not a submodule.
+There are no gitlinks anywhere: `_data/` is in `.gitignore`, which is a
+correctness requirement rather than hygiene — without it, `git add -A` in the
+root would swallow the children as embedded repos.
+
 ```
 awi/
 ├── CLAUDE.md                           # Claude Code session instructions
+├── CONTEXT.md                          # Domain model: what each term means
 ├── README.md                           # This file
 │
-├── _system/                            # AWI engine — framework docs (partially public)
-│   ├── INSTRUCTIONS.md                 # Canonical source of truth for all AI agents
-│   ├── users/                          # Vault user profiles
-│   ├── chief-of-staff/                 # Claude Code operator references
-│   ├── awi/                            # AWI architecture docs
-│   └── gtd/                            # GTD methodology adaptations
+├── _system/                            # The harness — maintained by awi-core
+│   ├── _agentic-workflow-integrator/
+│   │   └── INSTRUCTIONS.md             # Canonical source of truth for all agents
+│   ├── chief-of-staff/                 # Operator references
+│   └── agency-agents/                  # Agent personas (upstream clone, read-only)
 │
-├── _data/entities/                         # One submodule per company/person
-│   ├── <user-root>/                    # User's personal workspace (separate git repo)
-│   │   ├── agenda/                     # tasks/ projects/ people/ daily/ outputs/ …
-│   │   ├── documentation/              # writing-style, business-profile, wiki
-│   │   └── codebase/                   # personal code repos (submodules)
-│   ├── <org-name>/                     # Org workspace (separate git repo)
-│   │   ├── agenda/
-│   │   ├── documentation/              # org wiki (submodule)
-│   │   └── codebase/                   # org repos (submodules)
-│   └── <name>/                         # Created by /initialize <name>
-│       ├── agenda/
-│       ├── documentation/
-│       └── codebase/
+├── _data/                              # Private to this operator, never committed
+│   ├── users/
+│   │   ├── current-user.json           # Who is logged in
+│   │   └── <github-id>/                # Cloned user repo
+│   │       ├── user-submodules.json    # Manifest: what this operator materialises
+│   │       ├── agenda/                 # tasks/ projects/ people/ daily/ outputs/ …
+│   │       └── documentation/           # professional identity, writing style
+│   └── organizations/
+│       └── <org-name>/                 # Cloned org workspace
+│           ├── codebases.json          # Manifest: what repos the org is made of
+│           ├── agenda/
+│           ├── documentation/
+│           └── codebase/<repo>/        # Each one a separate clone
+│
+├── docs/
+│   ├── adr/                            # Architecture decision records
+│   └── purga-del-historial.md          # Sensitive-material handling
 │
 └── .claude/
     ├── settings.json
+    ├── rules/                          # Versioned rule sets (sensitive, vocabulary)
     ├── hooks/
-    │   └── stop-sound.sh
+    │   └── git/                        # pre-commit, post-commit
     └── skills/
         ├── new/          today/        today-start/    today-end/
         ├── week/         week-review/  quarter/        year/
@@ -304,17 +327,17 @@ awi/
 Every action generates a timestamped commit:
 
 ```
-cos: <action> - <description>
+type(scope): subject
 ```
 
 ### Useful Commands
 
 ```bash
 # Today's activity
-git log --since="8am" --grep="cos:" --oneline
+git log --since="8am" --oneline
 
 # Last week
-git log --since="7 days ago" --grep="cos:" --format="%ad %s" --date=short
+git log --since="7 days ago" --format="%ad %s" --date=short
 
 # What changed last
 git diff HEAD~1
@@ -329,7 +352,7 @@ git log -p <user-root>/agenda/tasks/<creation-date>-my-task.md
 
 ### Work not being committed
 
-There is no auto-commit hook. The agent commits at logical task boundaries; if something is left uncommitted, commit it yourself with a `cos:` prefix. Ensure git commit permissions are present in `.claude/settings.json`:
+There is no hook that commits for you. The agent commits at logical task boundaries; if something is left uncommitted, commit it yourself in Conventional Commits format. Ensure git commit permissions are present in `.claude/settings.json`:
 ```json
 "allow": ["Bash(git add:*)", "Bash(git commit:*)"]
 ```
@@ -354,7 +377,7 @@ There is no auto-commit hook. The agent commits at logical task boundaries; if s
 2. **Natural language first** — Say what you mean, let classification handle the rest
 3. **Grep before glob** — Never load all files, search efficiently
 4. **Progressive disclosure** — Skills load context in layers to manage tokens
-5. **Commit at task boundaries** — Finished work is committed with a `cos:` prefix so nothing is lost
+5. **Commit at task boundaries** — Finished work is committed in Conventional Commits format so nothing is lost
 6. **Cross-repo awareness** — Delegation maintains context across projects
 
 ---
