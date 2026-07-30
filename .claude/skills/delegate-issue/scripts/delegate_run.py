@@ -3,10 +3,12 @@
 Run a delegate agent in the background with monitoring and status tracking.
 
 Usage (launcher):
-  python delegate_run.py --prompt "<task>" [--model sonnet] [--repo <path>] [--slug <name>] [--effort medium]
+  python delegate_run.py --prompt "<task>" [--model sonnet] [--repo <path>] [--slug <name>]
+                         [--effort medium] [--timeout 2700]
 
 Usage (worker, internal):
-  python delegate_run.py --worker --slug <slug> --prompt "<task>" --model <model> --delegates-dir <path> [--repo <path>] [--effort <level>]
+  python delegate_run.py --worker --slug <slug> --prompt "<task>" --model <model>
+                         --delegates-dir <path> [--repo <path>] [--effort <level>] [--timeout <s>]
 """
 import argparse
 import json
@@ -20,6 +22,10 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+
+# Tope de reloj por delegate. Sin esto, proc.wait() no tiene timeout y un
+# delegate colgado corre indefinido facturando tokens sin que nada lo note.
+DEFAULT_TIMEOUT_S = 45 * 60
 
 
 def is_wsl():
@@ -59,7 +65,7 @@ def beep_done(success):
         pass
 
 
-def run_worker(slug, prompt, model, repo, effort, delegates_dir):
+def run_worker(slug, prompt, model, repo, effort, delegates_dir, timeout_s):
     """Worker mode: run the agent and track it. This process stays alive until agent exits."""
     delegate_dir = delegates_dir / slug
     delegate_dir.mkdir(parents=True, exist_ok=True)
@@ -89,6 +95,7 @@ def run_worker(slug, prompt, model, repo, effort, delegates_dir):
         "status": "running",
         "model": model,
         "effort": effort,
+        "timeout_s": timeout_s,
         "repo": cwd,
         "prompt_preview": prompt[:300],
         "started_at": started_at,
@@ -111,7 +118,21 @@ def run_worker(slug, prompt, model, repo, effort, delegates_dir):
     status["pid"] = proc.pid
     status_file.write_text(json.dumps(status, indent=2))
 
-    exit_code = proc.wait()
+    # Wall-clock cap. Without it a stuck delegate runs forever: proc.wait() has
+    # no timeout, and nothing else in the pipeline would notice. This is a cost
+    # guard, not a security one — a runaway agent bills tokens until killed.
+    timed_out = False
+    try:
+        exit_code = proc.wait(timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        proc.terminate()  # SIGTERM: let it flush its log
+        try:
+            exit_code = proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            exit_code = proc.wait()
+
     finished_at = datetime.now().isoformat()
 
     started = datetime.fromisoformat(started_at)
@@ -119,11 +140,12 @@ def run_worker(slug, prompt, model, repo, effort, delegates_dir):
     duration_s = int((finished - started).total_seconds())
     duration = f"{duration_s // 60}m {duration_s % 60}s"
 
-    if exit_code == 0:
+    if timed_out:
+        final_status = "timed-out"
+    elif exit_code == 0:
         final_status = "completed"
-    elif exit_code in (-15, -9, 1):
-        # -15 = SIGTERM (killed), -9 = SIGKILL, 1 = budget exceeded or interrupted
-        final_status = "killed" if exit_code < 0 else "failed"
+    elif exit_code < 0:
+        final_status = "killed"  # -15 SIGTERM · -9 SIGKILL
     else:
         final_status = "failed"
 
@@ -136,7 +158,7 @@ def run_worker(slug, prompt, model, repo, effort, delegates_dir):
     # Append to inbox for UserPromptSubmit hook to surface.
     # fsync ensures the write is durable before the hook reads on next prompt.
     inbox_file = delegates_dir / "inbox.md"
-    icon = "✓" if final_status == "completed" else "✗"
+    icon = {"completed": "✓", "timed-out": "⏱"}.get(final_status, "✗")
     entry = f"- {icon} **{slug}** {final_status} ({duration}, exit: {exit_code}) — {prompt[:100]}\n"
     try:
         with open(inbox_file, "a", encoding="utf-8") as f:
@@ -150,7 +172,7 @@ def run_worker(slug, prompt, model, repo, effort, delegates_dir):
     beep_done(final_status == "completed")
 
 
-def launch_worker(slug, prompt, model, repo, effort, delegates_dir):
+def launch_worker(slug, prompt, model, repo, effort, delegates_dir, timeout_s):
     """Launcher mode: spawn worker as detached background process, return immediately."""
     script = Path(__file__).resolve()
     cmd = [
@@ -161,6 +183,7 @@ def launch_worker(slug, prompt, model, repo, effort, delegates_dir):
         "--prompt", prompt,
         "--model", model,
         "--effort", effort,
+        "--timeout", str(timeout_s),
         "--delegates-dir", str(delegates_dir),
     ]
     if repo:
@@ -191,6 +214,9 @@ def main():
     parser.add_argument("--repo", help="Repository path to run in")
     parser.add_argument("--effort", default="medium", choices=["low", "medium", "high", "max"],
                         help="Effort level: low (quick tasks) · medium (default) · high (complex) · max (architecture)")
+    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S,
+                        help=f"Tope de tiempo en segundos (default {DEFAULT_TIMEOUT_S} = "
+                             f"{DEFAULT_TIMEOUT_S // 60} min). Al vencer, se mata el delegate.")
     parser.add_argument("--delegates-dir", help="Override delegates directory")
     args = parser.parse_args()
 
@@ -198,9 +224,9 @@ def main():
     slug = args.slug or (slugify(args.prompt[:40]) + "-" + str(int(time.time()))[-6:])
 
     if args.worker:
-        run_worker(slug, args.prompt, args.model, args.repo, args.effort, delegates_dir)
+        run_worker(slug, args.prompt, args.model, args.repo, args.effort, delegates_dir, args.timeout)
     else:
-        launch_worker(slug, args.prompt, args.model, args.repo, args.effort, delegates_dir)
+        launch_worker(slug, args.prompt, args.model, args.repo, args.effort, delegates_dir, args.timeout)
 
 
 if __name__ == "__main__":

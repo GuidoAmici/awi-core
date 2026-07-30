@@ -48,14 +48,22 @@ Frontend file changes are **always delegated to Gemini CLI employees**:
 
 ## How It Works
 
-1. Reads `employees.json` for cross-repo delegation targets
-2. Builds prompt with full context (absolute paths, source repo reference)
-3. Executes via `fork_terminal.py`:
+1. Builds the prompt with full context (absolute paths, source repo reference)
+2. Launches it with `delegate_run.py`, which spawns a detached background worker:
    ```bash
-   python3 .claude/skills/delegate/scripts/fork_terminal.py 'claude --model opus "<prompt>"'
+   python3 .claude/skills/delegate-issue/scripts/delegate_run.py \
+     --prompt "<prompt>" --model opus --effort high [--repo <path>] [--timeout 2700]
    ```
-4. New terminal opens with `CLAUDE_DELEGATED=1` set
-5. When complete, `stop-sound.sh` plays notification
+3. The worker runs `claude -p` with `CLAUDE_DELEGATED=1`, streaming into
+   `.claude/tmp/delegates/<slug>/output.log` and tracking `status.json`
+4. **A wall-clock cap applies** — 45 min by default, `--timeout` to change it. On
+   expiry the delegate gets SIGTERM (so it flushes its log), then SIGKILL if it
+   does not exit within 30s, and lands as `timed-out`. Without the cap a stuck
+   delegate ran indefinitely, billing tokens with nothing watching
+5. On exit it appends a line to `.claude/tmp/delegates/inbox.md`, which the
+   `UserPromptSubmit` hook surfaces on your next message, and plays a beep
+
+Monitor with `delegate_monitor.py <slug>`, stop one with `delegate_kill.py <slug>`.
 
 ---
 
