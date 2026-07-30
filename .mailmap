@@ -1,0 +1,8 @@
+# Canonicaliza las identidades de git del mismo operador cuando commitea desde
+# máquinas con distinta configuración. Afecta a `git log`, `git shortlog`, `git
+# blame` y a las vistas de contribuyentes de GitHub, sin reescribir el historial.
+#
+# Sólo se unifican identidades que comparten el GitHub ID 42481462. Ver ADR 0014.
+
+Guido Amici <guido.amici95@gmail.com> GuidoAmici <42481462+GuidoAmici@users.noreply.github.com>
+Guido Amici <guido.amici95@gmail.com> Wiido <42481462+GuidoAmici@users.noreply.github.com>
