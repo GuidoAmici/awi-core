@@ -114,4 +114,12 @@ La era del vault, anterior a Conventional Commits: **207 commits** con prefijo `
 
 Lo que se construyó en ese período: el árbol de `_system/`, las skills de rituales (`/today`, `/week`, `/quarter`, `/year`), el sistema de delegación, los hooks, y el andamiaje de orgs y usuarios.
 
-El tag `v0.2.0` existe en el remoto apuntando a un merge del 2026-06-16 en la línea de `stg`, que no es ancestro de `main`. Se conserva como registro histórico; los números `0.1.0` y `0.2.0` quedan consumidos y no se reutilizan.
+Release-please llegó a generar un `CHANGELOG.md` para `0.2.0` sobre la línea de `stg`, que nunca alcanzó `main` y se rescató antes de eliminar esa rama. Sus tres entradas:
+
+* agent discovery desde `_system/agency-agents` — elimina `employees.json` y la skill `/delegate` ([99fe3dc](https://github.com/GuidoAmici/awi-core/commit/99fe3dc))
+* CI con release-please como gate y promoción `dev` → `prod` ([5cdfbb4](https://github.com/GuidoAmici/awi-core/commit/5cdfbb4))
+* CI de 3 ramas (`dev` → `stg` → `prod`) con release-please como gate ([c9c36c5](https://github.com/GuidoAmici/awi-core/commit/c9c36c5))
+
+Las dos últimas describen el esquema que la revisión integral desarmó en `0.7.0`, y la primera una migración que quedó a medias: `employees.json` sigue vivo hoy, lo que motiva el [PRD #82](https://github.com/GuidoAmici/awi-core/issues/82).
+
+El tag `v0.2.0` apunta a un merge del 2026-06-16 en la línea de `stg`, que no es ancestro de `main`. Se conserva como registro histórico; los números `0.1.0` y `0.2.0` quedan consumidos y no se reutilizan.
