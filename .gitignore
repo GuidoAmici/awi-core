@@ -10,9 +10,10 @@
 # Temporary files
 *.tmp
 
-# Instance data — private to each AWI instance, never mirrored to awi-core.
-# Holds user profiles, org workspaces and their submodules. Source of truth for
-# .gitmodules generation (current-user.json + user-submodules.json).
+# Instance data — private to each operator, never leaves the machine. Holds user
+# profiles and the org workspaces, each a separate cloned repo. Ignoring it is a
+# correctness requirement: without this, `git add -A` swallows the children as
+# embedded repos. See ADR 0011 on what .gitignore is and isn't for.
 _data/
 
 # Python cache
@@ -25,13 +26,25 @@ apps/package-lock.json
 # Claude local settings — machine-specific, not committed
 .claude/settings.local.json
 
-# Generated per-user from _data/users/*/user-submodules.json — never committed.
-# See ADR 0001 and .claude/skills/shared/scripts/generate_gitmodules.py
+# Nothing generates or reads .gitmodules since ADR 0009 — nothing here is a
+# submodule, and the generator that used to write this file is gone. Kept as a
+# guard: a stray .gitmodules would be a bug to notice, not config to commit.
 .gitmodules
 
-# Submodules declared in user-submodules.json and materialised by /awi-initialize.
-# Their gitlinks are not versioned either — see ADR 0001.
+# Cloned repo declared in user-submodules.json, not a submodule (ADR 0009).
+# Ignored for the same correctness reason as _data/, not because of gitlinks —
+# there are none left anywhere.
 _system/agency-agents/
 
 # Supabase CLI temp files (contain project ref and connection URLs)
 supabase/
+
+# Agent scratch — delegate logs and prompts, throwaway scripts. The directory
+# exists at runtime (delegate_run.py and check-delegates.sh use
+# .claude/tmp/delegates/inbox.md) but is never versioned: this is how 105 files
+# of scratch, including plaintext credentials, ended up in a public repo.
+# See ADR 0014.
+.claude/tmp/
+
+# Test runner scratch
+test-results/
