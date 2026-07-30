@@ -29,7 +29,7 @@ El 0013 describió un patrón —migraciones a medias que dejan residuo activo�
 | `ci-dev.yml` duplica el job de test de `dev.yml`, con la invocación de pytest rota | nunca se nota |
 | `CLAUDE.md` declara "No auto-commit hook" mientras `/awi-sync` auto-commitea | 73 corridas registradas |
 
-Más la duplicación estructural: cuatro copias de la misma skill de scaffolding, tres de ellas byte-idénticas, y once skills triplicadas entre `.agents/`, `.claude/` y el plugin `mattpocock-skills`.
+Más la duplicación estructural: cuatro copias de la misma skill de scaffolding, tres de ellas byte-idénticas, y once skills duplicadas byte a byte entre `.agents/` y `.claude/`, cuatro de las cuales están además en el plugin `mattpocock-skills` — o sea presentes tres veces, con la precedencia decidida por lotería.
 
 Los workflows merecen una aclaración, porque la primera lectura de la revisión fue equivocada. **El gate existe y funciona**: `dev.yml` corre `pytest -q tests` y los nueve tests pasan en cada push. Lo que hay son dos duplicados suyos que no aportan nada. `ci-dev.yml` repite el job de test con una invocación que colecta los 33 archivos de script en lugar de `tests/` —termina en error interno y `no tests ran`—, y su inutilidad pasa inadvertida porque `dev.yml` ya cubre el mismo trigger, `push` y `pull_request` sobre `dev`. `promote-dev-to-stg.yml` repite el merge con un token que no puede saltar las reglas de rama, y por eso falla siempre mientras el merge real lo hace `dev.yml`.
 
@@ -59,7 +59,7 @@ Las otras dos capas se rehacen. La de skills, porque ahí vive el residuo. La de
 
 **Semver y changelog se conservan, fuera del camino de distribución.** Lo que congelaba no era el versionado sino el pipeline de promoción de tres ramas. release-please se reapunta a la rama única y produce `CHANGELOG.md`, que nunca se generó. `/awi-update` consume la punta de la rama, no el último tag: los cambios llegan sin gate, y cortar versión vuelve a ser un acto deliberado que no bloquea a nadie. El changelog pasa a ser la parte visible del canal —un compañero que actualiza lee "esto cambió" en castellano en lugar de un `git log`—, y por eso los mensajes que redacte la IA tienen que ser Conventional Commits: son su materia prima.
 
-**AWI vuelve a ser Claude-native.** Se eliminan `.agents/`, `GEMINI.md`, `.gemini/` y `AGENTS.md`. Para las once skills triplicadas gana el plugin, y se borra también la copia de `.claude/`.
+**AWI vuelve a ser Claude-native.** Se eliminan `.agents/`, `GEMINI.md`, `.gemini/` y `AGENTS.md`. De las once duplicadas, gana el plugin donde el plugin tiene equivalente —`diagnose`, `tdd`, `prototype` y `grill-me`, que se borran también de `.claude/`— y las siete restantes se quedan en `.claude/skills/`, que pasa a ser su único hogar. Las referencias a `AGENTS.md` de otros repos en `INSTRUCTIONS.md` y las de `.gemini/` en la guía de migración se conservan: hablan de repos ajenos y de instancias legacy, no de éste.
 
 **El riesgo de permisos de los delegates se acepta hasta la fase 2.** Un delegate corre desatendido con acceso a doppler, supabase, mercadopago y gmail, y su prompt sale de un comentario de issue, que es contenido externo y editable. El operador asume el riesgo con la información a la vista, y la aceptación es válida **mientras sea el único que corre delegates**. Si un compañero usa `/delegate-issue`, el cálculo cambia. Sí entran en fase 1 un timeout y un tope de gasto, que no son seguridad sino costo: hoy un delegate colgado corre indefinido.
 

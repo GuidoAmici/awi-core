@@ -89,8 +89,6 @@ type: context
 ```
 awi/
 ├── CLAUDE.md                        # Claude Code session instructions
-├── AGENTS.md                        # Codex CLI session instructions
-├── GEMINI.md                        # Gemini CLI session instructions
 ├── README.md                        # Project overview
 ├── .gitignore
 │

@@ -262,8 +262,6 @@ Plays notification sound when a delegated task completes. Only triggers when `CL
 ```
 awi/
 ├── CLAUDE.md                           # Claude Code session instructions
-├── AGENTS.md                           # Codex CLI session instructions
-├── GEMINI.md                           # Gemini CLI session instructions
 ├── README.md                           # This file
 │
 ├── _system/                            # AWI engine — framework docs (partially public)
