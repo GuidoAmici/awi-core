@@ -1,9 +1,15 @@
 # El sustrato sigue siendo archivos mientras el ERP sea una intención
 
-> **Estado: propuesto, pendiente de la decisión del operador.**
-> Este es el único ADR de la fase 2 que un agente no puede cerrar por su cuenta: el
+> **Estado: aceptado (2026-08-03).**
+> Este fue el único ADR de la fase 2 que un agente no podía cerrar por su cuenta: el
 > insumo y la evidencia son de un agente, la decisión es del operador. Ver el PRD 5
 > ([#84](https://github.com/GuidoAmici/awi-core/issues/84)).
+>
+> Antes de aceptarlo se volvió a correr `docs/sustrato/reproducir.py` en una sesión
+> distinta de la que lo escribió: reproduce el mismo resultado —4 afirmaciones de 8,
+> las mismas tres brechas de diseño— con la latencia en 65 ms contra los 54 ms de la
+> corrida original, variación de medición que no cambia la conclusión. La evidencia
+> es reproducible por terceros, que es la condición que el ADR 0013 pedía.
 
 ## El problema
 
