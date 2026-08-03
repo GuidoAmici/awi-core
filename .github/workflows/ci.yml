@@ -55,6 +55,12 @@ jobs:
           # el test falla con "git-filter-repo no está instalado" en vez de con
           # una señal real sobre la purga.
           pip install pytest git-filter-repo
+          # El runner arranca sin identidad de git, y los tests de scaffold
+          # crean repos y commitean en ellos. Sin esto fallan con "Author
+          # identity unknown", que es ruido de entorno y no una señal sobre el
+          # código. Representa una máquina de desarrollo normalmente configurada.
+          git config --global user.email "ci@awi-core.local"
+          git config --global user.name "AWI CI"
           pytest -q tests
 
       # Detecta una regresión en el gate y no meses después. Corre sobre HEAD y
