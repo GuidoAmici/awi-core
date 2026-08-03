@@ -50,7 +50,11 @@ jobs:
           python-version: '3.11'
       - name: pytest
         run: |
-          pip install pytest
+          # git-filter-repo hace falta porque tests/test_history_purge.py lo
+          # ejercita de verdad (no lo mockea): sin esto en el PATH del runner,
+          # el test falla con "git-filter-repo no está instalado" en vez de con
+          # una señal real sobre la purga.
+          pip install pytest git-filter-repo
           pytest -q tests
 
       # Detecta una regresión en el gate y no meses después. Corre sobre HEAD y
