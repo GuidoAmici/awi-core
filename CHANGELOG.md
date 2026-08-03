@@ -2,6 +2,43 @@
 
 Las versiones `0.3.0` en adelante se reconstruyeron retroactivamente el 2026-07-29 a partir del historial, un hito por decisión de arquitectura registrada. Ver [ADR 0014](docs/adr/0014-el-problema-era-la-distribucion-no-la-composicion.md).
 
+## [0.8.0](https://github.com/GuidoAmici/awi-core/compare/v0.7.0...v0.8.0) (2026-08-03)
+
+
+### Características
+
+* **delegate:** least privilege y trazabilidad en la delegación ([37264a3](https://github.com/GuidoAmici/awi-core/commit/37264a3e18c8760a9933fd781eb2b030014db421))
+* **seguridad:** hook de pre-commit sobre el mismo motor de reglas ([136866f](https://github.com/GuidoAmici/awi-core/commit/136866f756562b81097c7fef8b772ef4138fb556))
+* **seguridad:** motor de reglas único y auditoría del historial ([8617ef3](https://github.com/GuidoAmici/awi-core/commit/8617ef31b284476c990ad5a59ddb5b6b1237461b))
+* **seguridad:** purga verificada del historial y su coordinación ([2b7dddf](https://github.com/GuidoAmici/awi-core/commit/2b7dddf6aa8257c52f7dcc87e144cee833571583))
+
+
+### Correcciones
+
+* **ci:** configurar identidad de git en el runner ([0c0a9b2](https://github.com/GuidoAmici/awi-core/commit/0c0a9b282a73eb846e4f8426b0b0397dc0ef9dda))
+* **ci:** fetch-depth 0 en la promoción a main ([fba354c](https://github.com/GuidoAmici/awi-core/commit/fba354cc49ca0943454ef60a4f126418a801d68c))
+* **ci:** instalar git-filter-repo en el runner ([a955be8](https://github.com/GuidoAmici/awi-core/commit/a955be8e6a43fd19234778f0a26436675486d3e8))
+* **seguridad:** el inventario perdía rutas de blobs compartidos ([2be1017](https://github.com/GuidoAmici/awi-core/commit/2be10171cb3537d9bac3058b80051887c12e71fb))
+
+
+### Refactorizaciones
+
+* **skills:** consolidar el scaffolding y volver confiable la telemetría ([8ad6c84](https://github.com/GuidoAmici/awi-core/commit/8ad6c8438fb8b11e88718af9baaa99073350c65e))
+
+
+### Mantenimiento
+
+* **repo:** .mailmap para unificar las identidades de git del operador ([0b06eb6](https://github.com/GuidoAmici/awi-core/commit/0b06eb6f42d0b9298ec896784135d6f9a4049b60))
+
+
+### Documentación
+
+* **adr:** aceptar el 0019 — el sustrato sigue siendo archivos ([b3bce64](https://github.com/GuidoAmici/awi-core/commit/b3bce6492687ebdd9f2f2a0709fa5fc7f3037411))
+* **changelog:** rescatar las entradas de 0.2.0 antes de eliminar stg ([2114769](https://github.com/GuidoAmici/awi-core/commit/21147692fdd0de7b35ec10a0284553a4ceb92fb3))
+* **contexto:** eliminar employees.json y ordenar el registro de decisiones ([125d839](https://github.com/GuidoAmici/awi-core/commit/125d839aa06f902429c7e7af7a91e3f8a2c01a48))
+* **contexto:** reescribir CONTEXT.md y el README sobre el mecanismo real ([2b7b6f2](https://github.com/GuidoAmici/awi-core/commit/2b7b6f2528604f771abdd4f8a8ff83aeba516bd0))
+* **sustrato:** reproducir qué puede git y desbloquear el rev del 0012 ([e85dd24](https://github.com/GuidoAmici/awi-core/commit/e85dd249bc07fb89ceee117ea56c40ba50195275))
+
 ## [0.7.0](https://github.com/GuidoAmici/awi-core/compare/v0.6.0...v0.7.0) (2026-07-29)
 
 La revisión integral que abría el ADR 0013, y la fase 1 completa. Reencuadra el problema de dominio —la pieza faltante era la distribución, no la composición— y construye el canal que nunca existió.
