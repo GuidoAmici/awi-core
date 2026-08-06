@@ -39,6 +39,16 @@ These are canonical role names — the actual label strings used in the issue tr
 
 State transitions: an unlabeled issue normally goes to `needs-triage` first; from there it moves to `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. `needs-info` returns to `needs-triage` once the reporter replies. The maintainer can override at any time — flag transitions that look unusual and ask before proceeding.
 
+## Traer el contexto compartido
+
+Antes de la primera consulta al tracker en cada invocación, sin preguntar:
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py pull
+```
+
+Triar es decidir sobre el estado actual del trabajo, y las notas de triage previas viven en los repos de contexto. Una línea de reporte alcanza si todo vuelve `al-día`. Ver «Contexto compartido» en INSTRUCTIONS.md.
+
 ## Invocation
 
 The maintainer invokes `/triage` and describes what they want in natural language. Interpret the request and act. Examples:

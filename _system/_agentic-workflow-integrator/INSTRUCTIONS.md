@@ -55,30 +55,52 @@ Los repos de contexto —las orgs, sus codebases y el repo del propio operador�
 
 La mecánica está en `context_sync.py`; el juicio de cuándo usarla es esto. No reimplementes la mecánica con comandos de git sueltos — el script existe porque un `pull --rebase` mal manejado deja repos a medias, y eso ya pasó.
 
-### Al abrir la sesión — traer, sin preguntar
+### Los momentos, y por qué están anclados en skills
+
+Esta sección existía y no se cumplía. La comprobación es directa: `context_sync.py status` encontró trabajo sin publicar en cinco repos a la vez, y en el workspace de una org el aporte más reciente de otra operadora llevaba tres semanas sin que nadie lo trajera. El mismo modo de falla que ya se había documentado para `log_command`, que subcuenta porque depende de que 22 archivos se acuerden de invocarlo.
+
+Por eso cada momento está **anclado como paso de la skill que lo abre**, y acá queda el porqué en un solo lugar. Ver [ADR 0020](../../docs/adr/0020-el-ciclo-de-contexto-se-ancla-en-las-skills.md).
+
+| Momento | Qué | Anclado en |
+|---|---|---|
+| Abrir o refrescar el día | traer | `/today` |
+| Antes de leer el tracker | traer | `/triage`, `/delegate-issue` |
+| Empezar un descanso | publicar | `/break <motivo>` |
+| Volver de un descanso | traer | `/break back` |
+| Cerrar la sesión | publicar | `/wrap-session` |
+
+Si estás en uno de esos momentos y la skill no corrió el paso, corrélo igual. La tabla manda sobre el archivo.
+
+### Traer — sin preguntar
 
 ```bash
 python3 .claude/skills/shared/scripts/context_sync.py pull
 ```
 
-Corrélo **siempre** al empezar, antes de leer o escribir contexto, y sin pedir permiso: trabajar sobre datos viejos es peor que la interrupción. Es rápido y no destruye nada.
+Antes de leer o escribir contexto, y sin pedir permiso: trabajar sobre datos viejos es peor que la interrupción. Es rápido y no destruye nada.
 
-### Durante la sesión y al cerrarla — publicar, con mensajes de verdad
+### Publicar — sin preguntar, pero contándolo
 
 ```bash
 python3 .claude/skills/shared/scripts/context_sync.py status
 python3 .claude/skills/shared/scripts/context_sync.py push --repo <nombre> --message "<mensaje>"
 ```
 
-En cortes lógicos y al cerrar, mirá `status` y **ofrecé** publicar lo que haya. Publicar sí se ofrece; traer no se pregunta.
+Mirá `status`, y publicá lo que haya **sin pedir confirmación**. Después contá en una línea por repo qué se publicó. La confirmación previa se sacó porque el costo de pedirla resultó ser que no se publicara nada: quien trabaja acompañado necesita que su contexto llegue al otro lado, no un permiso más que dar.
 
 **Redactá vos el mensaje de cada repo, uno por repo.** En [Conventional Commits](references/commit-format.md), describiendo lo que cambió de verdad. Nunca un mensaje genérico repetido: el historial compartido de estos repos es una pared de `chore(sync): stage local changes` porque el sync viejo usaba una constante, y eso lo vuelve inservible para saber qué pasó.
+
+Publicar automáticamente sólo es aceptable con la red debajo: `push` escanea el material sensible antes de tocar el índice, con las mismas reglas que el hook de pre-commit. El hook no alcanza a estos repos —`core.hooksPath` apunta a un directorio del harness y ellos son repos aparte, en `_data/`— así que el escaneo vive dentro del script.
 
 ### Cuando un repo reporta `conflicto`
 
 Significa que los cambios del operador y los de otra persona se pisan. **El repo quedó como estaba** — el script nunca lo deja a mitad de una operación.
 
 No lo resuelvas por tu cuenta: decidir qué versión del trabajo de otra persona sobrevive no es tuyo. Mostrale al operador qué repo es y qué se toca, y preguntale cómo seguir. El resto de los repos sí se sincronizó, así que la sesión puede continuar.
+
+### Cuando un repo reporta `sensible`
+
+Hay una credencial o material de cliente entre los cambios. **No se commiteó ni publicó nada, y el índice quedó intacto.** Mostrale al operador las rutas señaladas y el remedio de cada regla; sacar el archivo, rotar la credencial o ajustar la regla son decisiones suyas. Los demás repos sí se publicaron.
 
 ### Qué no entra en este ciclo
 

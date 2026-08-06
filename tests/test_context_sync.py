@@ -148,3 +148,71 @@ def test_sin_clonar_se_reporta_y_no_explota(tmp_path):
     repo = Repo(name="fantasma", url="x", branch="only", path=tmp_path / "no-existe", parent="AWI")
     assert cs.pull_one(repo).state == "sin-clonar"
     assert cs.push_one(repo, "m").state == "sin-clonar"
+
+
+# ── Material sensible ────────────────────────────────────────────────────────
+# Publicar dejó de pedir confirmación (ADR 0020), así que `git add -A` corre sin
+# que nadie mire lo que barre. El hook de pre-commit no cubre estos repos:
+# `core.hooksPath` apunta a un directorio del harness y ellos son repos aparte,
+# en `_data/`. Sin estos tests, el ciclo publica credenciales en silencio.
+
+def test_push_no_publica_una_credencial(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / ".env").write_text("DATABASE_URL=postgres://admin:s3cr3t0@db.example.com/prod\n")
+
+    res = cs.push_one(repo, "chore: no debería llegar al remoto")
+
+    assert res.state == "sensible"
+    assert any(".env" in h for h in res.hallazgos)
+    assert git(local, "log", "-1", "--format=%s").stdout.strip() == "inicial", "commiteó igual"
+
+
+def test_push_bloqueado_no_toca_el_indice(tmp_path):
+    """Escanear antes del `add` y no después: revertir un staging que el operador
+    quizás armó a mano es otra forma de dejar el repo en un estado del que hay que
+    salir con comandos de git."""
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / "a-mano.md").write_text("esto lo estageé yo\n")
+    git(local, "add", "a-mano.md")
+    (local / ".env").write_text("API_KEY=x\n")
+
+    assert cs.push_one(repo, "chore: bloqueado").state == "sensible"
+
+    estagiado = git(local, "diff", "--cached", "--name-only").stdout.split()
+    assert estagiado == ["a-mano.md"], f"el índice cambió: {estagiado}"
+
+
+def test_push_detecta_un_token_dentro_de_un_archivo_comun(tmp_path):
+    """No alcanza con mirar la ruta: el caso real es una credencial pegada en una
+    nota de agenda, que es markdown como cualquier otro."""
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / "daily.md").write_text("# Hoy\n\nla key de prod es AKIAIOSFODNN7EXAMPLE\n")
+
+    res = cs.push_one(repo, "docs: daily")
+
+    assert res.state == "sensible"
+    assert any("daily.md" in h for h in res.hallazgos)
+
+
+def test_push_no_filtra_la_credencial_en_su_propio_reporte(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / "daily.md").write_text("token: AKIAIOSFODNN7EXAMPLE\n")
+
+    res = cs.push_one(repo, "docs: daily")
+
+    assert not any("AKIAIOSFODNN7EXAMPLE" in h for h in res.hallazgos), "el reporte filtra el secreto"
+
+
+def test_push_publica_lo_que_no_es_sensible(tmp_path):
+    """El escaneo no puede volverse un freno para el trabajo normal."""
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / "agenda.md").write_text("# Reunión\n\nDecidimos migrar en agosto.\n")
+
+    assert cs.push_one(repo, "docs(agenda): resumen de la reunión").state == "publicado"
+
+
+def test_sensible_cuenta_como_atencion_humana(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    (local / ".env").write_text("API_KEY=x\n")
+
+    assert cs.report([cs.push_one(repo, "m")], "Prueba:") == cs.NEEDS_ATTENTION

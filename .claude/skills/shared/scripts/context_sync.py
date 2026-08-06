@@ -37,6 +37,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sensitive_scan as ss
 from manifest import Repo, plan
 from paths import AWI_ROOT
 
@@ -46,10 +47,12 @@ NEEDS_ATTENTION = 3
 @dataclass
 class Result:
     repo: str
-    state: str          # pulled · al-día · conflicto · sin-clonar · error
+    state: str          # pulled · al-día · conflicto · sensible · sin-clonar · error
     detail: str = ""
     dirty: int = 0
     ahead: int = 0
+    #: Rutas con material sensible, cuando `state == "sensible"`.
+    hallazgos: tuple[str, ...] = ()
 
 
 def git(repo: Path, *args: str) -> subprocess.CompletedProcess:
@@ -109,6 +112,44 @@ def pull_one(r: Repo) -> Result:
     return Result(r.name, state, dirty=dirty_count(r.path), ahead=ahead_count(r.path, r.branch))
 
 
+def pending_paths(path: Path) -> list[str]:
+    """Rutas que un `git add -A` levantaría. El renombre entra por su destino."""
+    rutas = []
+    for ln in git(path, "status", "--porcelain").stdout.splitlines():
+        if not ln.strip():
+            continue
+        ruta = ln[3:]
+        if " -> " in ruta:          # R  viejo -> nuevo
+            ruta = ruta.split(" -> ", 1)[1]
+        rutas.append(ruta.strip('"'))
+    return rutas
+
+
+def scan_sensitive(path: Path) -> ss.Reporte:
+    """Escanear lo que está por publicarse, leyendo del árbol de trabajo.
+
+    El motor de `sensitive_scan` no sabe de git a propósito, y acá se aprovecha:
+    escanear antes de `git add -A` deja el índice intacto cuando hay hallazgos,
+    en vez de tener que revertir un staging que quizás el operador armó a mano.
+
+    Este escaneo no reemplaza al hook de pre-commit — lo cubre donde el hook no
+    llega. `core.hooksPath` apunta a un directorio del harness, así que los repos
+    de contexto, que viven en `_data/` y son repos aparte, nunca lo tuvieron. Sin
+    esto, publicar automáticamente sería `git add -A` sin ninguna red debajo.
+    """
+    reglas = ss.cargar_reglas(AWI_ROOT / ss.REGLAS_SENSIBLES)
+    entradas = []
+    for ruta in pending_paths(path):
+        archivo = path / ruta
+        try:
+            crudo = archivo.read_bytes()
+            contenido = None if len(crudo) > ss.MAX_BYTES else crudo.decode("utf-8", errors="replace")
+        except OSError:             # borrado, o ilegible: se evalúa por la ruta
+            contenido = None
+        entradas.append(ss.Entrada(ruta, contenido))
+    return ss.escanear(entradas, reglas)
+
+
 def push_one(r: Repo, message: str) -> Result:
     """Commitear lo que haya y publicarlo, con el mensaje que decidió la IA.
 
@@ -120,6 +161,19 @@ def push_one(r: Repo, message: str) -> Result:
         return Result(r.name, "sin-clonar")
 
     if dirty_count(r.path):
+        try:
+            reporte = scan_sensitive(r.path)
+        except (ss.ReglasInvalidas, OSError) as e:
+            return Result(r.name, "error", f"no se pudo escanear material sensible: {e}")
+
+        if reporte.bloqueantes:
+            return Result(
+                r.name, "sensible",
+                "hay material sensible entre los cambios; no se publicó nada",
+                dirty=dirty_count(r.path),
+                hallazgos=tuple(str(h) for h in reporte.bloqueantes),
+            )
+
         git(r.path, "add", "-A")
         res = git(r.path, "commit", "-m", message)
         if res.returncode != 0 and "nothing to commit" not in (res.stdout + res.stderr):
@@ -138,17 +192,21 @@ def push_one(r: Repo, message: str) -> Result:
 
 
 def report(results: list[Result], header: str) -> int:
-    icons = {"pulled": "↓", "publicado": "↑", "al-día": "·", "conflicto": "⚠", "sin-clonar": "○", "error": "✗"}
+    icons = {"pulled": "↓", "publicado": "↑", "al-día": "·", "conflicto": "⚠",
+             "sensible": "⛔", "sin-clonar": "○", "error": "✗"}
+    needs_human = ("conflicto", "sensible", "error")
     print(f"\n{header}")
     attention = []
-    for res in sorted(results, key=lambda x: (x.state != "conflicto", x.repo)):
+    for res in sorted(results, key=lambda x: (x.state not in needs_human, x.repo)):
         line = f"  {icons.get(res.state, '?')} {res.repo:28} {res.state}"
         if res.dirty:
             line += f"  ({res.dirty} sin commitear)"
         print(line)
         if res.detail:
             print(f"      {res.detail}")
-        if res.state in ("conflicto", "error"):
+        for h in res.hallazgos:
+            print(f"      {h}")
+        if res.state in needs_human:
             attention.append(res.repo)
 
     if attention:

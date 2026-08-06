@@ -1,6 +1,6 @@
 ---
 name: wrap-session
-description: End-of-session ritual. Saves observations about the user and flags any unsaved info from the conversation.
+description: End-of-session ritual. Closes open threads first, then saves observations, publishes the shared context, and reports.
 allowed-tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
 model: sonnet
 subagent_type: general-purpose
@@ -8,72 +8,106 @@ subagent_type: general-purpose
 
 # /wrap-session — End of Session
 
-Four steps, in strict order. Steps 1–3 are fully automatic — no prompts, no confirmations. Step 4 uses `AskUserQuestion`, not free-form text. Do not print progress during Step 1 — output comes in Step 2.
+Five steps, in strict order.
+
+**Step 1 va primero por diseño.** Antes vivía último, y el orden importaba más de lo que parecía: para cuando el gate corría, la sesión ya estaba archivada y resumida, así que todo lo que aparecía ahí llegaba como un apéndice a algo que el operador ya daba por cerrado. Lo que se decide en el Step 1 cambia lo que hay que escribir en el Step 2 y lo que hay que publicar en el Step 3 — no puede ir después de ellos.
+
+Steps 2–3 son automáticos: sin prompts, sin confirmaciones. Step 1 usa `AskUserQuestion`, no texto libre. No imprimas progreso durante los Steps 2–3 — la salida viene en el Step 4.
 
 ---
 
-## Step 1 — Save all files silently
+## Step 1 — Gate de hilos abiertos
 
-Save every file below without asking for confirmation. Do not pause between saves.
+Dos barridos de la conversación, en este orden. Para cada ítem, una llamada a `AskUserQuestion` por vez, esperando respuesta antes de la siguiente. No vuelques una lista en markdown ni pidas texto libre.
 
-### 1a — Resolve context
+### 1a — Trabajo sin terminar
+
+Recorré la sesión buscando lo que quedó a mitad de camino:
+
+- Tareas empezadas y nunca cerradas
+- Issues que el trabajo de hoy resolvió, invalidó o hizo obsoletos, y que siguen abiertos sin comentario (la política está en «Issue hygiene» de INSTRUCTIONS.md — comentar y **sugerir** la disposición, no cerrar solo)
+- Decisiones tomadas en la conversación que ameritan un ADR y no lo tienen
+- Cambios de código sin commitear que no son contexto — el Step 3 publica los repos de contexto, no los repos de trabajo del harness
+
+Para cada uno, preguntá qué hacer: resolverlo ahora, anotarlo como pendiente para mañana, o dejarlo.
+
+### 1b — Información sin guardar
+
+Recorré la sesión buscando lo que se mencionó y no se archivó:
+
+- Tareas o to-dos referidos pero nunca creados
+- Ideas o decisiones que pertenecen al vault
+- Cambios de estado de proyectos que todavía no están en los archivos
+- Personas o reuniones nombradas al pasar
+
+Si no hay nada abierto en ninguno de los dos barridos, decilo en una línea y pasá al Step 2.
+
+Lo que el operador decida guardar entra en los archivos del Step 2. Lo que decida diferir va al handoff de mañana.
+
+---
+
+## Step 2 — Guardar todos los archivos, en silencio
+
+Guardá cada archivo de abajo sin pedir confirmación. No pauses entre guardados.
+
+### 2a — Resolver contexto
 
 ```bash
 bash .claude/hooks/get-datetime.sh full
 gh api user --jq '{id: .id, login: .login, name: .name}'
 ```
 
-Read `_data/users/current-user.json` to get `<user-root>`.
+Leé `_data/users/current-user.json` para obtener `<user-root>`.
 
-### 1b — Infer which orgs were touched
+### 2b — Inferir qué orgs se tocaron
 
-An org was touched if any of the following are true:
-1. Files were edited under `_data/organizations/<name>/`
-2. Issues were referenced by an org workspace repo (e.g. `GuidoAmici/newhaze-workspace`, `GuidoAmici/rabbitek-workspace`)
+Una org se tocó si se cumple alguna de estas:
+1. Se editaron archivos bajo `_data/organizations/<name>/`
+2. Se referenciaron issues de un repo workspace de la org (p. ej. `GuidoAmici/newhaze-workspace`, `GuidoAmici/rabbitek-workspace`)
 
-The org name is the repo prefix before `-workspace` (e.g. `newhaze` from `GuidoAmici/newhaze-workspace`). Build a list of touched org names — use it for Steps 1d and 1e.
+El nombre de la org es el prefijo del repo antes de `-workspace` (p. ej. `newhaze` de `GuidoAmici/newhaze-workspace`). Armá la lista de orgs tocadas — se usa en los pasos 2d y 2e.
 
-### 1c — User inference file
+### 2c — Archivo de inferencias del usuario
 
-Path: `<user-root>agenda/user-profile-inference/YYYY-MM-DD-<login>.md`
+Ruta: `<user-root>agenda/user-profile-inference/YYYY-MM-DD-<login>.md`
 
-Review the conversation for behavioral patterns the user may not be consciously aware of:
-- How they communicate (verbosity, delegation style, trust)
-- How they make decisions (data-driven, intuitive, socially influenced)
-- What they avoid, assume, or don't notice
-- Patterns in what they asked for vs what they actually needed
+Revisá la conversación buscando patrones de comportamiento que el operador quizás no registra conscientemente:
+- Cómo se comunica (verbosidad, estilo de delegación, confianza)
+- Cómo decide (por datos, por intuición, por influencia social)
+- Qué evita, qué asume, qué no nota
+- Diferencias entre lo que pidió y lo que en realidad necesitaba
 
-Write 1–3 observations. Each must be:
-- **Specific to this session** — grounded in what actually happened
-- **Non-judgmental** — framed as observation, not evaluation
-- About something they likely don't consciously track
-- **Must include explicit Pros and Cons**
+Escribí 1–3 observaciones. Cada una debe ser:
+- **Específica de esta sesión** — anclada en lo que pasó de verdad
+- **No valorativa** — planteada como observación, no como evaluación
+- Sobre algo que probablemente no registra
+- **Con Pros y Contras explícitos**
 
-Before writing, check existing entries to avoid repetition:
+Antes de escribir, revisá las entradas existentes para no repetirte:
 ```bash
 ls <user-root>agenda/user-profile-inference/ | sort -r | head -3
 ```
 
-Format:
+Formato:
 ```markdown
-<details><summary><strong>Short label</strong></summary>
+<details><summary><strong>Etiqueta corta</strong></summary>
 
-One short paragraph. Specific, grounded in what happened this session.
+Un párrafo corto. Específico, anclado en lo que pasó esta sesión.
 
-**Pros:** What this pattern enables or where it serves the user well.
-**Cons:** Where this pattern may create friction, blind spots, or tradeoffs.
+**Pros:** Qué habilita este patrón o dónde le sirve.
+**Contras:** Dónde puede generar fricción, puntos ciegos o costos.
 
 </details>
 ```
 
-- If the file exists for today: append a new `<details>` block
-- If new: create with `# <name>` as H1, `## YYYY-MM-DD` as section heading
+- Si el archivo de hoy ya existe: agregá un `<details>` nuevo
+- Si es nuevo: crealo con `# <nombre>` como H1 y `## YYYY-MM-DD` como sección
 
-### 1d — User daily file
+### 2d — Daily del usuario
 
-Path: `<user-root>agenda/daily/YYYY-MM-DD.md`
+Ruta: `<user-root>agenda/daily/YYYY-MM-DD.md`
 
-If it doesn't exist, create it:
+Si no existe, crealo:
 ```markdown
 ---
 type: daily
@@ -85,19 +119,21 @@ checked-out: false
 # DayOfWeek, Month DD
 ```
 
-Append a `## Session Log` section with:
+Agregá una sección `## Session Log` con:
 
-**Completed this session** — everything done, marked `[x]`, linked to task file if one exists. Include unscheduled work.
+**Completado esta sesión** — todo lo hecho, marcado `[x]`, enlazado al archivo de tarea si existe. Incluí el trabajo no planificado.
 
-**Added this session** — every task, decision, or idea created this session. For each: priority (`critical` / `high` / `medium` / `low`) and a flag: **[strategic]** or **[reactive]**.
+**Agregado esta sesión** — cada tarea, decisión o idea creada. Para cada una: prioridad (`critical` / `high` / `medium` / `low`) y una marca: **[strategic]** o **[reactive]**.
 
-**Impulse check** — one line: was this session mostly strategic or reactive? If reactive dominated, name it plainly.
+**Hilos abiertos** — lo que el Step 1 decidió diferir, para que el handoff de mañana lo levante.
 
-### 1e — Org daily files
+**Impulse check** — una línea: ¿la sesión fue mayormente estratégica o reactiva? Si dominó lo reactivo, decilo sin rodeos.
 
-For each org touched, save `_data/organizations/<name>/agenda/daily/YYYY-MM-DD.md`.
+### 2e — Dailies de las orgs
 
-If it doesn't exist, create with minimal structure:
+Para cada org tocada, guardá `_data/organizations/<name>/agenda/daily/YYYY-MM-DD.md`.
+
+Si no existe, creala con estructura mínima:
 ```markdown
 ---
 type: daily
@@ -108,55 +144,60 @@ date: YYYY-MM-DD
 # DayOfWeek, Month DD — <name>
 ```
 
-Append a `## Session Log` section summarising work done for that org this session.
+Agregá una sección `## Session Log` que resuma el trabajo hecho para esa org.
 
-### 1f — Outputs files
+### 2f — Outputs
 
-If any outputs were produced during the session (plans, designs, decisions, reports), save them to:
-- `<user-root>agenda/outputs/YYYY-MM-DD-<slug>.md` for personal outputs
-- `_data/organizations/<name>/agenda/outputs/YYYY-MM-DD-<slug>.md` for org-specific outputs
+Si la sesión produjo outputs (planes, diseños, decisiones, informes), guardalos en:
+- `<user-root>agenda/outputs/YYYY-MM-DD-<slug>.md` para outputs personales
+- `_data/organizations/<name>/agenda/outputs/YYYY-MM-DD-<slug>.md` para outputs de una org
 
-Only create outputs files for content that was actually produced, not for the session log itself.
-
----
-
-## Step 2 — Print one-liner per file saved
-
-After all saves, print a single line per file:
-
-```
-_data/users/42481462/agenda/user-profile-inference/2026-05-14-GuidoAmici.md — 2 observations added
-_data/users/42481462/agenda/daily/2026-05-14.md — session log appended
-_data/organizations/newhaze/agenda/daily/2026-05-14.md — created, session log added
-_data/users/42481462/agenda/outputs/2026-05-14-wrap-session-rewrite.md — created
-```
+Sólo creá archivos de output para contenido que se produjo de verdad, no para el session log en sí.
 
 ---
 
-## Step 3 — Session summary
+## Step 3 — Publicar el contexto compartido
 
-Print 3–6 bullet points covering actions taken and open threads. Focus on outcomes, not process.
+Va después del Step 2 porque publica lo que el Step 2 acaba de escribir.
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py status
+python3 .claude/skills/shared/scripts/context_sync.py push --repo <nombre> --message "<mensaje>"
+```
+
+Un `push` por repo con cambios, **sin pedir confirmación**. Redactá vos el mensaje de cada repo en [Conventional Commits](../../../_system/_agentic-workflow-integrator/references/commit-format.md), describiendo lo que cambió de verdad — nunca un mensaje genérico repetido.
+
+Si `status` no reporta nada, no corras `push`.
+
+Si un repo vuelve `conflicto` o `sensible`, **no lo resuelvas por tu cuenta**: mostralo en el Step 4 con las rutas señaladas. El repo quedó como estaba y los demás sí se publicaron.
+
+---
+
+## Step 4 — Una línea por archivo guardado y por repo publicado
+
+```
+_data/users/42481462/agenda/user-profile-inference/2026-05-14-GuidoAmici.md — 2 observaciones
+_data/users/42481462/agenda/daily/2026-05-14.md — session log agregado
+_data/organizations/newhaze/agenda/daily/2026-05-14.md — creado, session log agregado
+_data/users/42481462/agenda/outputs/2026-05-14-wrap-session-rewrite.md — creado
+
+Publicado:
+  ↑ newhaze    docs(newhaze): auditoría de identidad visual de Mark
+  ↑ 42481462   docs(agenda): cierre de sesión del 14/05
+```
+
+---
+
+## Step 5 — Resumen de la sesión
+
+3–6 viñetas sobre acciones tomadas e hilos que quedan abiertos. Resultados, no proceso.
 
 ```
 ## Session summary
-- [action or outcome]
-- [action or outcome]
+- [acción o resultado]
+- [acción o resultado]
 - ...
 ```
-
----
-
-## Step 4 — Unsaved info gate
-
-Scan the conversation for anything mentioned but not filed:
-- Tasks or to-dos referenced but never created
-- Ideas or decisions that belong in the vault
-- Project status changes not yet reflected in files
-- People or meetings mentioned in passing
-
-For each unsaved item, use `AskUserQuestion` with one question at a time. Do not dump a markdown list. Do not use free-form text. One call per item, wait for a response before asking the next.
-
-If nothing is unsaved, say so in one line and stop.
 
 ---
 
