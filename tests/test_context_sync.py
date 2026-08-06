@@ -216,3 +216,39 @@ def test_sensible_cuenta_como_atencion_humana(tmp_path):
     (local / ".env").write_text("API_KEY=x\n")
 
     assert cs.report([cs.push_one(repo, "m")], "Prueba:") == cs.NEEDS_ATTENTION
+
+
+# ── Rama activa distinta de la del manifiesto ────────────────────────────────
+# Un codebase con una rama de feature checkeada es lo normal. El commit va a la
+# rama activa y el push publica la del manifiesto: si no son la misma, publicar
+# «con éxito» deja el trabajo en local mientras sube otra cosa.
+
+def test_push_no_publica_desde_otra_rama(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    git(local, "checkout", "-q", "-b", "feat/algo")
+    (local / "trabajo.md").write_text("mi feature\n")
+
+    res = cs.push_one(repo, "feat: algo")
+
+    assert res.state == "otra-rama"
+    assert "feat/algo" in res.detail and "only" in res.detail
+    assert git(local, "log", "-1", "--format=%s").stdout.strip() == "inicial", "commiteó igual"
+
+
+def test_otra_rama_no_commitea_ni_estagea(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    git(local, "checkout", "-q", "-b", "feat/algo")
+    (local / "trabajo.md").write_text("mi feature\n")
+
+    cs.push_one(repo, "feat: algo")
+
+    assert git(local, "diff", "--cached", "--name-only").stdout.strip() == ""
+    assert (local / "trabajo.md").read_text() == "mi feature\n", "perdió el trabajo"
+
+
+def test_otra_rama_cuenta_como_atencion_humana(tmp_path):
+    repo, local, _ = make_repo(tmp_path, "org")
+    git(local, "checkout", "-q", "-b", "feat/algo")
+    (local / "trabajo.md").write_text("x\n")
+
+    assert cs.report([cs.push_one(repo, "m")], "Prueba:") == cs.NEEDS_ATTENTION

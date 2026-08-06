@@ -102,6 +102,12 @@ No lo resuelvas por tu cuenta: decidir qué versión del trabajo de otra persona
 
 Hay una credencial o material de cliente entre los cambios. **No se commiteó ni publicó nada, y el índice quedó intacto.** Mostrale al operador las rutas señaladas y el remedio de cada regla; sacar el archivo, rotar la credencial o ajustar la regla son decisiones suyas. Los demás repos sí se publicaron.
 
+### Cuando un repo reporta `otra-rama`
+
+El operador está trabajando en una rama distinta de la que el manifiesto declara — una rama de feature en un codebase es lo normal, no la excepción. El ciclo no publica ahí: el commit iría a la rama activa y el push subiría la del manifiesto, así que «publicado» significaría que el trabajo quedó en local mientras se subía otra cosa.
+
+Decíselo y preguntá. Mergear, abrir un PR o cambiar de rama son decisiones del operador, y ninguna es del ciclo de contexto.
+
 ### Qué no entra en este ciclo
 
 - **El harness.** Se actualiza con `/awi-update`, que es otra cosa: ahí el operador es consumidor y no coautor.

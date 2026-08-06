@@ -59,6 +59,18 @@ operador quizás armó a mano es otra forma de dejar un repo en un estado del qu
 que salir con comandos de git, que es exactamente lo que el ADR 0014 le reprochaba a
 `/awi-sync`.
 
+**`push` no publica desde una rama que no es la del manifiesto.** Al escribir este
+ADR, `newhaze-webapp` estaba en `feat/hero-learn-flag` con el manifiesto declarando
+`stg` — una rama de feature en un codebase es lo normal, no la excepción. El commit
+habría ido a la rama activa y el `push origin stg` habría subido otra cosa: el
+operador vería «publicado» con su trabajo intacto en local. Ahora eso devuelve el
+estado `otra-rama` y no toca nada. Mergear o abrir un PR son decisiones del operador;
+ninguna es del ciclo de contexto.
+
+Este caso no existía como riesgo mientras publicar pedía confirmación, porque el
+operador veía el repo antes de aceptar. Automatizar la publicación es lo que lo
+convirtió en uno.
+
 ## `/wrap-session` cambia de orden
 
 El gate de información sin guardar era el último paso, después de archivar la sesión

@@ -82,6 +82,10 @@ def ahead_count(path: Path, branch: str) -> int:
     return int(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip().isdigit() else 0
 
 
+def current_branch(path: Path) -> str:
+    return git(path, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+
+
 def pull_one(r: Repo) -> Result:
     """Traer un repo sin dejarlo nunca a mitad de un rebase.
 
@@ -160,6 +164,19 @@ def push_one(r: Repo, message: str) -> Result:
     if not (r.path / ".git").exists():
         return Result(r.name, "sin-clonar")
 
+    # El commit va a la rama activa, pero el push publica la del manifiesto. Si no
+    # son la misma, publicar «con éxito» dejaría el trabajo del operador en una rama
+    # local mientras se sube otra cosa — el peor resultado posible para alguien que
+    # por diseño no mira git. Un codebase con una rama de feature checkeada es el
+    # caso normal, no el raro.
+    activa = current_branch(r.path)
+    if activa != r.branch:
+        return Result(
+            r.name, "otra-rama",
+            f"estás en «{activa}» y el ciclo publica «{r.branch}»; nadie decide eso por vos",
+            dirty=dirty_count(r.path),
+        )
+
     if dirty_count(r.path):
         try:
             reporte = scan_sensitive(r.path)
@@ -193,8 +210,8 @@ def push_one(r: Repo, message: str) -> Result:
 
 def report(results: list[Result], header: str) -> int:
     icons = {"pulled": "↓", "publicado": "↑", "al-día": "·", "conflicto": "⚠",
-             "sensible": "⛔", "sin-clonar": "○", "error": "✗"}
-    needs_human = ("conflicto", "sensible", "error")
+             "sensible": "⛔", "otra-rama": "⌥", "sin-clonar": "○", "error": "✗"}
+    needs_human = ("conflicto", "sensible", "otra-rama", "error")
     print(f"\n{header}")
     attention = []
     for res in sorted(results, key=lambda x: (x.state not in needs_human, x.repo)):
@@ -235,13 +252,18 @@ def main() -> None:
         sys.exit(report([pull_one(r) for r in repos], "Contexto compartido — traído:"))
 
     if args.cmd == "status":
-        results = [
-            Result(r.name, "al-día" if (r.path / ".git").exists() else "sin-clonar",
-                   dirty=dirty_count(r.path) if (r.path / ".git").exists() else 0,
-                   ahead=ahead_count(r.path, r.branch) if (r.path / ".git").exists() else 0)
-            for r in repos
-        ]
-        pending = [x for x in results if x.dirty or x.ahead]
+        results = []
+        for r in repos:
+            if not (r.path / ".git").exists():
+                results.append(Result(r.name, "sin-clonar"))
+                continue
+            activa = current_branch(r.path)
+            results.append(Result(
+                r.name, "al-día" if activa == r.branch else "otra-rama",
+                "" if activa == r.branch else f"en «{activa}», el ciclo publica «{r.branch}»",
+                dirty=dirty_count(r.path), ahead=ahead_count(r.path, r.branch),
+            ))
+        pending = [x for x in results if x.dirty or x.ahead or x.state == "otra-rama"]
         if not pending:
             print("Todo publicado — no hay nada sin commitear ni sin subir.")
             return
@@ -252,7 +274,9 @@ def main() -> None:
                 bits.append(f"{x.dirty} archivo(s) sin commitear")
             if x.ahead:
                 bits.append(f"{x.ahead} commit(s) sin subir")
-            print(f"  · {x.repo:28} {', '.join(bits)}")
+            print(f"  · {x.repo:28} {', '.join(bits) or 'nada pendiente'}")
+            if x.detail:
+                print(f"      ⌥ {x.detail}")
         return
 
     match = [r for r in repos if r.name == args.repo]
