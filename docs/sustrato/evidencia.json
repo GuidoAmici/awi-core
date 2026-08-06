@@ -24,7 +24,7 @@
     "eje": "capacidad de consulta",
     "afirmacion": "git no puede responder una consulta sobre el contenido sin leer todo",
     "reproduce": true,
-    "evidencia": "filtrar 200 registros exigió abrir y parsear los 200 archivos (4 ms). No hay índice: el costo es lineal en el total, no en el resultado. Con 200k registros esto no escala.",
+    "evidencia": "filtrar 200 registros exigió abrir y parsear los 200 archivos (5 ms). No hay índice: el costo es lineal en el total, no en el resultado. Con 200k registros esto no escala.",
     "brecha": "diseño — git indexa por ruta y por contenido-hash, nunca por valor de un campo. Un índice externo sería otro sustrato adentro."
   },
   {
@@ -38,7 +38,7 @@
     "eje": "latencia de propagación",
     "afirmacion": "git no puede propagar un cambio en tiempo casi real",
     "reproduce": false,
-    "evidencia": "el viaje completo commit → push → pull sobre un remoto local tardó 51 ms y el cambio llegó (True). Contra un remoto en internet son segundos. Lo que falta no es velocidad: es que **alguien dispare el pull**. Hoy lo dispara el ciclo de contexto al abrir sesión.",
+    "evidencia": "el viaje completo commit → push → pull sobre un remoto local tardó 65 ms y el cambio llegó (True). Contra un remoto en internet son segundos. Lo que falta no es velocidad: es que **alguien dispare el pull**. Hoy lo dispara el ciclo de contexto al abrir sesión.",
     "brecha": "del mecanismo de sincronización, no del almacenamiento. Un watcher o un pull periódico lo cierra sin cambiar dónde viven los datos."
   },
   {
