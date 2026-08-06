@@ -9,6 +9,16 @@ Dispatch GitHub issues labeled `ready-for-agent` to background agents.
 `ready-for-agent` implies the issue was grilled and an employee was assigned in the agent brief.
 Never fires without user confirmation.
 
+## Step 0: Traer el contexto compartido
+
+Sin preguntar, antes de mirar el tracker:
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py pull
+```
+
+Un agente se despacha contra el estado del repo, no contra la copia local: delegar sobre contexto viejo es cómo se produce trabajo que pisa el de otra persona. Una línea de reporte alcanza si todo vuelve `al-día`. Ver «Contexto compartido» en INSTRUCTIONS.md.
+
 ## Step 1: Scan
 
 One call covers every active org tracker plus the operator's personal repo — `fetch_issues.py` resolves them from `user-submodules.json`:

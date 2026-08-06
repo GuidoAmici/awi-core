@@ -26,6 +26,20 @@ If `current-user.json` does not exist: stop and tell the operator to run `/awi-u
 
 ---
 
+## Step 0 — Traer el contexto compartido
+
+Corré esto **antes de leer cualquier archivo de agenda o issue**, sin preguntar:
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py pull
+```
+
+El día se planifica sobre lo que hicieron los demás, no sobre la copia local de ayer. Si algún repo reporta `conflicto`, mostralo y seguí con el resto — la política completa está en la sección «Contexto compartido» de INSTRUCTIONS.md.
+
+No imprimas la salida cruda si todos los repos volvieron `al-día`: una línea alcanza (`Contexto al día.`). Si alguno trajo cambios, decí cuáles.
+
+---
+
 ## Step 1 — Resolve working date
 
 ```bash

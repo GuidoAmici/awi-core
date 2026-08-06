@@ -49,11 +49,32 @@ Append to the `## Breaks` section:
 - **HH:MM** — [motive] — started
 ```
 
-Tell the operator:
+**Después de escribir la línea, publicá el contexto compartido.** Un descanso es el corte lógico más barato que hay: el trabajo ya está hecho y nadie lo está tocando.
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py status
+python3 .claude/skills/shared/scripts/context_sync.py push --repo <nombre> --message "<mensaje>"
+```
+
+Un `push` por repo con cambios, **sin pedir confirmación**, con un mensaje que vos redactás describiendo lo que cambió de verdad ([Conventional Commits](../../../_system/_agentic-workflow-integrator/references/commit-format.md)). Si `status` no reporta nada, no corras `push`.
+
+Los codebases que `status` liste en su sección aparte **no se publican acá**: el código avanza en su propia sesión, supervisado. Nombralos si hay algo pendiente, y nada más.
+
+Contale al operador qué se publicó, una línea por repo:
 
 > Break started at HH:MM. Say `/break back` when you're back.
+>
+> Publicado: `newhaze` — docs(newhaze): auditoría de identidad visual de Mark
+
+Si algún repo vuelve `conflicto` o `sensible`, decilo acá: es el mejor momento para enterarse, no al cerrar la sesión. No lo resuelvas por tu cuenta.
 
 ### Ending a break (`/break back`)
+
+Traé lo que haya pasado mientras no estabas, sin preguntar:
+
+```bash
+python3 .claude/skills/shared/scripts/context_sync.py pull
+```
 
 Find the last `started` entry in `## Breaks` that has no end time. Calculate duration.
 
@@ -66,6 +87,8 @@ Update the line:
 Calculate running totals and tell the operator:
 
 > Back at HH:MM. Break was Xm. Total breaks today: Xh Ym. Remaining work time: Xh Ym.
+
+Si el `pull` trajo cambios de otra persona, nombralos en una línea antes de los totales. Si no, no lo menciones.
 
 ---
 
