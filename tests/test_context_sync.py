@@ -252,3 +252,35 @@ def test_otra_rama_cuenta_como_atencion_humana(tmp_path):
     (local / "trabajo.md").write_text("x\n")
 
     assert cs.report([cs.push_one(repo, "m")], "Prueba:") == cs.NEEDS_ATTENTION
+
+
+def test_pull_no_rebasea_una_rama_de_feature(tmp_path):
+    """Lo que más duele de los dos: `pull --rebase origin stg` con una rama de
+    feature checkeada reescribe la rama del desarrollador sin que nadie lo pida."""
+    repo, local, other = make_repo(tmp_path, "org")
+    (other / "nota.md").write_text("del compañero\n")
+    git(other, "commit", "-qam", "suyo"); git(other, "push", "-q", "origin", "only")
+
+    git(local, "checkout", "-q", "-b", "feat/algo")
+    (local / "trabajo.md").write_text("mi feature\n")
+    git(local, "add", "-A"); git(local, "commit", "-qm", "mi feature")
+    antes = git(local, "rev-parse", "HEAD").stdout.strip()
+
+    res = cs.pull_one(repo)
+
+    assert res.state == "otra-rama"
+    assert git(local, "rev-parse", "HEAD").stdout.strip() == antes, "rebaseó la rama de feature"
+
+
+# ── Los codebases quedan fuera del ciclo automático ──────────────────────────
+# Su contenido no es contexto que se pasa entre operadores: es código, y avanza
+# en una sesión de desarrollo con un desarrollador mirando.
+
+def test_los_codebases_no_entran_en_el_ciclo(monkeypatch, tmp_path):
+    org = Repo(name="org", url="u", branch="only", path=tmp_path / "org", parent="AWI")
+    code = Repo(name="app", url="u", branch="dev", path=tmp_path / "app", parent="org")
+    dep = Repo(name="dep", url="u", branch="main", path=tmp_path / "dep", parent="AWI", upstream=True)
+    monkeypatch.setattr(cs, "plan", lambda _: ([org, code, dep], []))
+
+    assert [r.name for r in cs.context_repos()] == ["org"]
+    assert [r.name for r in cs.context_repos(con_codebases=True)] == ["org", "app"]

@@ -58,6 +58,8 @@ python3 .claude/skills/shared/scripts/context_sync.py push --repo <nombre> --mes
 
 Un `push` por repo con cambios, **sin pedir confirmación**, con un mensaje que vos redactás describiendo lo que cambió de verdad ([Conventional Commits](../../../_system/_agentic-workflow-integrator/references/commit-format.md)). Si `status` no reporta nada, no corras `push`.
 
+Los codebases que `status` liste en su sección aparte **no se publican acá**: el código avanza en su propia sesión, supervisado. Nombralos si hay algo pendiente, y nada más.
+
 Contale al operador qué se publicó, una línea por repo:
 
 > Break started at HH:MM. Say `/break back` when you're back.

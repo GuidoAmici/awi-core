@@ -110,7 +110,8 @@ Decíselo y preguntá. Mergear, abrir un PR o cambiar de rama son decisiones del
 
 ### Qué no entra en este ciclo
 
-- **El harness.** Se actualiza con `/awi-update`, que es otra cosa: ahí el operador es consumidor y no coautor.
+- **Los codebases.** Su contenido no es contexto que se pasa entre operadores: es código. Avanza en su propia sesión, con el desarrollador mirando, y por eso ni se trae ni se publica automáticamente. `status` los lista igual —enterarse de que hay trabajo sin publicar es útil— pero no los toca, y `push --repo <codebase>` falla con una explicación. Si estás **en** esa sesión de desarrollo y el operador lo pide, `--con-codebases` los habilita.
+- **El harness.** Se actualiza con `/awi-update`, que es otra cosa: ahí el operador es consumidor y no coautor. En la instancia del mantenedor, donde el harness sí se edita, sus commits se publican como cualquier otro trabajo terminado — con git, no con este ciclo.
 - **Los repos `upstream`.** Son dependencias, no contexto ([ADR 0012](../../docs/adr/0012-contextos-flotan-dependencias-pinean.md)), y su política de versionado es distinta.
 
 ## Structure

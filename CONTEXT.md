@@ -77,7 +77,7 @@ Cambiar el Current User, disparado por `gh auth switch`. Actualiza `current-user
 _Evitar_: cambio de login, swap de cuenta.
 
 **Ciclo de contexto**:
-Traer y publicar el Contexto Compartido de cada repo materializado, en cinco momentos anclados como pasos de skill: al abrir el día, antes de leer el tracker, al empezar y al volver de un descanso, y al cerrar la sesión ([ADR 0020](docs/adr/0020-el-ciclo-de-contexto-se-ancla-en-las-skills.md)). Lo implementa `context_sync.py`. Ante un conflicto aborta limpio y nunca deja un repo a mitad de una operación — la razón por la que reemplazó a `/awi-sync`. Publica sin pedir confirmación, y por eso escanea material sensible antes de estagear.
+Traer y publicar el Contexto Compartido de cada repo materializado, en cinco momentos anclados como pasos de skill: al abrir el día, antes de leer el tracker, al empezar y al volver de un descanso, y al cerrar la sesión ([ADR 0020](docs/adr/0020-el-ciclo-de-contexto-se-ancla-en-las-skills.md)). Lo implementa `context_sync.py`. Ante un conflicto aborta limpio y nunca deja un repo a mitad de una operación — la razón por la que reemplazó a `/awi-sync`. Publica sin pedir confirmación, y por eso escanea material sensible antes de estagear. **Alcanza a las agendas, no a los codebases**: el código avanza en su propia sesión, supervisado.
 _Evitar_: sync, `/awi-sync` (eliminado).
 
 **Contexto Compartido**:

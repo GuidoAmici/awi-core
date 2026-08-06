@@ -83,12 +83,29 @@ gate es contenido que el paso de archivado tiene que escribir y el de publicaci�
 tiene que subir. Corriéndolo último, cualquier cosa que apareciera llegaba después de
 un resumen que ya daba la sesión por cerrada.
 
+## El ciclo automático deja de incluir los codebases
+
+Lo que se automatiza es el movimiento del contexto: agendas de org, documentación,
+decisiones, el repo del operador. El código no es eso. Avanza en su propia sesión,
+con un desarrollador mirando, y un ciclo que lo publica en cada descanso convierte
+una decisión de desarrollo en un efecto secundario de tomarse un café.
+
+El caso de `newhaze-webapp` lo muestra desde el otro lado: `pull --rebase origin stg`
+con una rama de feature checkeada **reescribe la rama del desarrollador**. El guard de
+rama lo previene, pero la respuesta correcta no es prevenir un daño en un repo que el
+ciclo no debería estar tocando.
+
+`context_repos()` los excluye por defecto. `status` los sigue listando en una sección
+aparte, porque enterarse de que hay trabajo sin publicar es útil y no cuesta nada;
+`push --repo <codebase>` falla con una explicación. `--con-codebases` los habilita
+para la sesión de desarrollo supervisada, que es el único lugar donde tiene sentido.
+
 ## Qué no cambia
 
 - **La mecánica.** `context_sync.py` sigue siendo el único lugar donde se hace git
   sobre repos de contexto.
 - **Los conflictos.** Un `conflicto` se le muestra al operador y lo decide él. Un
-  `sensible` también.
+  `sensible` y un `otra-rama`, también.
 - **El alcance.** Los repos `upstream` siguen afuera del ciclo
   ([ADR 0012](0012-contextos-flotan-dependencias-pinean.md)), y el harness se
   actualiza con `/awi-update`.

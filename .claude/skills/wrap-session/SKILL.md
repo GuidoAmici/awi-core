@@ -169,7 +169,9 @@ Un `push` por repo con cambios, **sin pedir confirmación**. Redactá vos el men
 
 Si `status` no reporta nada, no corras `push`.
 
-Si un repo vuelve `conflicto` o `sensible`, **no lo resuelvas por tu cuenta**: mostralo en el Step 4 con las rutas señaladas. El repo quedó como estaba y los demás sí se publicaron.
+Los codebases que `status` liste en su sección aparte **no se publican acá**: el código avanza en su propia sesión, supervisado. Si tienen trabajo pendiente, eso es un hilo abierto — nombralo en el Step 5, no lo publiques.
+
+Si un repo vuelve `conflicto`, `sensible` u `otra-rama`, **no lo resuelvas por tu cuenta**: mostralo en el Step 4 con el detalle que devolvió. El repo quedó como estaba y los demás sí se publicaron.
 
 ---
 

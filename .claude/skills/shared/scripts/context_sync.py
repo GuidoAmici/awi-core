@@ -59,17 +59,23 @@ def git(repo: Path, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True)
 
 
-def context_repos() -> list[Repo]:
-    """Repos de contexto, sin los upstream.
+def context_repos(con_codebases: bool = False) -> list[Repo]:
+    """Repos que el ciclo automático toca: agendas de org y el repo del operador.
 
     Un repo `upstream` es una dependencia —comportamiento que se ejecuta— y no
     contexto —datos sobre los que se trabaja. Mezclarlos fue el error que el
     ADR 0012 corrige.
+
+    **Los codebases quedan afuera por defecto.** Su contenido no es contexto que
+    se pasa entre operadores: es código, y avanza en una sesión de desarrollo con
+    un desarrollador mirando. Traerlos automáticamente es además destructivo — un
+    `pull --rebase origin stg` con una rama de feature checkeada reescribe la rama
+    del desarrollador sin que nadie lo pida. Ver ADR 0020.
     """
     repos, warnings = plan(AWI_ROOT)
     for w in warnings:
         print(f"  ⚠ {w}", file=sys.stderr)
-    return [r for r in repos if not r.upstream]
+    return [r for r in repos if not r.upstream and (con_codebases or not r.is_codebase)]
 
 
 def dirty_count(path: Path) -> int:
@@ -96,6 +102,17 @@ def pull_one(r: Repo) -> Result:
     """
     if not (r.path / ".git").exists():
         return Result(r.name, "sin-clonar", "corré /awi-initialize")
+
+    # Rebasear la rama activa sobre otra reescribe el trabajo de quien la abrió.
+    # El guard va antes del fetch: no hay nada que traer a un repo que no vamos a
+    # tocar.
+    activa = current_branch(r.path)
+    if activa != r.branch:
+        return Result(
+            r.name, "otra-rama",
+            f"estás en «{activa}»; traer «{r.branch}» acá reescribiría tu rama",
+            dirty=dirty_count(r.path),
+        )
 
     if git(r.path, "fetch", "origin", "--quiet").returncode != 0:
         return Result(r.name, "error", "no se pudo contactar el remoto")
@@ -233,17 +250,51 @@ def report(results: list[Result], header: str) -> int:
     return 0
 
 
+def report_codebases() -> None:
+    """Qué hay pendiente en los codebases, sin tocar ninguno.
+
+    Se informa y no se opera: enterarse de que hay trabajo sin publicar es útil;
+    publicarlo automáticamente es lo que la sesión de desarrollo hace con un
+    desarrollador mirando.
+    """
+    pendientes = []
+    for r in context_repos(con_codebases=True):
+        if not r.is_codebase or not (r.path / ".git").exists():
+            continue
+        activa, dirty = current_branch(r.path), dirty_count(r.path)
+        ahead = ahead_count(r.path, r.branch) if activa == r.branch else 0
+        bits = []
+        if dirty:
+            bits.append(f"{dirty} archivo(s) sin commitear")
+        if ahead:
+            bits.append(f"{ahead} commit(s) sin subir")
+        if activa != r.branch:
+            bits.append(f"en «{activa}», no en «{r.branch}»")
+        if bits:
+            pendientes.append(f"  · {r.name:28} {', '.join(bits)}")
+
+    if pendientes:
+        print("\nCodebases — fuera del ciclo, se ven pero no se tocan:")
+        print("\n".join(pendientes))
+        print("  El código avanza en su propia sesión, con el desarrollador mirando.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Ciclo de contexto compartido")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("pull", help="Traer los cambios de todos los repos de contexto")
-    sub.add_parser("status", help="Qué hay sin commitear y sin publicar, por repo")
+    for nombre, ayuda in (("pull", "Traer los cambios de los repos de contexto"),
+                          ("status", "Qué hay sin commitear y sin publicar, por repo")):
+        s = sub.add_parser(nombre, help=ayuda)
+        s.add_argument("--con-codebases", action="store_true",
+                       help="incluir los codebases: sólo para una sesión de desarrollo supervisada")
     p = sub.add_parser("push", help="Commitear y publicar un repo")
     p.add_argument("--repo", required=True, help="Nombre del repo, como aparece en pull/status")
     p.add_argument("--message", required=True, help="Mensaje de commit (Conventional Commits)")
+    p.add_argument("--con-codebases", action="store_true",
+                   help="permitir publicar un codebase: sólo para una sesión de desarrollo supervisada")
     args = ap.parse_args()
 
-    repos = context_repos()
+    repos = context_repos(con_codebases=args.con_codebases)
     if not repos:
         print("No hay repos de contexto materializados.")
         return
@@ -266,23 +317,31 @@ def main() -> None:
         pending = [x for x in results if x.dirty or x.ahead or x.state == "otra-rama"]
         if not pending:
             print("Todo publicado — no hay nada sin commitear ni sin subir.")
-            return
-        print("\nSin publicar:")
-        for x in pending:
-            bits = []
-            if x.dirty:
-                bits.append(f"{x.dirty} archivo(s) sin commitear")
-            if x.ahead:
-                bits.append(f"{x.ahead} commit(s) sin subir")
-            print(f"  · {x.repo:28} {', '.join(bits) or 'nada pendiente'}")
-            if x.detail:
-                print(f"      ⌥ {x.detail}")
+        else:
+            print("\nSin publicar:")
+            for x in pending:
+                bits = []
+                if x.dirty:
+                    bits.append(f"{x.dirty} archivo(s) sin commitear")
+                if x.ahead:
+                    bits.append(f"{x.ahead} commit(s) sin subir")
+                print(f"  · {x.repo:28} {', '.join(bits) or 'nada pendiente'}")
+                if x.detail:
+                    print(f"      ⌥ {x.detail}")
+        if not args.con_codebases:
+            report_codebases()
         return
 
     match = [r for r in repos if r.name == args.repo]
     if not match:
-        print(f"✗ '{args.repo}' no es un repo de contexto. Opciones: {', '.join(r.name for r in repos)}",
-              file=sys.stderr)
+        conocidos = {r.name: r for r in context_repos(con_codebases=True)}
+        if args.repo in conocidos and conocidos[args.repo].is_codebase:
+            print(f"✗ '{args.repo}' es un codebase: el ciclo automático no publica código.\n"
+                  f"  El código avanza en su propia sesión, con el desarrollador mirando.\n"
+                  f"  Si esta es esa sesión, agregá --con-codebases.", file=sys.stderr)
+        else:
+            print(f"✗ '{args.repo}' no es un repo de contexto. Opciones: {', '.join(r.name for r in repos)}",
+                  file=sys.stderr)
         sys.exit(1)
     sys.exit(report([push_one(match[0], args.message)], f"Publicando {args.repo}:"))
 
