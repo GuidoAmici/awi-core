@@ -26,6 +26,10 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Multi-context layout — `CONTEXT-MAP.md` at root points to per-org `CONTEXT.md` files under `_data/organizations/`. See `docs/agents/domain.md`.
 
+### Artifacts
+
+Los artifacts son prototipos efímeros: el fuente HTML/MD se versiona en el repo (nunca en el scratchpad) y la trazabilidad artifact ↔ repo es bidireccional. See `docs/agents/artifacts.md`.
+
 ## End of Session
 
 Before closing every session, tell the user one or more things you observed or learned about them during the conversation — ideally things they may not be consciously aware of about themselves. Then save those observations to `<user-root>agenda/user-profile-inference/YYYY-MM-DD - <FullName>.md` with the user's name as the H1 heading and the date in the filename.
