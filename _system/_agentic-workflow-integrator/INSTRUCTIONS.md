@@ -83,6 +83,28 @@ Traer treinta issues enteros satura el contexto sin ayudar a nadie. Traé los qu
 
 En las respuestas al operador y en todo texto que vaya a leer un humano: comentarios en issues, ADR, BDR, outputs, cuerpos de PR. Los mensajes de commit quedan fuera — el scope de Conventional Commits ya cumple esa función y el subject tiene límite de caracteres.
 
+## Qué está en juego y qué duerme
+
+El tracker no distingue lo que está en curso de lo que espera. Los labels de triage dicen en qué punto de la evaluación está un issue, no si alguien lo va a tocar esta semana, y `priority:` está poblado donde el operador prioriza a mano y vacío en el resto. Esa distinción hay que **derivarla**, no esperarla del tracker.
+
+En orden, un issue está en juego si:
+
+1. **El operador lo nombró** en esta sesión, en el daily o en el plan de la semana. Manda sobre todo lo demás.
+2. **Está triado y listo** — `ready-for-agent` o `ready-for-human`. `needs-triage` y `needs-info` significan que todavía no se decidió nada.
+3. **Tiene prioridad, assignee o milestone puestos.** Cuando el operador se tomó el trabajo de marcarlo, es señal. La ausencia no significa "baja" — significa **sin clasificar**, y hay trackers enteros sin clasificar.
+4. **Se movió hace poco** — comentarios o cambios en las últimas dos semanas.
+5. **Toca lo que estás haciendo ahora**, aunque nada de lo anterior aplique.
+
+Lo demás es backlog: sigue abierto, no está en juego hoy.
+
+### Qué traer
+
+Traé enteros los que están en juego y los que toca la tarea. Del resto alcanza con saber que existen — y decí cuántos dejaste afuera, para que el operador pueda pedirlos.
+
+**La excepción es real y hay que reconocerla:** en trabajo de estrategia o arquitectura, el barrido completo *es* el trabajo — un backlog leído a medias produce un diseño que ignora la mitad de las restricciones. Ahí se trae todo, y se dice que se hizo y por qué.
+
+Esto decide qué entra en la conversación, no relaja nada de la sección anterior: cualquier identificador que menciones, del backlog o no, se lee antes de nombrarlo.
+
 ## Contexto compartido
 
 Los repos de contexto —las orgs, sus codebases y el repo del propio operador— los editan **varias personas**. Traer y publicar los cambios es responsabilidad tuya, no del operador: la idea es que nadie tenga que saber git para trabajar acompañado.
