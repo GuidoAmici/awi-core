@@ -200,11 +200,11 @@ Parse the JSON. Display the top `priority:high` issues (up to 10) as a numbered 
 
 ```
 **newhaze**
-  1. [#30] Publish Privacy Policy page on newhaze.ar
-  2. [#22] Publish Google OAuth Consent Screen
+  1. newhaze-webapp#30 — publicar la política de privacidad, que bloquea la verificación de OAuth
+  2. newhaze-webapp#22 — completar la pantalla de consentimiento de Google para salir de modo testing
 
 **rabbitek**
-  3. [#14] Rebuild Q4 daily picker as curses TUI
+  3. rabbitek-workspace#14 — rehacer el picker diario del Q4 como TUI curses
 
 Which issues are you committing to today? Type up to 3 numbers (e.g. "1, 3"). Press Enter with no input to skip.
 ```

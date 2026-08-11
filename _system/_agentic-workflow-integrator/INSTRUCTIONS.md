@@ -49,6 +49,40 @@ The comment must state:
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
+## Ningún identificador viaja desnudo
+
+Un `#63`, un `ADR 0021` o un `d0f96fd` no dicen nada por sí mismos: son direcciones, no información. El operador no memoriza el backlog, y un agente que escribe "esto lo cubre #47" está pidiendo que alguien vaya a buscar qué plantea #47 para poder seguir la frase.
+
+**Todo identificador que traiga el agente a la conversación va acompañado de qué plantea.** Si el identificador lo escribió el operador, ya sabe de qué habla — no hace falta repetírselo.
+
+### Qué cubre
+
+Cualquier identificador opaco: issues, PRs, ADR, BDR, PRD, SHAs de commit, milestones. No es una lista cerrada; el criterio es si el identificador, leído solo, dice de qué se trata.
+
+### Qué acompaña al identificador
+
+Una **paráfrasis de una frase**, en el idioma de la conversación — no el título literal. Los títulos son etiquetas de tracker ("pgTAP", "variantes"); la paráfrasis dice qué está en juego.
+
+Referencia primero, tema después:
+
+```
+newhaze-webapp#63 — soporte de variantes de producto en el panel B2B
+ADR 0021 — la progresión se registra como eventos, no como estado
+d0f96fd — el commit que sacó los codebases del ciclo automático de sync
+```
+
+Cross-repo, el identificador lleva el repo: `newhaze-webapp#63`. Dentro del repo en curso, `#63` alcanza.
+
+### Leer antes de mencionar
+
+**No se parafrasea desde el título ni de memoria.** Un artefacto se lee antes de nombrarlo: `gh issue view <n> --repo <owner/repo>` para uno solo, `gh issue list --json number,title,body` para varios en una sola llamada, y los ADR/BDR son archivos locales.
+
+Traer treinta issues enteros satura el contexto sin ayudar a nadie. Traé los que están en juego, y decí cuántos dejaste afuera y por qué — curar es parte del trabajo, no un atajo.
+
+### Dónde aplica
+
+En las respuestas al operador y en todo texto que vaya a leer un humano: comentarios en issues, ADR, BDR, outputs, cuerpos de PR. Los mensajes de commit quedan fuera — el scope de Conventional Commits ya cumple esa función y el subject tiene límite de caracteres.
+
 ## Contexto compartido
 
 Los repos de contexto —las orgs, sus codebases y el repo del propio operador— los editan **varias personas**. Traer y publicar los cambios es responsabilidad tuya, no del operador: la idea es que nadie tenga que saber git para trabajar acompañado.

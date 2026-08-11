@@ -40,7 +40,7 @@ For each issue, find the `## Agent Brief` comment in its `comments` array (no ex
 
 If either field is missing, skip the issue and warn:
 ```
-⚠ #42 skipped — agent brief missing Assigned agent or Model. Re-run /triage to complete it.
+⚠ newhaze-api#42 (auth tokens expire early) skipped — agent brief missing Assigned agent or Model. Re-run /triage to complete it.
 ```
 
 ## Step 3: Present dispatch list
@@ -48,10 +48,10 @@ If either field is missing, skip the issue and warn:
 ```
 N issues ready for dispatch:
 
-  [1] Fix auth token expiry bug (#42, newhaze-api)
+  [1] newhaze-api#42 — auth tokens expire early and log users out
       → senior-developer · opus · effort:high
 
-  [2] Write ADR for caching strategy (#17, my-awi-user)
+  [2] my-awi-user#17 — record the caching strategy decision as an ADR
       → technical-writer · sonnet · effort:low
 
 Fire all? [a]  ·  Select [1,2…]  ·  Skip [s]
