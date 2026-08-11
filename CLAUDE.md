@@ -28,7 +28,7 @@ Multi-context layout — `CONTEXT-MAP.md` at root points to per-org `CONTEXT.md`
 
 ### Artifacts
 
-Los artifacts son prototipos efímeros: el fuente HTML/MD se versiona en el repo (nunca en el scratchpad) y la trazabilidad artifact ↔ repo es bidireccional. See `docs/agents/artifacts.md`.
+Todo artifact se compone con el **Design System de la org destinataria** —se resuelve antes de escribir la primera línea de HTML, no al final—, el fuente HTML/MD se versiona en el repo (nunca en el scratchpad) y la trazabilidad artifact ↔ repo es bidireccional. See `docs/agents/artifacts.md`.
 
 ## End of Session
 
