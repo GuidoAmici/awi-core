@@ -1,6 +1,6 @@
 # #194 — Organizaciones fantasma reclamables
 
-**Fecha:** 2026-08-28 · **Empleado:** `backend-architect` · **PR:** [newhaze-webapp#198](https://github.com/GuidoAmici/newhaze-webapp/pull/198) (contra `stg`, sin mergear)
+**Fecha:** 2026-08-28 · **Empleado:** `backend-architect` · **PRs:** [#198](https://github.com/GuidoAmici/newhaze-webapp/pull/198) (diseño) · [#201](https://github.com/GuidoAmici/newhaze-webapp/pull/201) (fix de `db-push`, va primero) — ambos contra `stg`, sin mergear
 **Rama:** `docs/194-organizaciones-fantasma`
 
 ---
@@ -131,7 +131,13 @@ Con stg compartida pre-merge entre todos los PRs abiertos (ADR-0017), la colisi�
 ### Qué hice
 
 1. **Renombré mis migraciones** a `20260828154500` / `20260828154600` (verificados libres contra las seis ramas abiertas con migraciones).
-2. **`db-push.mjs` guarda ahora el `name` además de la `version` y falla fuerte** cuando una version ya registrada corresponde a otro archivo, con un mensaje que dice qué renombrar. Detección pura: no cambia la semántica de aplicación, sólo convierte en rojo lo que hoy es silencio. **Va marcado aparte en el PR** — si preferís que salga en su propio PR, se saca en un commit.
+2. **`db-push.mjs` guarda ahora el `name` además de la `version` y falla fuerte** cuando una version ya registrada corresponde a otro archivo. Detección pura: no cambia la semántica de aplicación, sólo convierte en rojo lo que hoy es silencio.
+
+**Decisión del maintainer: eso va en su propio PR — [#201](https://github.com/GuidoAmici/newhaze-webapp/pull/201) — y va primero.** Un arreglo al script que migra producción (`release-prod.yml`) no debe viajar dentro de un PR de diseño de un ADR ni esperar a que ese ADR se apruebe: son dos cosas con urgencias distintas. #198 quedó sólo con diseño; el rename de timestamps se queda ahí y lo desbloquea **sin** depender de #201.
+
+En #201 quedó documentada una decisión propia: el guard no puede distinguir una **colisión** (dos migraciones, un timestamp) de un **rename** (un archivo ya aplicado que cambia de nombre) — misma firma. Elegí fallar en ambos casos, y el precio explícito es que **el nombre de un archivo de migración pasa a ser inmutable una vez aplicado** (renombrarlo exige actualizar la fila del historial). La alternativa era no chequear nada, que es lo de hoy.
+
+Como el repo no tiene harness para `scripts/` (`vitest.config.ts` incluye sólo `src/**`), en vez de montar ese andamiaje ejercité el código real con un stub de `fetch`: el script actual sale **exit 0** ("✓ 1 migración aplicada") habiendo salteado la otra — el bug reproducido —, y con el guard corta en exit 1 con el mensaje que dice qué renombrar.
 
 ### Estado de stg: intacta, verificado
 
@@ -166,4 +172,4 @@ La llamada de la migración fallida es transaccional, así que no quedó nada su
 - `supabase/tests/unclaimed_organizations_test.sql`
 - `supabase/import/reclassify_unclaimed.sql`
 - `src/lib/supabase/database.types.ts` (regenerado)
-- `scripts/db-push.mjs` (guard de colisión de timestamp)
+- `scripts/db-push.mjs` — **fuera de este PR**, ahora en [#201](https://github.com/GuidoAmici/newhaze-webapp/pull/201)
