@@ -6,6 +6,8 @@ Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and
 
 Always use relative paths from project root for Bash commands. Before requesting permission for any command, convert absolute paths to relative — the relative version may already be permitted and avoids unnecessary permission prompts.
 
+Eso vale para los comandos que **ejecutás vos**. Los que le pasás al operador para que los pegue en su consola siguen la regla opuesta y están en [Un comando que le pasás al operador se pega y corre](#un-comando-que-le-pasás-al-operador-se-pega-y-corre).
+
 ## GitHub MCP
 
 A GitHub MCP server (`mcp__github__*`) is available in every AWI instance. It runs via `npx @modelcontextprotocol/server-github` and sources its token automatically from `gh auth token` — no separate PAT setup required.
@@ -113,6 +115,30 @@ Traer treinta issues enteros satura el contexto sin ayudar a nadie. Traé los qu
 ### Dónde aplica
 
 En las respuestas al operador y en todo texto que vaya a leer un humano: comentarios en issues, ADR, BDR, outputs, cuerpos de PR. Los mensajes de commit quedan fuera — el scope de Conventional Commits ya cumple esa función y el subject tiene límite de caracteres.
+
+## Un comando que le pasás al operador se pega y corre
+
+Todo bloque de shell dirigido al operador es **autocontenido**: se copia entero, se pega en una terminal cualquiera y funciona. Sin editarlo, sin adivinar desde qué carpeta correrlo, sin haber corrido antes otro bloque de la misma respuesta.
+
+El modo de falla es cotidiano y siempre el mismo: el agente conoce su directorio de trabajo y escribe el comando desde ahí, pero el operador está en otra terminal, en otra carpeta, a veces en otro repo. Pega, falla, y tiene que pedir el `cd` que faltaba. **La ruta la sabe el agente — pedírsela al operador es devolverle trabajo ya hecho.**
+
+### Qué cumple un bloque pegable
+
+- **Arranca con `cd` a la ruta absoluta** del directorio donde corresponde ejecutarlo. Absoluta, no relativa: no se sabe dónde está parado el operador. Vale también dentro del vault — los repos de `_data/` son repos aparte, y un comando de git contra el repo equivocado no falla, hace otra cosa.
+- **Un solo bloque por tarea.** Varios pasos se encadenan con `&&` o van en líneas seguidas dentro del mismo bloque. Tres bloques que hay que pegar en orden son tres oportunidades de pegar mal.
+- **Nada de estado heredado**: si un bloque anterior definió una variable, este la vuelve a definir.
+- **Sin `$` de prompt al inicio de línea y sin la salida esperada mezclada adentro.** Ensucian el pegado.
+- **Las explicaciones van afuera del bloque**, o adentro como comentarios `#`. Nunca partiendo el comando en dos para intercalar un párrafo.
+- **Los placeholders son el último recurso.** Si el valor se puede resolver —un número de issue, un SHA, una ruta—, se resuelve y va literal. Cuando de verdad depende del operador, va en `MAYÚSCULAS`, uno solo por bloque idealmente, y qué poner se explica **arriba** del bloque.
+- **Si el comando es destructivo, requiere `sudo` o toca algo compartido, se dice antes en una línea.** Sigue siendo pegable: se avisa, no se mutila.
+
+```bash
+cd /ruta/absoluta/al/repo && git status --short
+```
+
+### Cuándo no hace falta
+
+Cuando el comando no es para pegar sino una **cita** —mostrar qué corriste, o qué hace un script— no lleva `cd` ni se lo trata como bloque ejecutable. Si el operador lo va a correr, es pegable; si es ilustración, decilo en la línea que lo introduce.
 
 ## Qué está en juego y qué duerme
 
