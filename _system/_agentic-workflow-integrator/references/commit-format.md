@@ -41,3 +41,18 @@ Conventional Commit. Durante la transición el filtro también matchea el viejo
 ```bash
 git log -E --grep='^(cos|feat|fix|docs|chore|refactor|perf|test|build|ci|style|revert)(\([^)]+\))?!?: '
 ```
+
+## Identidad del autor en repos de cliente
+
+En un repo de cliente el commit sale con el `user.email` **local del repo**, no
+con el del perfil AWI. Se comprueba antes de commitear:
+
+```bash
+git config user.email   # dentro del repo del codebase, no en el vault
+```
+
+No es cosmética: Vercel resuelve el autor del commit contra sus colaboradores y
+**bloquea el deployment** de un commit cuyo email no reconoce. Le pasó a un
+agente delegado el 2026-08-28 en `newhaze-webapp` (issue #193) commiteando con
+`newhazetek@gmail.com` en vez de `guido@newhaze.ar`: el primer push quedó sin
+preview y hubo que rehacer el commit.
