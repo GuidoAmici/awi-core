@@ -33,6 +33,12 @@ Each issue carries `number`, `title`, `body`, `labels`, `org` (null for personal
 
 ## Step 2: Validate each issue
 
+**Descartar primero todo issue con el label `en-pr`** — ya tiene un PR abierto que lo implementa; re-despacharlo duplica trabajo (ver `docs/agents/triage-labels.md`). Avisar y seguir:
+
+```
+⏭ newhaze-webapp#21 (promo badges) salteado — label `en-pr`: ya hay PR abierto. Mergear, no re-delegar.
+```
+
 For each issue, find the `## Agent Brief` comment in its `comments` array (no extra `gh` call — Step 1 already fetched them). It must contain:
 - `**Assigned agent:**` — a persona-agente that resolves in `_system/agency-agents/`:
   `python3 .claude/skills/shared/scripts/agent_personas.py --resolver <nombre>`
