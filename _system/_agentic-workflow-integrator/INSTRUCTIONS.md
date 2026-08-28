@@ -49,6 +49,37 @@ The comment must state:
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
+## El TLDR va primero
+
+Concepto tomado de Alex Hormozi. Un texto que no dice de qué va en las primeras líneas obliga al lector a armar el contexto mientras lee, y esa carga se paga **antes** de que haya podido evaluar nada. La claridad no es un resumen que se agrega al final: es lo primero que se escribe.
+
+Cuatro líneas, en este orden:
+
+| # | Línea | Qué responde |
+|---|---|---|
+| 1 | **Qué quiero** | La tesis o el pedido, en una frase |
+| 2 | **Qué querés que haga** | La acción concreta que le toca al lector |
+| 3 | **Qué obtiene** | El resultado, desde el lado del lector |
+| 4 | **Por qué vale la pena** | Lo que vuelve razonable el intercambio |
+
+**Nada más, nada menos.** Los dos modos de falla son simétricos y los dos cuestan igual: si falta una línea el lector no puede decidir —sabe qué le pedís pero no qué gana, o al revés—; si sobra contexto, el ruido tapa las cuatro que sí importaban. Un TLDR de seis líneas no es un TLDR más completo, es uno peor.
+
+### Cuando el texto no es un pedido
+
+La plantilla nace de una oferta, así que en un reporte hay que traducirla: la línea 1 pasa a ser qué se hizo o qué se propone. **La línea 2 nunca se omite — se declara vacía.** "No necesito nada de vos, es para que estés al tanto" es información; borrar la línea deja al lector preguntándose si le toca algo.
+
+### Dónde aplica
+
+En la apertura de cualquier texto que un humano vaya a leer y que sea más largo que un párrafo: respuestas al operador, cuerpos de issues y PRs, PRD, BDR, outputs, briefs a subagentes, artifacts —arriba de la capa de escaneo— y copy de marca. En un artifact o un issue el TLDR puede ser un bloque de cuatro líneas rotuladas; en una respuesta al operador suele ser un párrafo corto que las contiene sin rotularlas.
+
+No aplica a mensajes de commit —el scope de Conventional Commits ya cumple esa función y el subject tiene límite—, ni a respuestas de una línea o confirmaciones, donde el mensaje entero ya es el TLDR.
+
+**No reemplaza la paráfrasis del identificador** de la sección siguiente: un TLDR que dice "cerrar #47" sigue sin decir nada. Las dos reglas se aplican juntas.
+
+### Marca y copy
+
+La bajada a copy de cara al consumidor —headline, CTA, promesa, prueba— está en [references/tldr.md](references/tldr.md). El TLDR pone el esqueleto; la voz y la forma siguen siendo las del Design System de la org destinataria.
+
 ## Ningún identificador viaja desnudo
 
 Un `#63`, un `ADR 0021` o un `d0f96fd` no dicen nada por sí mismos: son direcciones, no información. El operador no memoriza el backlog, y un agente que escribe "esto lo cubre #47" está pidiendo que alguien vaya a buscar qué plantea #47 para poder seguir la frase.
