@@ -135,7 +135,9 @@ Con stg compartida pre-merge entre todos los PRs abiertos (ADR-0017), la colisi�
 
 **Decisión del maintainer: eso va en su propio PR — [#201](https://github.com/GuidoAmici/newhaze-webapp/pull/201) — y va primero.** Un arreglo al script que migra producción (`release-prod.yml`) no debe viajar dentro de un PR de diseño de un ADR ni esperar a que ese ADR se apruebe: son dos cosas con urgencias distintas. #198 quedó sólo con diseño; el rename de timestamps se queda ahí y lo desbloquea **sin** depender de #201.
 
-En #201 quedó documentada una decisión propia: el guard no puede distinguir una **colisión** (dos migraciones, un timestamp) de un **rename** (un archivo ya aplicado que cambia de nombre) — misma firma. Elegí fallar en ambos casos, y el precio explícito es que **el nombre de un archivo de migración pasa a ser inmutable una vez aplicado** (renombrarlo exige actualizar la fila del historial). La alternativa era no chequear nada, que es lo de hoy.
+En #201 quedó una decisión propia, que **el maintainer ya resolvió**: el guard no puede distinguir una **colisión** (dos migraciones, un timestamp) de un **rename** (un archivo ya aplicado que cambia de nombre) — misma firma, indistinguibles desde el script. La resolución fue **que fallen los dos casos**, textual: *«Nadie cambia el nombre de una migración ya aplicada.»*
+
+Consecuencia, ahora regla del repo: **el nombre de una migración es inmutable una vez aplicada**; renombrar una de verdad exige actualizar también su fila del historial. Quedó escrito en el comentario del código, no sólo en la descripción del PR, para que no se reabra en la próxima review. **#201 no tiene decisiones abiertas.**
 
 Como el repo no tiene harness para `scripts/` (`vitest.config.ts` incluye sólo `src/**`), en vez de montar ese andamiaje ejercité el código real con un stub de `fetch`: el script actual sale **exit 0** ("✓ 1 migración aplicada") habiendo salteado la otra — el bug reproducido —, y con el guard corta en exit 1 con el mensaje que dice qué renombrar.
 
