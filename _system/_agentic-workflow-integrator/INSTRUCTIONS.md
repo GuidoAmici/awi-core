@@ -126,7 +126,7 @@ El modo de falla es cotidiano y siempre el mismo: el agente conoce su directorio
 
 - **Arranca con `cd` a la ruta absoluta** del directorio donde corresponde ejecutarlo. Absoluta, no relativa: no se sabe dónde está parado el operador. Vale también dentro del vault — los repos de `_data/` son repos aparte, y un comando de git contra el repo equivocado no falla, hace otra cosa.
 - **Un solo bloque por tarea.** Varios pasos se encadenan con `&&` o van en líneas seguidas dentro del mismo bloque. Tres bloques que hay que pegar en orden son tres oportunidades de pegar mal.
-- **Nada de estado heredado**: si un bloque anterior definió una variable, este la vuelve a definir.
+- **Nada de estado heredado**: si un bloque anterior definió una variable, este la vuelve a definir. Y lo que el bloque asume del entorno del operador —un PAT, un token, una var de shell— **no se asume: se verifica**, con un guard que falla diciendo qué falta.
 - **Sin `$` de prompt al inicio de línea y sin la salida esperada mezclada adentro.** Ensucian el pegado.
 - **Las explicaciones van afuera del bloque**, o adentro como comentarios `#`. Nunca partiendo el comando en dos para intercalar un párrafo.
 - **Los placeholders son el último recurso.** Si el valor se puede resolver —un número de issue, un SHA, una ruta—, se resuelve y va literal. Cuando de verdad depende del operador, va en `MAYÚSCULAS`, uno solo por bloque idealmente, y qué poner se explica **arriba** del bloque.
@@ -135,6 +135,41 @@ El modo de falla es cotidiano y siempre el mismo: el agente conoce su directorio
 ```bash
 cd /ruta/absoluta/al/repo && git status --short
 ```
+
+### Un stack de comandos es un solo comando
+
+El caso que más falla no es el comando suelto: es la **secuencia** —exportar credencial, cargar un `.env`, correr la herramienta—. Pegada como tres líneas sueltas tiene tres problemas que no se ven hasta que ya corrió.
+
+Así lo entregó el harness, y no está listo para pegar:
+
+```bash
+export SUPABASE_ACCESS_TOKEN=$MI_PAT
+set -a; . supabase/env/stg.env; set +a
+supabase config push --project-ref <project-ref>
+```
+
+1. **Falta el `cd`.** `supabase/env/stg.env` es relativa al repo del codebase, no al vault.
+2. **`$MI_PAT` se asume definida.** Si no lo está, `export` no falla: deja el token **vacío**, y el error aparece tres líneas después como "no autenticado", que manda a diagnosticar la cosa equivocada.
+3. **No hay cortocircuito.** Sin `&&`, si el `.env` no existe la tercera línea corre igual — y `config push` empuja configuración incompleta a un proyecto real. El fallo silencioso es el caro.
+
+Pegable:
+
+```bash
+( cd /ruta/absoluta/al/repo \
+  && : "${MI_PAT:?definí MI_PAT en el entorno antes de correr esto}" \
+  && export SUPABASE_ACCESS_TOKEN="$MI_PAT" \
+  && set -a && . supabase/env/stg.env && set +a \
+  && supabase config push --project-ref <project-ref> )
+```
+
+Qué agrega cada pieza:
+
+- El **subshell** `( … )` deja la sesión del operador como estaba: no le cambia el directorio ni le deja un token exportado dando vueltas. Si el operador necesita esas variables después, se le dice y se saca el subshell.
+- El **guard** `: "${VAR:?mensaje}"` corta ahí mismo con un mensaje que nombra la variable. Dentro del subshell aborta el subshell, nunca la terminal del operador.
+- El **`&&` encadenado** hace que el primer error sea el último paso. `set -e` no sirve acá: en la shell interactiva del operador cierra la sesión.
+- Las **comillas** en `"$MI_PAT"` — un valor con espacios o vacío rompe distinto y peor sin ellas.
+
+**Los secretos son la única excepción a "resolvé los valores".** Un token no se pega en el chat ni se escribe en un doc: viaja como nombre de variable, con su guard. Todo lo demás —el project-ref, la ruta, el número de issue— va literal y resuelto.
 
 ### Cuándo no hace falta
 
