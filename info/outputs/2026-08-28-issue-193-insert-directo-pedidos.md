@@ -83,15 +83,29 @@ La segunda capa se logra igual con las políticas `RESTRICTIVE`: las permissive 
 
 ---
 
-## Qué necesita ojo humano
+## Resuelto por el maintainer (2026-08-28, tras entregar el PR)
 
-1. **¿Se acepta la corrección al `REVOKE`?** Es el punto donde el PR se aparta de lo pedido en el issue.
-2. **¿E4 #28 va a escribir pedidos como interno `authenticated` (por tabla) o por RPC?** Si el plan real es RPC también para el panel interno, entonces sí se puede hacer el `REVOKE` completo a `authenticated` y eso es una capa más. Es decisión de E4.
-3. **¿`anon` puede perder el `SELECT` sobre pedidos?** Verificado que nada en este repo lo usa; queda el ojo humano por consumidores externos (scripts, dashboards).
-4. **¿Se abre el issue por las 41 tablas con `TRUNCATE`?**
-5. **Recordatorio del contrato:** con este PR la DB deja de validar pedidos del cliente por completo. **El piso G1 y el recálculo server-side de precios pasan a vivir enteros dentro de la RPC de #24** — si esa RPC los omite, no hay red abajo.
+Los cuatro puntos que quedaban para criterio humano volvieron resueltos:
+
+1. **Corrección al `REVOKE` aceptada** — las políticas `RESTRICTIVE` quedan.
+2. **E4 #28 va a escribir por RPC, no por tabla.** Anotado en un comentario de [#28](https://github.com/GuidoAmici/newhaze-webapp/issues/28#issuecomment-5457587146) para que quien lo tome no lo re-decida, con lo que eso habilita después: una vez desplegada esa RPC, ningún código escribe estas tablas como `authenticated` y entra el `REVOKE INSERT, UPDATE, DELETE … FROM authenticated` completo. **Con una salvedad que hay que no pasar por alto:** `sales_orders_internal_all` es `FOR ALL`, y su arm de `SELECT` es lo que le deja al panel interno leer **todos** los pedidos (`sales_orders_own_read` sólo cubre los propios y los de la org del usuario). No se borra: se achica a `FOR SELECT`. Es contracción → PR aparte, después del deploy (ADR-0017).
+3. **`anon` pierde el `SELECT`** — **ya estaba en el PR desde el primer commit.** El `REVOKE ALL … FROM anon` de la línea 97 de la migración incluye `SELECT`, y el pgTAP lo cubre por partida doble: `throws_ok('SELECT 1 FROM public.sales_orders', '42501')` como `anon` y `NOT has_table_privilege('anon', …, 'SELECT')` sobre las dos tablas. No hizo falta commit nuevo; el PR sigue en `19c4c75` y en verde.
+
+   Evidencia reforzada de que nada lo usa, pedida por el maintainer y ahora dura en vez de "no aparece en el grep": el universo **completo** de tablas que el código toca es `git grep -hoE '\.from\("[a-z_]+"\)' -- src` → `profiles` (6), `org_x_users` (6), `organizations` (3), `items` (2), `form_responses` (1). **`sales_orders`/`sales_order_items` no aparecen ni una vez, con ningún rol.** Y el único `createPublicClient()` (rol `anon`) del repo es `src/lib/catalog.ts:48`, que consulta `items`.
+4. **Issue de las 41 tablas abierto: [#200](https://github.com/GuidoAmici/newhaze-webapp/issues/200)**, asignado a `senior-secops`, **sin empezar** por indicación explícita. Medido contra las bases reales y es peor de lo reportado acá: `anon` **también** tiene `TRUNCATE` — 38 tablas en stg, **40 en prod**, sobre 41.
+
+**Dato de contexto del maintainer, medido con acceso directo:** prod tiene **0 organizaciones y 0 pedidos** (17 items). La superficie real de pedidos en producción está vacía — lo que refuerza la excepción a expand-only: la contracción se aplica sobre tablas que en prod no tienen ni una fila que perder.
+
+## Qué queda abierto
+
+- **PR #197 sin mergear**, esperando el merge del maintainer.
+- **#200 sin empezar** (indicación explícita: primero cerrar #197).
+- **El contrato que hereda #24:** con este PR la DB deja de validar pedidos del cliente por completo. El piso G1 y el recálculo server-side de precios viven enteros dentro de la RPC — si esa RPC los omite, no hay red abajo.
+- **Vigilar `tests-local/recovery.spec.ts`**: es el segundo spec de recovery con flake de timing.
 
 ## Estado de gestión
 
-- PR #197 **abierto**, sin mergear, como pedía el issue.
+- PR #197 **abierto** en `19c4c75`, sin mergear, CI entero en verde (run `33184252265`).
 - Issue #193 comentado; labels: `en-pr` puesta, `ready-for-agent` sacada.
+- Issue #28 comentado con la decisión de la RPC.
+- Issue #200 recibido y **no empezado**, por indicación.
