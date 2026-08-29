@@ -51,6 +51,65 @@ The comment must state:
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
+## Toda respuesta tiene cuatro bloques con dirección
+
+Una respuesta larga puede tener todo lo que el operador necesita y aun así no decirle dónde está nada. El resultado del pedido aparece a mitad de un párrafo, la sugerencia que había que aprobar quedó entre dos hallazgos, y para contestar "sí a lo segundo" hay que reescribir lo segundo. **La estructura no es cortesía tipográfica: es lo que vuelve la respuesta contestable.**
+
+Cuatro bloques, siempre en este orden:
+
+| Letra | Bloque | Qué va adentro |
+|---|---|---|
+| `A` | **Lo que preguntaste** | Una entrada por pregunta del operador. Nada más |
+| `B` | **Dónde estamos** | Qué quedó hecho y dónde; después, qué se encontró que el operador no sabía |
+| `C` | **Lo que sugiero** | Lo que el agente propone y podría hacer después |
+| `D` | **Qué necesito de vos** | Lo que el agente no puede resolver solo |
+
+### Cada ítem lleva su dirección
+
+Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Lo que sugiero` y sus ítems son `C1`, `C2`, `C3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
+
+La dirección existe para que el operador conteste sin reescribir. «`C3`, aplicalo, el resto no» es una respuesta completa.
+
+- **La letra pertenece al bloque, no al lugar.** Sugerencias es `C` aunque falten `A` y `B`. Una dirección que cambia de significado según el turno no es una dirección.
+- **Los cuatro bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
+- **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una sugerencia para respetar un número es peor que una lista larga.
+- **Valen para el último turno.** Cada respuesta renumera desde `1`. Si el operador se refiere a un turno anterior, el agente confirma qué entendió antes de actuar.
+
+### Los bloques vacíos se omiten, menos `D`
+
+Un bloque sin contenido no se rotula. Si el operador no preguntó nada, `A` no aparece y la respuesta abre en `B`.
+
+**`D` es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
+
+### Sugerencia y decisión se separan por una sola pregunta
+
+**¿Puedo avanzar sin la respuesta?** Si sí, es `C`. Si no, es `D`.
+
+El criterio es binario y se evalúa al escribir el ítem, no al terminar la respuesta. Una sugerencia que el operador ignora no traba nada; una decisión que ignora deja trabajo detenido — y por eso las dos no pueden vivir en el mismo bloque, aunque las dos terminen en "¿lo hago?".
+
+**Con `D` abierto el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y `D` dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
+
+### Dónde aplica
+
+En las respuestas al operador y en el informe final de un subagente al agente principal: los dos son turnos de conversación. Un documento no es un turno — issues, PRs, ADR, BDR, outputs, PRD, artifacts y briefs a subagentes abren con el TLDR de la sección siguiente.
+
+**El piso es más de un párrafo.** Una confirmación o una respuesta de una línea no se estructura: ahí el mensaje entero ya es `A1`.
+
+```markdown
+## Dónde estamos
+B1. El fix quedó en `auth.ts:42` y los 42 tests pasan.
+B2. El mismo patrón aparece en otros tres handlers.
+
+## Lo que sugiero
+C1. Unificar los tres handlers detrás de una sola guarda.
+
+## Qué necesito de vos
+D1. ¿Migración nueva o edito la pendiente? Frena el paso 3;
+    los pasos 1 y 2 ya están hechos.
+```
+
+Las otras reglas de escritura siguen valiendo adentro de los bloques: ningún identificador viaja desnudo, y un comando dirigido al operador se pega y corre.
+
 ## El TLDR va primero
 
 Concepto tomado de Alex Hormozi. Un texto que no dice de qué va en las primeras líneas obliga al lector a armar el contexto mientras lee, y esa carga se paga **antes** de que haya podido evaluar nada. La claridad no es un resumen que se agrega al final: es lo primero que se escribe.
@@ -72,9 +131,11 @@ La plantilla nace de una oferta, así que en un reporte hay que traducirla: la l
 
 ### Dónde aplica
 
-En la apertura de cualquier texto que un humano vaya a leer y que sea más largo que un párrafo: respuestas al operador, cuerpos de issues y PRs, PRD, BDR, outputs, briefs a subagentes, artifacts —arriba de la capa de escaneo— y copy de marca. En un artifact o un issue el TLDR puede ser un bloque de cuatro líneas rotuladas; en una respuesta al operador suele ser un párrafo corto que las contiene sin rotularlas.
+En la apertura de cualquier **texto escrito** que un humano vaya a leer y que sea más largo que un párrafo: cuerpos de issues y PRs, PRD, BDR, ADR, outputs, briefs a subagentes, artifacts —arriba de la capa de escaneo— y copy de marca. En un artifact o un issue el TLDR puede ser un bloque de cuatro líneas rotuladas; en un output suele ser un párrafo corto que las contiene sin rotularlas.
 
-No aplica a mensajes de commit —el scope de Conventional Commits ya cumple esa función y el subject tiene límite—, ni a respuestas de una línea o confirmaciones, donde el mensaje entero ya es el TLDR.
+**No aplica a los turnos de conversación** —respuestas al operador, informe final de un subagente—. Ahí manda el orden de la sección anterior: `A1` o `B1` ya abren diciendo de qué va, y encimarles un TLDR duplica la apertura. La regla es "¿es un turno o es un documento?".
+
+Tampoco aplica a mensajes de commit —el scope de Conventional Commits ya cumple esa función y el subject tiene límite—, ni a textos de una línea o confirmaciones, donde el mensaje entero ya es el TLDR.
 
 **No reemplaza la paráfrasis del identificador** de la sección siguiente: un TLDR que dice "cerrar #47" sigue sin decir nada. Las dos reglas se aplican juntas.
 
@@ -345,6 +406,8 @@ Those personas are written against **a stack that is not ours**. `engineering-se
 **Therefore: the brief supplies the stack, the persona supplies the role.** When dispatching a subagent — via `/delegate-issue`, `/triage`, or a direct `Agent` call — the prompt **must** state the target repo's real stack explicitly, and instruct the agent to disregard any framework-specific framing carried by the persona. Read it from the repo's own `AGENTS.md` / `CONTEXT.md` rather than trusting the persona.
 
 Treat the persona as *role, seniority and judgement*; treat the stack as *something only the brief knows*.
+
+**El informe final vuelve en los cuatro bloques con dirección** — ver «Toda respuesta tiene cuatro bloques con dirección». El brief lo pide explícitamente, porque el subagente lee esta sección y no aquella. Un informe sin direcciones obliga al agente principal a reescribirlo entero antes de pasarle nada al operador, y ahí es donde se pierde lo que el subagente encontró. El brief que se le manda, en cambio, es un documento: abre con TLDR.
 
 See [awi-core#77](https://github.com/GuidoAmici/awi-core/issues/77) for the open discussion on making the roster stack-agnostic.
 
