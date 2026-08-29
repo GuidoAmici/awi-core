@@ -51,61 +51,82 @@ The comment must state:
 
 Before starting non-trivial work, search the issue trackers for prior art — issues frequently record decisions that an ADR later formalised, and acting without reading them risks contradicting a decision already made.
 
-## Toda respuesta tiene cuatro bloques con dirección
+## Toda respuesta tiene cinco bloques con dirección
 
 Una respuesta larga puede tener todo lo que el operador necesita y aun así no decirle dónde está nada. El resultado del pedido aparece a mitad de un párrafo, la sugerencia que había que aprobar quedó entre dos hallazgos, y para contestar "sí a lo segundo" hay que reescribir lo segundo. **La estructura no es cortesía tipográfica: es lo que vuelve la respuesta contestable.**
 
-Cuatro bloques, siempre en este orden:
+Cinco bloques, siempre en este orden:
 
 | Letra | Bloque | Qué va adentro |
 |---|---|---|
 | `A` | **Qué hice** | Lo que creé, modifiqué o borré, y dónde |
 | `B` | **Qué tenés que saber** | Lo que averigüé o detecté y el operador no sabía |
-| `C` | **Qué propongo** | Lo que el agente podría hacer después y no hizo |
-| `D` | **Qué necesito de vos** | Lo que el agente no puede resolver solo |
+| `C` | **Hilos abiertos** | Lo que esta sesión empezó y no terminó |
+| `D` | **Qué propongo** | Lo que el agente podría hacer después y no empezó |
+| `E` | **Qué necesito de vos** | Lo que el agente no puede resolver solo |
 
-### Los cuatro bloques son un solo eje
+### Los cinco bloques son un solo eje
 
-`A` y `B` son pasado cerrado; `C` y `D`, futuro abierto. De lo abierto, `C` lo puede cerrar el agente y `D` sólo el operador. **Ningún ítem cae en dos bloques**, porque cada frontera es una pregunta binaria que se contesta al escribirlo:
+El eje es **el grado de cierre**. `A` y `B` están cerrados: lo hecho no vuelve a hacerse y un hallazgo no pide nada. `C` está abierto y empezado. `D` y `E` están abiertos y sin empezar — y de esos dos, `D` lo puede cerrar el agente y `E` sólo el operador.
+
+**Ningún ítem cae en dos bloques**, porque cada frontera es una pregunta binaria que se contesta al escribir el ítem:
 
 - **`A` o `B` — ¿quedó algo distinto?** Si el disco, el repo o un issue quedaron cambiados, es `A`. Si no —leí, busqué, medí, deduje—, es `B`. "Revisé los tres handlers y no hay bug" es `B`: lo único que cambió es lo que sabemos.
-- **`B` o `C` — ¿es un hecho o es una idea?** Un hallazgo se verifica; una propuesta se acepta o se rechaza.
-- **`C` o `D` — ¿puedo avanzar sin la respuesta?** Ver más abajo.
+- **`A` o `C` — ¿quedó terminado?** Un trabajo a medias produce las dos cosas: `A` reporta la parte que sí quedó y es verificable en el repo, `C` dice qué falta. El hilo no repite lo hecho.
+- **`C` o `D` — ¿ya empezó?** Una propuesta que nunca se tocó es `D`. En cuanto se empieza —o el operador acepta un `D` y todavía no se ejecutó— pasa a ser un hilo.
+- **`D` o `E` — ¿puedo avanzar sin la respuesta?** Ver más abajo.
 
 Un bloque que necesita un "y después" adentro de su definición son dos bloques.
 
 ### Cada ítem lleva su dirección
 
-Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `C1`, `C2`, `C3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
+Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `D1`, `D2`, `D3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
 
-La dirección existe para que el operador conteste sin reescribir. «`C3`, aplicalo, el resto no» es una respuesta completa.
+La dirección existe para que el operador conteste sin reescribir. «`D3`, aplicalo, el resto no» es una respuesta completa.
 
-- **La letra pertenece al bloque, no al lugar.** Las propuestas son `C` aunque falten `A` y `B`. Una dirección que cambia de significado según el turno no es una dirección.
-- **Los cuatro bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
+- **La letra pertenece al bloque, no al lugar.** Las propuestas son `D` aunque falten `A`, `B` y `C`. Una dirección que cambia de significado según el turno no es una dirección.
+- **Los cinco bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
+- **Los bloques se citan entre sí por dirección.** Un hilo frenado por una decisión lo dice: «`C2` … frenado por `E1`». Es la ventaja de tener direcciones y no cuesta nada.
 - **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
 - **Valen para el último turno.** Cada respuesta renumera desde `1`. Si el operador se refiere a un turno anterior, el agente confirma qué entendió antes de actuar.
 
 ### Lo que contesta la pregunta va primero dentro de su bloque
 
-Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste": la respuesta a una pregunta es un hallazgo (`B`), una propuesta (`C`) o el reporte de algo hecho (`A`), según qué sea.
+Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste": la respuesta a una pregunta es un hallazgo (`B`), una propuesta (`D`) o el reporte de algo hecho (`A`), según qué sea.
 
 Lo que la regla sí exige es el orden: **si el operador preguntó algo, lo que lo contesta es el primer ítem de su bloque.** Una respuesta que hace buscar la respuesta adentro de una lista larga falla igual que una sin estructura.
 
-### Los bloques vacíos se omiten, menos `D`
+### `C` es lo único que no se renumera desde cero
+
+Los otros cuatro bloques valen para el último turno. **Los hilos abiertos son de la sesión entera:** un hilo que se abrió en el tercer turno sigue apareciendo en el noveno hasta que se cierre. La numeración se rehace en cada respuesta; la lista, no.
+
+Esa persistencia es todo el punto del bloque. Sin ella, repartir el trabajo entre sesiones obliga a reconstruir al final lo que se fue abriendo al principio — y en una sesión larga los primeros hilos ya no están en contexto para reconstruirlos.
+
+**Un hilo dice dónde quedó, no qué se pensaba hacer.** "Empecé a migrar los handlers" no se puede retomar. "La migración tiene los tres primeros hechos en `auth.ts`; faltan `billing.ts` y `webhooks.ts`, con el mismo patrón" sí.
+
+**Un hilo sale de la lista de tres maneras**, y sólo de esas tres:
+
+1. **Se cierra** — pasa a `A` en el turno que lo termina, y desaparece de `C`.
+2. **Se abandona** — el operador dice que no va, y el agente lo confirma antes de borrarlo.
+3. **Se convierte en issue** — si el hilo va a sobrevivir a la sesión, deja de ser un hilo y pasa al tracker, con su enlace. Es la vía normal para repartir trabajo entre sesiones.
+
+`C` es lo que consume el `Step 1` de [`/wrap-session`](.claude/skills/wrap-session/SKILL.md), que hoy reconstruye la lista barriendo la conversación al cerrar. Mantenerla turno a turno hace ese barrido una verificación en vez de una reconstrucción.
+
+### Los bloques vacíos se omiten, menos `E`
 
 Un bloque sin contenido no se rotula. Si el agente no tocó nada, `A` no aparece y la respuesta abre en `B`.
 
-**`D` es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
+**`E` es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
 
 ### Propuesta y decisión se separan por una sola pregunta
 
-**¿Puedo avanzar sin la respuesta?** Si sí, es `C`. Si no, es `D`.
+**¿Puedo avanzar sin la respuesta?** Si sí, es `D`. Si no, es `E`.
 
 El criterio es binario y se evalúa al escribir el ítem, no al terminar la respuesta. Una propuesta que el operador ignora no traba nada; una decisión que ignora deja trabajo detenido — y por eso las dos no pueden vivir en el mismo bloque, aunque las dos terminen en "¿lo hago?".
 
-**`D` no es sólo información.** Una decisión entre dos caminos, la conformidad sobre algo ya hecho y un dato que sólo el operador tiene son los tres el mismo bloque: cosas que el agente no puede resolver por su cuenta.
+**`E` no es sólo información.** Una decisión entre dos caminos, la conformidad sobre algo ya hecho y un dato que sólo el operador tiene son los tres el mismo bloque: cosas que el agente no puede resolver por su cuenta.
 
-**Con `D` abierto el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y `D` dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
+**Con `E` abierto el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y `E` dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
 
 ### Dónde aplica
 
@@ -120,12 +141,17 @@ A1. El fix quedó en `auth.ts:42` y los 42 tests pasan.
 ## Qué tenés que saber
 B1. El mismo patrón aparece en otros tres handlers.
 
+## Hilos abiertos
+C1. La guarda unificada tiene el caso de sesión expirada resuelto
+    en `guard.ts`; faltan los de token inválido y refresh.
+C2. El renombre de `UserCtx` quedó a mitad — frenado por `E1`.
+
 ## Qué propongo
-C1. Unificar los tres handlers detrás de una sola guarda.
+D1. Un issue para los otros tres handlers, y lo cierro con `C1`.
 
 ## Qué necesito de vos
-D1. ¿Migración nueva o edito la pendiente? Frena el paso 3;
-    los pasos 1 y 2 ya están hechos.
+E1. ¿`UserCtx` pasa a `Principal` o a `Actor`? Frena `C2`;
+    el resto del renombre no depende de eso y siguió.
 ```
 
 Las otras reglas de escritura siguen valiendo adentro de los bloques: ningún identificador viaja desnudo, y un comando dirigido al operador se pega y corre.
@@ -427,7 +453,7 @@ Those personas are written against **a stack that is not ours**. `engineering-se
 
 Treat the persona as *role, seniority and judgement*; treat the stack as *something only the brief knows*.
 
-**El informe final vuelve en los cuatro bloques con dirección** — ver «Toda respuesta tiene cuatro bloques con dirección». El brief lo pide explícitamente, porque el subagente lee esta sección y no aquella. Un informe sin direcciones obliga al agente principal a reescribirlo entero antes de pasarle nada al operador, y ahí es donde se pierde lo que el subagente encontró. El brief que se le manda, en cambio, es un documento: abre con TLDR.
+**El informe final vuelve en los cinco bloques con dirección** — ver «Toda respuesta tiene cinco bloques con dirección». El brief lo pide explícitamente, porque el subagente lee esta sección y no aquella. Un informe sin direcciones obliga al agente principal a reescribirlo entero antes de pasarle nada al operador, y ahí es donde se pierde lo que el subagente encontró. El brief que se le manda, en cambio, es un documento: abre con TLDR.
 
 See [awi-core#77](https://github.com/GuidoAmici/awi-core/issues/77) for the open discussion on making the roster stack-agnostic.
 

@@ -1,9 +1,10 @@
 # El operador contesta por dirección, no reescribiendo
 
-> **Estado: aceptado (2026-08-28), enmendado (2026-08-29).**
-> La enmienda reemplaza la taxonomía de los cuatro bloques. Las direcciones `A`-`D`
-> siguen siendo el mecanismo; cambió qué significa cada una. Ver
-> [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día).
+> **Estado: aceptado (2026-08-28), enmendado dos veces (2026-08-29).**
+> Las direcciones siguen siendo el mecanismo; cambió el corte de los bloques, primero
+> en su taxonomía y después en su cantidad. Ver
+> [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día) y
+> [Los hilos abiertos son un bloque, no una nota al pie](#los-hilos-abiertos-son-un-bloque-no-una-nota-al-pie).
 
 El harness ya tenía tres reglas sobre cómo se escribe una respuesta: el TLDR abre
 diciendo de qué va, ningún identificador viaja desnudo, y un comando dirigido al
@@ -25,46 +26,47 @@ direcciones, y una dirección sólo sirve si significa lo mismo en todos los tur
 
 ## Decisión
 
-**Toda respuesta al operador se estructura en cuatro bloques, y cada ítem lleva su
+**Toda respuesta al operador se estructura en cinco bloques, y cada ítem lleva su
 dirección.**
 
 | Letra | Bloque | Qué va adentro |
 |---|---|---|
 | `A` | Qué hice | Lo que creé, modifiqué o borré, y dónde |
 | `B` | Qué tenés que saber | Lo que averigüé o detecté y el operador no sabía |
-| `C` | Qué propongo | Lo que el agente podría hacer después y no hizo |
-| `D` | Qué necesito de vos | Lo que el agente no puede resolver solo |
+| `C` | Hilos abiertos | Lo que esta sesión empezó y no terminó |
+| `D` | Qué propongo | Lo que el agente podría hacer después y no empezó |
+| `E` | Qué necesito de vos | Lo que el agente no puede resolver solo |
 
-*(Tabla enmendada el 2026-08-29. La original está en
-[La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día).)*
+*(Tabla enmendada dos veces el 2026-08-29. Las versiones anteriores están en las dos
+secciones de enmienda, al final.)*
 
 Lo que hace que la dirección funcione, y que se decidió pieza por pieza:
 
-- **La letra pertenece al bloque, no al lugar.** Las propuestas son `C` aunque falten
-  `A` y `B`. La alternativa —letras corridas por orden de aparición— se descartó porque
+- **La letra pertenece al bloque, no al lugar.** Las propuestas son `D` aunque falten
+  `A`, `B` y `C`. La alternativa —letras corridas por orden de aparición— se descartó porque
   hace que `C` signifique cosas distintas según el turno, que es exactamente lo que
   una dirección no puede hacer.
 - **El tag va en el ítem, no en el título.** El bloque se titula `## Qué propongo`
-  y sus ítems son `C1`, `C2`. Repetir la letra en el encabezado no agrega nada.
-- **Los cuatro bloques numeran sus ítems**, `B` incluido: un hallazgo que no se puede
+  y sus ítems son `D1`, `D2`. Repetir la letra en el encabezado no agrega nada.
+- **Los cinco bloques numeran sus ítems**, `B` incluido: un hallazgo que no se puede
   citar no se puede objetar.
 - **Sin tope de ítems.** Se evaluó un tope de tres con excedente contado, como en la
-  regla de backlog. Se descartó para `D`: posponer un bloqueo para que entrara en un
-  número es peor que una lista larga. Sin tope en `D`, un tope en `C` sólo era
-  asimetría sin ganancia.
+  regla de backlog. Se descartó para el bloque de decisiones: posponer un bloqueo
+  para que entrara en un número es peor que una lista larga. Sin tope ahí, un tope
+  en las propuestas sólo era asimetría sin ganancia.
 - **Lo que contesta la pregunta va primero dentro de su bloque.** Es una regla de
   orden, no un bloque: ver la enmienda.
-- **`C` y `D` se separan por una sola pregunta** — *¿puedo avanzar sin la respuesta?*
-  Binaria, y se evalúa al escribir el ítem.
-- **Los bloques vacíos se omiten, menos `D`**, que se declara vacío. Es la misma
+- **Propuesta y decisión se separan por una sola pregunta** — *¿puedo avanzar sin la
+  respuesta?* Binaria, y se evalúa al escribir el ítem.
+- **Los bloques vacíos se omiten, menos el último**, que se declara vacío. Es la misma
   razón por la que la línea 2 del TLDR nunca se borra: "no necesito nada de vos" es
   información.
-- **Con `D` abierto el agente no espera.** Hace todo lo que no dependa de la
+- **Con una decisión abierta el agente no espera.** Hace todo lo que no dependa de la
   respuesta y frena sólo lo que sí.
 
 **El TLDR se repliega a los textos escritos.** Su `Dónde aplica` nombraba las
 respuestas al operador; ahora la frontera es "¿es un turno o es un documento?". Los
-turnos —respuestas al operador, informe final de un subagente— usan los cuatro
+turnos —respuestas al operador, informe final de un subagente— usan los cinco
 bloques; los documentos —issues, PRs, ADR, outputs, PRD, artifacts, briefs— siguen
 abriendo con TLDR. Encimar los dos duplicaba la apertura: `A1` y `B1` ya dicen de
 qué va.
@@ -136,6 +138,49 @@ información que sólo el operador tiene, y el nombre tiene que cubrir las tres.
 Esto se enmendó en su lugar y no se abrió un ADR nuevo: la decisión que este
 documento defiende —que el operador conteste por dirección en vez de reescribir— se
 sostiene intacta. Lo que falló fue el corte de los bloques, no el mecanismo.
+
+## Los hilos abiertos son un bloque, no una nota al pie
+
+Un día después de la primera enmienda, el operador nombró el modo de falla que
+quedaba: **abre en una sesión más cosas de las que puede cerrar, y sin un listado le
+cuesta repartir el resto entre handoffs.**
+
+El trabajo a medias no tenía lugar canónico. Se dispersaba en tres: lo empezado
+aparecía en `Qué hice` con una aclaración de que había quedado corto, lo pendiente
+volvía disfrazado de propuesta, y lo frenado sólo existía adentro del bloque de
+decisiones. Ninguno de los tres es una lista de deuda, y el eje tenía un agujero
+declarado — `A` cubría "cambió el mundo y terminó" sin que nada cubriera "cambió el
+mundo y no terminó".
+
+**Se agrega `Hilos abiertos` como tercer bloque**, entre los hechos y las propuestas.
+El eje se reformula como **grado de cierre**: cerrado (`A`, `B`), abierto y empezado
+(`C`), abierto y sin empezar (`D`, `E`).
+
+- **Va antes de las propuestas, no al final.** Un hilo es pasado, y todo el pasado se
+  lee junto. Puesto después del bloque de decisiones habría competido por atención
+  justamente con lo que lo desbloquea.
+- **`C` es el único bloque que no se renumera desde cero.** Los otros cuatro valen
+  para el último turno; los hilos son de la sesión entera y persisten hasta cerrarse.
+  Sin esa persistencia el bloque no sirve para lo que se pidió: en una sesión larga,
+  los hilos del principio ya no están en contexto para reconstruirlos al final.
+- **Sale de la lista de tres maneras**: se cierra y pasa a `A`, se abandona con
+  confirmación del operador, o **se convierte en issue**. La tercera es la que reparte
+  trabajo entre sesiones, y hace del bloque la bandeja de entrada de los handoffs.
+- **El hilo dice dónde quedó, no qué se pensaba hacer.** Un estado retomable, no una
+  intención.
+
+Ya existía un consumidor: el `Step 1` de `/wrap-session` es un «gate de hilos
+abiertos» que barre la conversación entera al cerrar para reconstruir esta misma
+lista. Mantenerla turno a turno convierte ese barrido en una verificación. El
+vocabulario tampoco es nuevo — la skill ya llamaba "hilos abiertos" a esto.
+
+**El costo aceptado: `D` cambia de significado**, de "qué necesito de vos" a "qué
+propongo", y aparece una `E`. Es la colisión más cara posible, porque `D` es la letra
+que el operador más usa para responder. Se aceptó igual: la taxonomía tenía dos días
+de uso, y la alternativa —darle al bloque nuevo una letra fuera de secuencia— rompía
+que el orden alfabético sea el orden de lectura, que es una ayuda gratis. La regla de
+que el agente confirma antes de actuar sobre una dirección de un turno anterior cubre
+el resto.
 
 ## Qué no cambia
 
