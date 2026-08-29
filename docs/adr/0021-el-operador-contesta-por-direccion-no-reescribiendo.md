@@ -1,6 +1,9 @@
 # El operador contesta por dirección, no reescribiendo
 
-> **Estado: aceptado (2026-08-28).**
+> **Estado: aceptado (2026-08-28), enmendado (2026-08-29).**
+> La enmienda reemplaza la taxonomía de los cuatro bloques. Las direcciones `A`-`D`
+> siguen siendo el mecanismo; cambió qué significa cada una. Ver
+> [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día).
 
 El harness ya tenía tres reglas sobre cómo se escribe una respuesta: el TLDR abre
 diciendo de qué va, ningún identificador viaja desnudo, y un comando dirigido al
@@ -27,18 +30,21 @@ dirección.**
 
 | Letra | Bloque | Qué va adentro |
 |---|---|---|
-| `A` | Lo que preguntaste | Una entrada por pregunta |
-| `B` | Dónde estamos | Qué quedó hecho, después qué se encontró |
-| `C` | Lo que sugiero | Lo que el agente propone y podría hacer después |
+| `A` | Qué hice | Lo que creé, modifiqué o borré, y dónde |
+| `B` | Qué tenés que saber | Lo que averigüé o detecté y el operador no sabía |
+| `C` | Qué propongo | Lo que el agente podría hacer después y no hizo |
 | `D` | Qué necesito de vos | Lo que el agente no puede resolver solo |
+
+*(Tabla enmendada el 2026-08-29. La original está en
+[La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día).)*
 
 Lo que hace que la dirección funcione, y que se decidió pieza por pieza:
 
-- **La letra pertenece al bloque, no al lugar.** Sugerencias es `C` aunque falten `A`
-  y `B`. La alternativa —letras corridas por orden de aparición— se descartó porque
+- **La letra pertenece al bloque, no al lugar.** Las propuestas son `C` aunque falten
+  `A` y `B`. La alternativa —letras corridas por orden de aparición— se descartó porque
   hace que `C` signifique cosas distintas según el turno, que es exactamente lo que
   una dirección no puede hacer.
-- **El tag va en el ítem, no en el título.** El bloque se titula `## Lo que sugiero`
+- **El tag va en el ítem, no en el título.** El bloque se titula `## Qué propongo`
   y sus ítems son `C1`, `C2`. Repetir la letra en el encabezado no agrega nada.
 - **Los cuatro bloques numeran sus ítems**, `B` incluido: un hallazgo que no se puede
   citar no se puede objetar.
@@ -46,6 +52,8 @@ Lo que hace que la dirección funcione, y que se decidió pieza por pieza:
   regla de backlog. Se descartó para `D`: posponer un bloqueo para que entrara en un
   número es peor que una lista larga. Sin tope en `D`, un tope en `C` sólo era
   asimetría sin ganancia.
+- **Lo que contesta la pregunta va primero dentro de su bloque.** Es una regla de
+  orden, no un bloque: ver la enmienda.
 - **`C` y `D` se separan por una sola pregunta** — *¿puedo avanzar sin la respuesta?*
   Binaria, y se evalúa al escribir el ítem.
 - **Los bloques vacíos se omiten, menos `D`**, que se declara vacío. Es la misma
@@ -85,6 +93,50 @@ instancia nueva—, y `CLAUDE.md` es específico de Claude Code, así que la pro
 "fuente de verdad compartida entre todos los agentes" quedaba cancelada. El hook
 resuelve el mismo problema sin tocar ninguna referencia.
 
+## La primera taxonomía duró un día
+
+La versión aceptada el 2026-08-28 cortaba los bloques así:
+
+| Letra | Bloque | Qué va adentro |
+|---|---|---|
+| `A` | Lo que preguntaste | Una entrada por pregunta |
+| `B` | Dónde estamos | Qué quedó hecho, después qué se encontró |
+| `C` | Lo que sugiero | Lo que el agente propone y podría hacer después |
+| `D` | Qué necesito de vos | Lo que el agente no puede resolver solo |
+
+Al usarla, el operador reportó que "funcionaba algo extraño". El diagnóstico:
+**los cuatro bloques no compartían un eje de clasificación.**
+
+- **`A` cortaba transversal a los otros tres.** "Lo que preguntaste" clasificaba por
+  *a quién le responde el contenido*; `B`, `C` y `D` clasificaban por *qué tipo de
+  cosa es el contenido*. Entonces toda respuesta a una pregunta caía en dos bloques
+  a la vez: "¿quedó hecho X?" era `A` y era `B`; "¿te parece Y?" era `A` y era `C`.
+  El ruteo quedaba a criterio del turno, y el modo de falla típico era duplicar —
+  contestar corto en `A` y volver a contarlo en `B`.
+- **`B` eran dos bloques con un punto y coma.** Su propia definición lo confesaba:
+  "qué quedó hecho y dónde; **después**, qué se encontró". Y son cosas de naturaleza
+  opuesta: lo que hice es reversible y se verifica en el repo; lo que averigüé no se
+  revierte y no se verifica igual.
+
+La taxonomía nueva usa un eje único: **qué cambió el mundo / qué cambió lo que sabés
+/ qué podría hacer / qué no puedo hacer solo.** `A` y `B` son pasado cerrado, `C` y
+`D` futuro abierto; de lo abierto, `C` lo cierra el agente y `D` sólo el operador.
+Cada frontera es binaria: `A` o `B` se decide con *¿quedó algo distinto en disco, en
+el repo o en un issue?*, y `C` o `D` con la pregunta que ya estaba.
+
+**Lo que `A` aportaba y había que reponer:** era lo único que obligaba al agente a
+contestar la pregunta literal. Se repone como regla de orden y no como bloque —
+*si el operador preguntó algo, lo que lo contesta es el primer ítem de su bloque*—
+porque un bloque por destinatario es justamente lo que rompía el eje.
+
+**`D` conserva su nombre, "Qué necesito de vos", y no pasó a "Qué necesito saber".**
+Conformidad y aprobación no son saber: el bloque cubre decisiones, visto bueno e
+información que sólo el operador tiene, y el nombre tiene que cubrir las tres.
+
+Esto se enmendó en su lugar y no se abrió un ADR nuevo: la decisión que este
+documento defiende —que el operador conteste por dirección en vez de reescribir— se
+sostiene intacta. Lo que falló fue el corte de los bloques, no el mecanismo.
+
 ## Qué no cambia
 
 - **Las otras tres reglas de escritura.** Ningún identificador viaja desnudo y los
@@ -92,7 +144,7 @@ resuelve el mismo problema sin tocar ninguna referencia.
 - **Dónde vive la fuente de verdad.** `INSTRUCTIONS.md` sigue donde estaba y sigue
   siendo el único lugar donde se edita la política.
 - **El piso.** Una confirmación o una respuesta de una línea no se estructura: ahí el
-  mensaje entero ya es `A1`.
+  mensaje entero es un solo ítem y no necesita rótulo.
 
 ## Cómo se verifica
 

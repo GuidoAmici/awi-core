@@ -59,33 +59,51 @@ Cuatro bloques, siempre en este orden:
 
 | Letra | Bloque | Qué va adentro |
 |---|---|---|
-| `A` | **Lo que preguntaste** | Una entrada por pregunta del operador. Nada más |
-| `B` | **Dónde estamos** | Qué quedó hecho y dónde; después, qué se encontró que el operador no sabía |
-| `C` | **Lo que sugiero** | Lo que el agente propone y podría hacer después |
+| `A` | **Qué hice** | Lo que creé, modifiqué o borré, y dónde |
+| `B` | **Qué tenés que saber** | Lo que averigüé o detecté y el operador no sabía |
+| `C` | **Qué propongo** | Lo que el agente podría hacer después y no hizo |
 | `D` | **Qué necesito de vos** | Lo que el agente no puede resolver solo |
+
+### Los cuatro bloques son un solo eje
+
+`A` y `B` son pasado cerrado; `C` y `D`, futuro abierto. De lo abierto, `C` lo puede cerrar el agente y `D` sólo el operador. **Ningún ítem cae en dos bloques**, porque cada frontera es una pregunta binaria que se contesta al escribirlo:
+
+- **`A` o `B` — ¿quedó algo distinto?** Si el disco, el repo o un issue quedaron cambiados, es `A`. Si no —leí, busqué, medí, deduje—, es `B`. "Revisé los tres handlers y no hay bug" es `B`: lo único que cambió es lo que sabemos.
+- **`B` o `C` — ¿es un hecho o es una idea?** Un hallazgo se verifica; una propuesta se acepta o se rechaza.
+- **`C` o `D` — ¿puedo avanzar sin la respuesta?** Ver más abajo.
+
+Un bloque que necesita un "y después" adentro de su definición son dos bloques.
 
 ### Cada ítem lleva su dirección
 
-Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Lo que sugiero` y sus ítems son `C1`, `C2`, `C3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
+Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `C1`, `C2`, `C3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
 
 La dirección existe para que el operador conteste sin reescribir. «`C3`, aplicalo, el resto no» es una respuesta completa.
 
-- **La letra pertenece al bloque, no al lugar.** Sugerencias es `C` aunque falten `A` y `B`. Una dirección que cambia de significado según el turno no es una dirección.
+- **La letra pertenece al bloque, no al lugar.** Las propuestas son `C` aunque falten `A` y `B`. Una dirección que cambia de significado según el turno no es una dirección.
 - **Los cuatro bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
-- **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una sugerencia para respetar un número es peor que una lista larga.
+- **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
 - **Valen para el último turno.** Cada respuesta renumera desde `1`. Si el operador se refiere a un turno anterior, el agente confirma qué entendió antes de actuar.
+
+### Lo que contesta la pregunta va primero dentro de su bloque
+
+Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste": la respuesta a una pregunta es un hallazgo (`B`), una propuesta (`C`) o el reporte de algo hecho (`A`), según qué sea.
+
+Lo que la regla sí exige es el orden: **si el operador preguntó algo, lo que lo contesta es el primer ítem de su bloque.** Una respuesta que hace buscar la respuesta adentro de una lista larga falla igual que una sin estructura.
 
 ### Los bloques vacíos se omiten, menos `D`
 
-Un bloque sin contenido no se rotula. Si el operador no preguntó nada, `A` no aparece y la respuesta abre en `B`.
+Un bloque sin contenido no se rotula. Si el agente no tocó nada, `A` no aparece y la respuesta abre en `B`.
 
 **`D` es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
 
-### Sugerencia y decisión se separan por una sola pregunta
+### Propuesta y decisión se separan por una sola pregunta
 
 **¿Puedo avanzar sin la respuesta?** Si sí, es `C`. Si no, es `D`.
 
-El criterio es binario y se evalúa al escribir el ítem, no al terminar la respuesta. Una sugerencia que el operador ignora no traba nada; una decisión que ignora deja trabajo detenido — y por eso las dos no pueden vivir en el mismo bloque, aunque las dos terminen en "¿lo hago?".
+El criterio es binario y se evalúa al escribir el ítem, no al terminar la respuesta. Una propuesta que el operador ignora no traba nada; una decisión que ignora deja trabajo detenido — y por eso las dos no pueden vivir en el mismo bloque, aunque las dos terminen en "¿lo hago?".
+
+**`D` no es sólo información.** Una decisión entre dos caminos, la conformidad sobre algo ya hecho y un dato que sólo el operador tiene son los tres el mismo bloque: cosas que el agente no puede resolver por su cuenta.
 
 **Con `D` abierto el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y `D` dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
 
@@ -93,14 +111,16 @@ El criterio es binario y se evalúa al escribir el ítem, no al terminar la resp
 
 En las respuestas al operador y en el informe final de un subagente al agente principal: los dos son turnos de conversación. Un documento no es un turno — issues, PRs, ADR, BDR, outputs, PRD, artifacts y briefs a subagentes abren con el TLDR de la sección siguiente.
 
-**El piso es más de un párrafo.** Una confirmación o una respuesta de una línea no se estructura: ahí el mensaje entero ya es `A1`.
+**El piso es más de un párrafo.** Una confirmación o una respuesta de una línea no se estructura: ahí el mensaje entero es un solo ítem y no necesita rótulo.
 
 ```markdown
-## Dónde estamos
-B1. El fix quedó en `auth.ts:42` y los 42 tests pasan.
-B2. El mismo patrón aparece en otros tres handlers.
+## Qué hice
+A1. El fix quedó en `auth.ts:42` y los 42 tests pasan.
 
-## Lo que sugiero
+## Qué tenés que saber
+B1. El mismo patrón aparece en otros tres handlers.
+
+## Qué propongo
 C1. Unificar los tres handlers detrás de una sola guarda.
 
 ## Qué necesito de vos
