@@ -1,10 +1,10 @@
 # El operador contesta por dirección, no reescribiendo
 
-> **Estado: aceptado (2026-08-28), enmendado dos veces (2026-08-29).**
-> Las direcciones siguen siendo el mecanismo; cambió el corte de los bloques, primero
-> en su taxonomía y después en su cantidad. Ver
-> [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día) y
-> [Los hilos abiertos son un bloque, no una nota al pie](#los-hilos-abiertos-son-un-bloque-no-una-nota-al-pie).
+> **Estado: aceptado (2026-08-28), enmendado tres veces (2026-08-29, 2026-08-30).**
+> Las direcciones siguen siendo el mecanismo; cambió el corte de los bloques y después
+> la forma del ítem. Ver [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día),
+> [Los hilos abiertos son un bloque, no una nota al pie](#los-hilos-abiertos-son-un-bloque-no-una-nota-al-pie)
+> y [El ítem también tiene TLDR](#el-ítem-también-tiene-tldr).
 
 El harness ya tenía tres reglas sobre cómo se escribe una respuesta: el TLDR abre
 diciendo de qué va, ningún identificador viaja desnudo, y un comando dirigido al
@@ -48,6 +48,7 @@ Lo que hace que la dirección funcione, y que se decidió pieza por pieza:
   una dirección no puede hacer.
 - **El tag va en el ítem, no en el título.** El bloque se titula `## Qué propongo`
   y sus ítems son `D1`, `D2`. Repetir la letra en el encabezado no agrega nada.
+- **Cada ítem abre con su TLDR en negrita.** Ver la tercera enmienda.
 - **Los cinco bloques numeran sus ítems**, `B` incluido: un hallazgo que no se puede
   citar no se puede objetar.
 - **Sin tope de ítems.** Se evaluó un tope de tres con excedente contado, como en la
@@ -181,6 +182,40 @@ de uso, y la alternativa —darle al bloque nuevo una letra fuera de secuencia�
 que el orden alfabético sea el orden de lectura, que es una ayuda gratis. La regla de
 que el agente confirma antes de actuar sobre una dirección de un turno anterior cubre
 el resto.
+
+## El ítem también tiene TLDR
+
+La estructura resolvió *dónde* está cada cosa y no dijo nada sobre *cómo se escribe
+cada ítem*. Con los bloques ya en uso, el operador señaló el hueco: un ítem que abre
+con «La tercera vía de salida es la que resuelve tu problema literal» **lo obliga a
+leer el párrafo entero para saber de qué se hablaba** — y a veces ni así. La
+dirección lo dejaba contestar sin reescribir, pero no lo dejaba decidir sin leer
+todo.
+
+Es el mismo modo de falla que ataca la regla del TLDR, una escala más abajo: del
+texto al ítem. Y es un modo de falla propio de la prosa de agente, que tiende al
+teaser porque suena a que está construyendo un argumento.
+
+**Cada ítem abre con un TLDR en negrita seguido de dos puntos**, y el resto es
+evidencia. El criterio que lo gobierna: *leer sólo las negritas de una respuesta
+tiene que alcanzar para tenerla entera.*
+
+Lo que hace falta para que eso se cumpla, y que sin nombrarlo no se cumple:
+
+- **El TLDR afirma, no anuncia.** Si admite un "Sobre" adelante y suena a título de
+  sección, es un rótulo. El test es mecánico y se corre al releer.
+- **Test del borrado**: tapado el detalle, el TLDR tiene que seguir siendo verdadero y
+  útil solo. Si no, es un anzuelo.
+- **Nombrá la cosa, no su categoría** — el dato concreto entra en el TLDR, no espera
+  en el detalle.
+- **Sin pronombres de suspenso** ("esto", "la clave acá", "lo que resuelve el
+  problema"). Es la forma más común del acertijo.
+- **Una sola negrita por ítem.** Si el detalle también resalta, no queda nada que
+  escanear — y el formato entero existe para poder escanear.
+- **El detalle es opcional.** Un ítem de una oración es todo TLDR y no lleva negrita.
+
+No aplica a documentos: ahí ya manda el TLDR de cuatro líneas, y encimar los dos
+duplicaría la apertura. Esta regla vive en los turnos, igual que los cinco bloques.
 
 ## Qué no cambia
 

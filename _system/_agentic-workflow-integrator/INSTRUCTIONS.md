@@ -90,6 +90,25 @@ La dirección existe para que el operador conteste sin reescribir. «`D3`, aplic
 - **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
 - **Valen para el último turno.** Cada respuesta renumera desde `1`. Si el operador se refiere a un turno anterior, el agente confirma qué entendió antes de actuar.
 
+### Cada ítem abre con su TLDR en negrita
+
+**Leer sólo las negritas de una respuesta tiene que alcanzar para tenerla entera.** Todo lo demás es evidencia, para lo que el operador quiera auditar. Es la misma regla de la sección siguiente —el TLDR va primero— una escala más abajo: del texto al ítem.
+
+El formato es fijo:
+
+```markdown
+A1. **La afirmación:** la evidencia, el detalle, la consecuencia.
+```
+
+- **El TLDR afirma, no anuncia.** Si le podés poner "Sobre" adelante y suena a título de sección, es un rótulo y no sirve. *"La tercera vía de salida es la que resuelve tu problema"* anuncia; *"Un hilo que no cerrás hoy sale como issue, y ese issue es el handoff"* afirma. El rótulo obliga a leer el párrafo para saber de qué se hablaba, que es exactamente lo que el formato existe para evitar.
+- **Test del borrado.** Tapá el detalle. Si el TLDR sigue siendo verdadero y útil solo, está bien escrito. Si deja al operador sin saber de qué se hablaba, es un anzuelo, no un resumen.
+- **Nombrá la cosa, no su categoría.** El dato entra en el TLDR: el número, el archivo, el nombre, la decisión. "Faltan `billing.ts` y `webhooks.ts`" y no "quedaron archivos pendientes".
+- **Sin pronombres de suspenso.** "Esto", "la clave acá", "lo que resuelve el problema", "el punto importante" — todos refieren a algo que sólo aparece en el detalle. Es la forma más común del acertijo y la más fácil de detectar al releer.
+- **Una sola negrita por ítem, la del TLDR.** Si el detalle también resalta, no queda nada que escanear.
+- **El detalle es opcional.** Un ítem que entra en una oración es todo TLDR y no lleva negrita: `A5. Commit 8139bcc, en dev.` El formato aplica cuando hay algo que resumir.
+
+**Una línea.** Si el TLDR no entra en una, casi siempre es porque empezó a contar el detalle.
+
 ### Lo que contesta la pregunta va primero dentro de su bloque
 
 Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste": la respuesta a una pregunta es un hallazgo (`B`), una propuesta (`D`) o el reporte de algo hecho (`A`), según qué sea.
@@ -136,22 +155,25 @@ En las respuestas al operador y en el informe final de un subagente al agente pr
 
 ```markdown
 ## Qué hice
-A1. El fix quedó en `auth.ts:42` y los 42 tests pasan.
+A1. **El fix del token expirado quedó en `auth.ts:42`:** los 42 tests
+    pasan y no hizo falta tocar el middleware.
 
 ## Qué tenés que saber
-B1. El mismo patrón aparece en otros tres handlers.
+B1. **El mismo bug vive en `billing.ts`, `webhooks.ts` y `export.ts`:**
+    los tres copian la guarda en vez de llamarla.
 
 ## Hilos abiertos
-C1. La guarda unificada tiene el caso de sesión expirada resuelto
-    en `guard.ts`; faltan los de token inválido y refresh.
-C2. El renombre de `UserCtx` quedó a mitad — frenado por `E1`.
+C1. **La guarda unificada resuelve sesión expirada y le faltan dos casos:**
+    token inválido y refresh, los dos en `guard.ts`.
+C2. **El renombre de `UserCtx` quedó a mitad, frenado por `E1`:** los
+    imports ya apuntan al nombre nuevo, las definiciones no.
 
 ## Qué propongo
-D1. Un issue para los otros tres handlers, y lo cierro con `C1`.
+D1. **Un issue por los tres handlers duplicados**, y cierro `C1` con él.
 
 ## Qué necesito de vos
-E1. ¿`UserCtx` pasa a `Principal` o a `Actor`? Frena `C2`;
-    el resto del renombre no depende de eso y siguió.
+E1. **¿`UserCtx` pasa a `Principal` o a `Actor`?** Frena `C2`; el resto
+    del renombre no depende de la respuesta y siguió.
 ```
 
 Las otras reglas de escritura siguen valiendo adentro de los bloques: ningún identificador viaja desnudo, y un comando dirigido al operador se pega y corre.
