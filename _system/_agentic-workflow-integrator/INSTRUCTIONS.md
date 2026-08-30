@@ -78,6 +78,8 @@ El eje es **el grado de cierre**. `A` y `B` están cerrados: lo hecho no vuelve 
 
 Un bloque que necesita un "y después" adentro de su definición son dos bloques.
 
+**Para código, "terminado" es "en el remoto compartido", no "committeado localmente".** Un commit sin pushear, un PR abierto esperando tests o CI, o un PR ya testeado y aprobado sin mergear son `C`, aunque el commit ya exista y esté reportado en `A`. El ítem de `A` cuenta qué se hizo; el de `C` dice que todavía no llegó a destino, citando la dirección del primero: «`C3`. El commit de `A2` sigue sin pushear — CI de `newhaze-webapp` corriendo».
+
 ### Cada ítem lleva su dirección
 
 Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `D1`, `D2`, `D3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.

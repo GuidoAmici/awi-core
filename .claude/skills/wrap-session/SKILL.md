@@ -47,8 +47,11 @@ Recorré la sesión buscando lo que quedó a mitad de camino y no está en la li
 - Issues que el trabajo de hoy resolvió, invalidó o hizo obsoletos, y que siguen abiertos sin comentario (la política está en «Issue hygiene» de INSTRUCTIONS.md — comentar y **sugerir** la disposición, no cerrar solo)
 - Decisiones tomadas en la conversación que ameritan un ADR y no lo tienen
 - Cambios de código sin commitear que no son contexto — el Step 3 publica los repos de contexto, no los repos de trabajo del harness
+- **Commits sin pushear, PRs esperando tests/CI, o PRs ya testeados y aprobados sin mergear.** Para código, terminado es "en el remoto compartido" — ver «Los cinco bloques son un solo eje» en INSTRUCTIONS.md. Corré `git status` y, si aplica, `gh pr status` / `gh pr checks` en los repos que la sesión tocó; no asumas que un commit local llegó a destino.
 
 Lo que aparezca acá y no estuviera en `C` se trata igual: misma pregunta, mismas cuatro opciones.
+
+**Si lo que encontraste no es de esta sesión, no asumas que quedó abandonado.** Antes de proponer una acción, corré `ListAgents` y fijate si hay una sesión de Claude Code interactiva que pueda seguir trabajándolo — sesiones iniciadas hace pocas horas son candidatas reales; una órfana de días no lo es. Si hay duda, decilo como hallazgo y dejá que el operador decida, no lo toques por tu cuenta.
 
 **Si el barrido encuentra bastante que `C` no tenía, decilo en el Step 5.** Significa que el bloque no se mantuvo durante la sesión, y es lo único que puede detectarlo.
 
