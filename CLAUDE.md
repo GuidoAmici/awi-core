@@ -26,6 +26,10 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Multi-context layout — `CONTEXT-MAP.md` at root points to per-org `CONTEXT.md` files under `_data/organizations/`. See `docs/agents/domain.md`.
 
+### Pentesting con IA
+
+Strix — agente open-source de pentesting con IA (corre la app, exploita fallas y adjunta un PoC a cada hallazgo). Adoptado en dos capas: guardarraíl por PR-diff en CI y auditoría completa a demanda. Los hallazgos entran al issue tracker vía triage. See `docs/agents/strix-pentesting.md`.
+
 ### Artifacts
 
 Todo artifact se compone con el **Design System de la org destinataria** —se resuelve antes de escribir la primera línea de HTML, no al final—, el fuente HTML/MD se versiona en el repo (nunca en el scratchpad) y la trazabilidad artifact ↔ repo es bidireccional. See `docs/agents/artifacts.md`.
