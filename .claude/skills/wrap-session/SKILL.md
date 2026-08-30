@@ -18,20 +18,41 @@ Steps 2–3 son automáticos: sin prompts, sin confirmaciones. Step 1 usa `AskUs
 
 ## Step 1 — Gate de hilos abiertos
 
-Dos barridos de la conversación, en este orden. Para cada ítem, una llamada a `AskUserQuestion` por vez, esperando respuesta antes de la siguiente. No vuelques una lista en markdown ni pidas texto libre.
+**El bloque `C` de la última respuesta es la lista, no un punto de partida.** La política de [los cinco bloques](../../../_system/_agentic-workflow-integrator/INSTRUCTIONS.md) hace que cada turno mantenga los hilos abiertos de la sesión entera, así que acá no se reconstruye nada: se levanta esa lista y se le da destino a cada ítem. El barrido de la conversación pasa a ser control, no fuente.
 
-### 1a — Trabajo sin terminar
+Para cada hilo, **una llamada a `AskUserQuestion` por vez**, esperando respuesta antes de la siguiente. No vuelques una lista en markdown ni pidas texto libre.
 
-Recorré la sesión buscando lo que quedó a mitad de camino:
+### 1a — Destino de cada hilo de `C`
+
+Tomá el bloque `Hilos abiertos` de la última respuesta del agente principal. Para cada ítem, preguntá con estas cuatro opciones:
+
+| Opción | Qué significa | Qué hacés |
+|---|---|---|
+| **Terminarlo ahora** | Entra antes de cerrar la sesión | Resolvelo en el momento; pasa a «Completado esta sesión» en el `2d` |
+| **Convertirlo en issue** | Sobrevive a la sesión con dueño y enlace | Creá el issue siguiendo [`docs/agents/issue-tracker.md`](../../../docs/agents/issue-tracker.md) y devolvé el número |
+| **Dejarlo para mañana** | Queda sólo en el daily, sin issue | Va a «Hilos abiertos» del `2d` — decile al operador que si mañana no lo levanta, se pierde |
+| **Abandonarlo** | No va | Confirmalo y no lo escribas en ningún lado |
+
+**«Terminarlo ahora» va primero cuando el hilo es corto.** El bloque `C` suele decir exactamente qué falta —«faltan `billing.ts` y `webhooks.ts`, mismo patrón»—; si eso entra en la sesión, cerrarlo cuesta menos que filear un issue y volver a cargarlo mañana.
+
+**Un hilo que se descompone en varias unidades entregables no es un issue, es una épica:** issue padre con sub-issues, en el workspace repo de la org, que es donde `issue-tracker.md` ya ubica las épicas cross-repo. Preguntalo como parte de la opción "Convertirlo en issue", no como una quinta opción.
+
+**Si no hay bloque `C` disponible** —la sesión no usó los bloques, o esta skill corre sin la conversación— saltá a `1b` y usalo como fuente.
+
+### 1b — Verificación: lo que `C` no registró
+
+Recorré la sesión buscando lo que quedó a mitad de camino y no está en la lista:
 
 - Tareas empezadas y nunca cerradas
 - Issues que el trabajo de hoy resolvió, invalidó o hizo obsoletos, y que siguen abiertos sin comentario (la política está en «Issue hygiene» de INSTRUCTIONS.md — comentar y **sugerir** la disposición, no cerrar solo)
 - Decisiones tomadas en la conversación que ameritan un ADR y no lo tienen
 - Cambios de código sin commitear que no son contexto — el Step 3 publica los repos de contexto, no los repos de trabajo del harness
 
-Para cada uno, preguntá qué hacer: resolverlo ahora, anotarlo como pendiente para mañana, o dejarlo.
+Lo que aparezca acá y no estuviera en `C` se trata igual: misma pregunta, mismas cuatro opciones.
 
-### 1b — Información sin guardar
+**Si el barrido encuentra bastante que `C` no tenía, decilo en el Step 5.** Significa que el bloque no se mantuvo durante la sesión, y es lo único que puede detectarlo.
+
+### 1c — Información sin guardar
 
 Recorré la sesión buscando lo que se mencionó y no se archivó:
 
@@ -40,9 +61,9 @@ Recorré la sesión buscando lo que se mencionó y no se archivó:
 - Cambios de estado de proyectos que todavía no están en los archivos
 - Personas o reuniones nombradas al pasar
 
-Si no hay nada abierto en ninguno de los dos barridos, decilo en una línea y pasá al Step 2.
+Si no hay nada abierto en ninguno de los tres barridos, decilo en una línea y pasá al Step 2.
 
-Lo que el operador decida guardar entra en los archivos del Step 2. Lo que decida diferir va al handoff de mañana.
+Lo que el operador decida guardar entra en los archivos del Step 2.
 
 ---
 
@@ -125,7 +146,7 @@ Agregá una sección `## Session Log` con:
 
 **Agregado esta sesión** — cada tarea, decisión o idea creada. Para cada una: prioridad (`critical` / `high` / `medium` / `low`) y una marca: **[strategic]** o **[reactive]**.
 
-**Hilos abiertos** — lo que el Step 1 decidió diferir, para que el handoff de mañana lo levante.
+**Hilos abiertos** — el destino que el Step 1 le dio a cada hilo de `C`, no sólo lo diferido. Los que se convirtieron en issue van con su número y no vuelven a esta lista; los que quedaron para mañana van sin enlace, para que el handoff los levante.
 
 **Impulse check** — una línea: ¿la sesión fue mayormente estratégica o reactiva? Si dominó lo reactivo, decilo sin rodeos.
 
@@ -193,6 +214,8 @@ Publicado:
 ## Step 5 — Resumen de la sesión
 
 3–6 viñetas sobre acciones tomadas e hilos que quedan abiertos. Resultados, no proceso.
+
+Si el `1b` encontró trabajo a medias que el bloque `C` no tenía, decilo acá en una línea con el número: es la señal de que los hilos no se mantuvieron durante la sesión.
 
 ```
 ## Session summary
