@@ -32,7 +32,7 @@ Un plugin de Claude Code puede empaquetar skills, comandos, agentes y **hooks**,
 instala con versión, actualización y alcance por proyecto o por usuario. El precedente es
 de Anthropic: `explanatory-output-style` y `learning-output-style` son plugins oficiales
 cuyo contenido entero es un hook de `SessionStart` que inyecta un estilo de respuesta —
-existen porque los output styles quedaron deprecados y el hook es el mecanismo vigente.
+cada uno se describe a sí mismo como imitación de un output style que se dejó de shipear. El mecanismo de output styles sigue existiendo —`outputStyle` en `settings.json`, y Claude Code trae los suyos— pero Anthropic empaquetó éstos como plugin con hook, que es el precedente que importa acá: es la forma de distribuir un estilo propio.
 
 Es exactamente la forma de las 255 líneas. No hacía falta inventar un mecanismo: hacía
 falta darse cuenta de que el que ya se estaba usando era distribuible.
