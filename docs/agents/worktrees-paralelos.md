@@ -4,9 +4,10 @@ capa: operacion
 descripcion: Aislar agentes que trabajan en ramas distintas del mismo repo con git worktree.
 last-updated: 2026-09-04
 artifacts:
-  - url: https://claude.ai/code/artifact/e07b050f-78c1-4cd9-9efe-964e66e73485
-    entrega: Modelo mental de git worktree para agentes en paralelo, y los cuatro recursos compartidos que sobreviven al aislamiento
-    estado: pendiente
+  - url: null
+    entrega: Modelo mental de git worktree para agentes en paralelo, y los recursos compartidos que sobreviven al aislamiento
+    estado: fuente-solo
+    nota: publicado desde otra cuenta; la URL dejó de resolver. El fuente vive en docs/agents/artifacts/worktrees.html
     fecha: 2026-09-04
 ---
 
@@ -50,8 +51,20 @@ Un container aísla el sistema operativo, no git: dos containers montando el mis
 
 ## Estado en newhaze-webapp
 
-Provisionado el 2026-09-04: `.env.local` symlinkeado y `node_modules` instalado en los tres worktrees, `.worktree-port` en 3000/3001/3002.
+Cerrado el 2026-09-04:
 
-El `playwright.config.ts` que lee ese archivo está en la PR [#239](https://github.com/GuidoAmici/newhaze-webapp/pull/239) contra `stg`, con CI verde y sin mergear. **Hasta que entre, las tres ramas siguen resolviendo `3000` fijo.** El `.gitignore` que cubre `.worktree-port` viaja en la misma PR, así que por ahora el archivo figura untracked en los tres worktrees.
+- **Puerto por worktree** — [#239](https://github.com/GuidoAmici/newhaze-webapp/pull/239) en `stg`, propagado por cherry-pick a las ramas activas. Los cuatro worktrees resolvieron `:3000`–`:3003` verificado.
+- **Guard del stack local** — [#241](https://github.com/GuidoAmici/newhaze-webapp/pull/241) en `stg`. `scripts/supabase-guard.mjs`, enganchado en `db:types`, `db:types:check` y `test:e2e:local`.
+- **Provisión manual** — `.env.local` symlinkeado y `node_modules` instalado en cada worktree.
 
-Lo que se hizo a mano ese día es lo que `worktree.py provision` hace ahora en un comando — salvo `playwright.config.ts` leyendo `.worktree-port`, que es config del repo y viaja por merge como cualquier commit.
+El merge completo de `stg` hacia las ramas de feature chocaba con trabajo en vuelo de esos agentes, así que viajó sólo el commit del puerto. Es el patrón a repetir: propagar el fix, no la base entera.
+
+## Una instancia de base de datos por rama
+
+El guard detecta la colisión pero no la evita. Aislar de verdad pide un stack por worktree, y eso **sí es posible**: el CLI soporta instancias paralelas con distinto `project_id` y puertos, seleccionables con `supabase start --workdir`. La prueba local es que ya conviven los stacks de `newhaze-webapp` y `afin-website`.
+
+El límite es la RAM. Medido en esta máquina: **~1,7 GiB y 11 contenedores por stack**. El host tiene 32 GB pero `.wslconfig` capa WSL2 en 10 GB, así que hoy entran uno o dos. Subir ese tope es el desbloqueo más barato.
+
+Para que las instancias no se acumulen, Claude Code expone hooks **`WorktreeCreate` / `WorktreeRemove`** en `.claude/settings.json`: el primero provisiona (env, deps, puertos determinísticos), el segundo limpia al cerrar el worktree. `WorktreeRemove` es fire-and-forget — no puede bloquear el cierre. Atención al [issue #37611](https://github.com/anthropics/claude-code/issues/37611): definir `WorktreeCreate` desactiva el prompt de limpieza al salir de la sesión.
+
+**El Playwright MCP de Docker no resuelve esto.** Es browser automation para que un agente maneje un navegador paso a paso; no aísla bases de datos ni corre la suite del repo. Son problemas distintos.

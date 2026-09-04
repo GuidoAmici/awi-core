@@ -222,29 +222,35 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <tr>
           <td class="mono">newhaze-webapp</td>
           <td class="mono">stg</td>
-          <td><span class="tag warn">3000 · sin el fix</span></td>
+          <td><span class="tag ok">3000</span></td>
           <td><span class="tag ok">propio</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
         <tr>
           <td class="mono">.claude/worktrees/issue-194</td>
           <td class="mono">docs/194-organizaciones-fantasma</td>
-          <td><span class="tag warn">3001 · sin el fix</span></td>
+          <td><span class="tag ok">3001</span></td>
           <td><span class="tag ok">symlink</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
         <tr>
           <td class="mono">.claude/worktrees/pedidos-b2b-whatsapp</td>
           <td class="mono">feat/pedidos-b2b-whatsapp</td>
-          <td><span class="tag warn">3002 · sin el fix</span></td>
+          <td><span class="tag ok">3002</span></td>
+          <td><span class="tag ok">symlink</span></td>
+          <td><span class="tag ok">sí</span></td>
+        </tr>
+        <tr>
+          <td class="mono">.claude/worktrees/guard-supabase</td>
+          <td class="mono">feat/guard-supabase-local</td>
+          <td><span class="tag ok">3003</span></td>
           <td><span class="tag ok">symlink</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
       </tbody>
     </table>
   </div>
-  <p style="font-size:.93rem;color:var(--muted);margin:0">El <code>.worktree-port</code> de los tres ya tiene su número, pero el <code>playwright.config.ts</code> que lo lee viaja en la <a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">PR&nbsp;#239</a> — abierta contra <code class="mono">stg</code>, CI verde, sin mergear. Hasta que entre, <strong>las tres ramas siguen resolviendo <code>3000</code> fijo</strong> y la colisión sigue viva.</p>
-  <p style="font-size:.93rem;color:var(--muted);margin:0">Efecto lateral mientras tanto: el <code>.gitignore</code> que cubre <code>.worktree-port</code> viaja en esa misma PR, así que hoy el archivo aparece <strong>untracked</strong> en los tres worktrees y un <code>git add -A</code> distraído lo commitearía — justamente el archivo que nunca debe compartirse.</p>
+  <p style="font-size:.93rem;color:var(--muted);margin:0">Resuelto el 2026-09-04. La <a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">PR&nbsp;#239</a> entró a <code class="mono">stg</code> y el fix se propagó por cherry-pick a las otras ramas — el merge completo de <code class="mono">stg</code> chocaba con trabajo en vuelo de esos agentes, así que viajó sólo el commit del puerto. Los cuatro worktrees resuelven puertos distintos y <code>.worktree-port</code> está ignorado en las cuatro ramas.</p>
 </section>
 
 <section class="col">
@@ -559,6 +565,56 @@ ln -sfn ../../../.env.local .claude/worktrees/&lt;wt&gt;/.env.local
 
 <section class="col">
   <div class="sec-head">
+    <p class="eyebrow">El recurso que queda</p>
+    <h2>¿Una base de datos por rama?</h2>
+  </div>
+  <p>Se puede, y el propio repo lo demuestra: los contenedores del stack se llaman <code class="mono">supabase_db_newhaze-webapp</code> — ese sufijo es el <code>project_id</code> de <code>config.toml</code>. En esta máquina ya convive un <code class="mono">supabase_db_afin-website</code>, así que dos stacks simultáneos no son una hipótesis. Y <code>config.toml</code> ya usa <code>env()</code> en varios campos, con lo cual parametrizar <code>project_id</code> y los puertos por worktree es mecánico.</p>
+  <p>El límite no es técnico, es de memoria. Los números de esta máquina:</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 210" role="img" aria-label="Con 9 GB de RAM total y 2 GB disponibles, y un stack de Supabase que consume 1,7 GB, entra un segundo stack muy justo y no entra un tercero.">
+      <rect class="dg-fill" x="30" y="40" width="560" height="34" rx="2"/>
+      <rect class="dg-acc-box" x="30" y="40" width="435" height="34" rx="2"/>
+      <text class="dg-t" x="46" y="62">en uso · 7 GiB</text>
+      <text class="dg-l" x="480" y="62">libre · 2 GiB</text>
+      <text class="dg-l" x="30" y="30">RAM DE LA MÁQUINA · 9 GiB (WSL2)</text>
+
+      <rect class="dg-ok-box" x="30" y="104" width="106" height="30" rx="2"/>
+      <text class="dg-s" x="44" y="124">stack 1</text>
+      <rect class="dg-warn-box" x="144" y="104" width="106" height="30" rx="2"/>
+      <text class="dg-s" x="158" y="124">stack 2</text>
+      <rect class="dg-box" x="258" y="104" width="106" height="30" rx="2" stroke-dasharray="5 4"/>
+      <text class="dg-s" x="272" y="124">stack 3</text>
+      <text class="dg-l" x="30" y="96">CADA STACK · 1,7 GiB · 11 CONTENEDORES</text>
+
+      <text class="dg-ok-t" x="30" y="160">1 entra</text>
+      <text class="dg-warn-t" x="144" y="160">2 muy justo</text>
+      <text class="dg-l" x="258" y="160">3 no entra</text>
+      <text class="dg-s" x="30" y="188">Con cuatro worktrees activos, un stack por rama no cierra en esta máquina.</text>
+    </svg>
+  </div>
+  <figcaption>El stack local no escala por worktree acá: son 11 contenedores y 1,7&nbsp;GiB cada uno, contra 2&nbsp;GiB libres. Un segundo stack entra raspando; el tercero y el cuarto, no.</figcaption>
+</figure>
+
+<div class="col">
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Camino</th><th>Aísla por rama</th><th>Costo</th></tr></thead>
+      <tbody>
+        <tr><td>Guard de colisión <span class="tag ok">aplicado</span></td><td><span class="tag warn">no — detecta, no aísla</span></td><td>cero</td></tr>
+        <tr><td><code>project_id</code> + puertos por <code>env()</code></td><td><span class="tag ok">sí, hasta 2</span></td><td>1,7 GiB por rama</td></tr>
+        <tr><td>Supabase Branching (remoto)</td><td><span class="tag ok">sí, sin límite práctico</span></td><td>plan Pro; cero RAM local</td></tr>
+        <tr><td>Subir la RAM de WSL2 (<code>.wslconfig</code>)</td><td><span class="tag ok">habilita el camino 2</span></td><td>depende del host</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:.95rem;color:var(--muted);margin-top:14px">Por eso el guard entró primero: es lo único que cuesta cero y funciona con cualquiera de los otros caminos puesto encima. No reemplaza al aislamiento — convierte un resultado silenciosamente equivocado en un error explícito, que es la mitad barata del problema.</p>
+</div>
+
+<section class="col">
+  <div class="sec-head">
     <p class="eyebrow">Operación</p>
     <h2>Las reglas de la casa</h2>
   </div>
@@ -575,7 +631,7 @@ ln -sfn ../../../.env.local .claude/worktrees/&lt;wt&gt;/.env.local
   </div>
   <div class="rule">
     <h3>Los recursos de máquina siguen siendo uno</h3>
-    <p>El stack local de Supabase es único: dos agentes migrando en paralelo se pisan, worktrees o no. Ese trabajo se serializa o se mueve a branches de Supabase.</p>
+    <p>El stack local de Supabase es único por máquina. El guard corta cuando otro worktree lo tiene tomado; aislarlo de verdad pide un stack por rama, y eso lo limita la RAM.</p>
   </div>
   <div class="rule">
     <h3>Un cambio de config no viaja solo</h3>
@@ -608,8 +664,8 @@ git worktree prune</code></pre>
     <table>
       <tr><th>Qué entrega</th><td>Modelo mental de <code>git worktree</code> para agentes en paralelo, y los cuatro recursos compartidos que sobreviven al aislamiento</td></tr>
       <tr><th>Archivo destino</th><td><code>docs/agents/worktrees-paralelos.md</code> · <code>GuidoAmici/awi-core</code></td></tr>
-      <tr><th>Estado</th><td><strong>pendiente</strong></td></tr>
-      <tr><th>Seguimiento</th><td><a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">newhaze-webapp#239</a> — el fix de puerto, en revisión</td></tr>
+      <tr><th>Estado</th><td><strong>integrado</strong> — puerto por worktree en las cuatro ramas; guard de Supabase en revisión</td></tr>
+      <tr><th>Seguimiento</th><td><a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">#239</a> mergeado · <a href="https://github.com/GuidoAmici/newhaze-webapp/pull/241">#241</a> guard de Supabase, abierto</td></tr>
       <tr><th>Fuente versionado</th><td><code>docs/agents/artifacts/worktrees.html</code></td></tr>
       <tr><th>Design System</th><td>ninguno vigente para esta org</td></tr>
     </table>
