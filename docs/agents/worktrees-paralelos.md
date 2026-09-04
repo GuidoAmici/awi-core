@@ -80,6 +80,6 @@ Dos criterios, conservadores a propósito (parar un stack en uso es peor que dej
 | huérfano | el `project_id` no corresponde a ningún `supabase/config.toml` montado en AWI | se baja |
 | inactivo | el proyecto existe, ningún checkout suyo tiene lease vigente, y lleva +8 h arriba | se baja |
 
-Todo lo demás se deja en paz. Sin Docker corriendo el hook no hace nada y sale con 0: un barrido que rompe el arranque de la sesión es peor que un stack colgado.
+Todo lo demás se deja en paz. Sin Docker corriendo el hook no hace nada y sale con 0: un barrido que rompe el arranque de la sesión es peor que un stack colgado. Para levantarlo cuando hace falta, `bash .claude/hooks/docker-up.sh` — lanza Docker Desktop por PowerShell y espera al daemon, no al proceso.
 
 **El Playwright MCP de Docker no resuelve esto.** Es browser automation para que un agente maneje un navegador paso a paso; no aísla bases de datos ni corre la suite del repo. Son problemas distintos.

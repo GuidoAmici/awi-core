@@ -352,9 +352,23 @@ Si sabés que la otra sesión terminó, `worktree.py release <codebase>` suelta 
 
 ### Lo que el worktree no aísla
 
-El aislamiento es del checkout, no de la máquina. Cuatro recursos siguen compartidos y están en el doc; dos los resuelve el script (archivos ignorados y puerto), uno se propaga por merge como cualquier commit (config versionada) y el cuarto **no tiene solución automática**: el stack local de base de datos. Si dos worktrees corren migraciones contra el mismo stack, se pisan — serializalas.
+El aislamiento es del checkout, no de la máquina. Cuatro recursos siguen compartidos y están en el doc; dos los resuelve el script (archivos ignorados y puerto), uno se propaga por merge como cualquier commit (config versionada) y el cuarto —el stack local de base de datos— **se detecta pero no se aísla**: hay un stack por máquina, no uno por worktree. El guard del codebase corta cuando otro worktree lo tiene tomado, y `.claude/hooks/supabase-sweep.py` baja al arrancar los stacks que ya no le sirven a nadie. Aislarlos de verdad pide un stack por rama; hasta entonces, las migraciones se serializan.
 
 De los cuatro, el del puerto es el único que no falla ruidosamente: `reuseExistingServer` hace que testees la app de otra rama y reportes sobre el código equivocado.
+
+## Docker apagado lo levantás vos
+
+Docker Desktop corre en Windows y WSL2 le habla por un named pipe. Cuando está cerrado —después de un `wsl --shutdown`, al reiniciar la máquina— todo lo que dependa de contenedores falla con `failed to connect to the docker API`: el stack local de Supabase, los tests que lo usan, el barrido de stacks.
+
+**Eso no es un pedido para el operador.** Si necesitás Docker y está caído, levantalo:
+
+```bash
+bash .claude/hooks/docker-up.sh
+```
+
+Si ya estaba corriendo sale enseguida sin tocar nada. Si no, lanza Docker Desktop por `powershell.exe` y espera al **daemon**, no al proceso: la app abre mucho antes de que el engine acepte conexiones, y ahí está la diferencia entre creer que arrancó y que arrancó. `docker-up.sh status` responde sin levantar nada.
+
+Sale con 1 sólo si no arrancó dentro del timeout, que suele significar algo que sí necesita al operador: login vencido o una actualización pendiente. Recién ahí se lo pedís, diciéndole qué falló.
 
 ## Contexto compartido
 
