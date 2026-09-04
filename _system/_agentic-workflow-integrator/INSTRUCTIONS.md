@@ -328,6 +328,34 @@ Traé enteros los que están en juego y los que toca la tarea. Del resto alcanza
 
 Esto decide qué entra en la conversación, no relaja nada de la sección anterior: cualquier identificador que menciones, del backlog o no, se lee antes de nombrarlo.
 
+## Tocar código es pedir un worktree
+
+Un working tree tiene un solo `HEAD`. Dos sesiones sobre el mismo checkout no se estorban un poco: la de al lado te reescribe los archivos abajo de los pies, y **el modo de falla es silencioso** — seguís trabajando, commiteás sobre la base equivocada, y te enterás cuando el PR trae los commits de otra rama.
+
+Pasó el 2026-09-04 en `newhaze-webapp`, con dos sesiones el mismo día. Una estaba entregando un fix; la otra hizo `git checkout` en el medio. El commit terminó colgando de la rama ajena y hubo que rehacer la entrega entera sobre la base correcta. El doc que explica todo esto —[`docs/agents/worktrees-paralelos.md`](../../docs/agents/worktrees-paralelos.md)— ya existía ese mismo día, escrito unas horas antes. Documentarlo no alcanzó.
+
+**Antes de la primera rama o el primer commit en un codebase, pedí tu worktree:**
+
+```bash
+python3 .claude/skills/shared/scripts/worktree.py provision <codebase> <tu-rama>
+```
+
+Te devuelve un directorio propio bajo `.claude/worktrees/`, con los archivos ignorados symlinkeados (`.env.local`) y un puerto de dev server que no choca con el de nadie. `EnterWorktree` hace lo mismo del lado del harness; `isolation: "worktree"` se lo da a un subagente.
+
+El checkout principal queda en su rama de integración y **no es de nadie**. `worktree.py list` muestra quién tiene qué, y `status` si alguien lo tomó.
+
+### Esto no se cumple por acordarse
+
+`worktree-guard.py` bloquea un `git checkout` de rama sobre un checkout principal que otra sesión tiene tomado, con el comando de provisión en el mensaje. Dentro de un worktree no dice nada, y `git checkout -- <archivo>` tampoco lo despierta: sólo le importa `HEAD` moviéndose donde hay alguien más trabajando.
+
+Si sabés que la otra sesión terminó, `worktree.py release <codebase>` suelta el lease. Los leases vencen solos a las 8 horas: una sesión que se murió sin soltar no deja el checkout inutilizable.
+
+### Lo que el worktree no aísla
+
+El aislamiento es del checkout, no de la máquina. Cuatro recursos siguen compartidos y están en el doc; dos los resuelve el script (archivos ignorados y puerto), uno se propaga por merge como cualquier commit (config versionada) y el cuarto **no tiene solución automática**: el stack local de base de datos. Si dos worktrees corren migraciones contra el mismo stack, se pisan — serializalas.
+
+De los cuatro, el del puerto es el único que no falla ruidosamente: `reuseExistingServer` hace que testees la app de otra rama y reportes sobre el código equivocado.
+
 ## Contexto compartido
 
 Los repos de contexto —las orgs, sus codebases y el repo del propio operador— los editan **varias personas**. Traer y publicar los cambios es responsabilidad tuya, no del operador: la idea es que nadie tenga que saber git para trabajar acompañado.

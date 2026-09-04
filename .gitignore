@@ -46,5 +46,10 @@ supabase/
 # See ADR 0014.
 .claude/tmp/
 
+# Lock de sesión del scheduler: sessionId + pid de la sesión viva. Es estado de
+# esta máquina, como .claude/tmp/ — versionado, aparece borrado o modificado en
+# el `git status` de cualquier sesión y se cuela en commits ajenos.
+.claude/scheduled_tasks.lock
+
 # Test runner scratch
 test-results/
