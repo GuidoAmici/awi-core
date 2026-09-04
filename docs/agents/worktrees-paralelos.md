@@ -67,4 +67,19 @@ El límite es la RAM. Medido en esta máquina: **~1,7 GiB y 11 contenedores por 
 
 Para que las instancias no se acumulen, Claude Code expone hooks **`WorktreeCreate` / `WorktreeRemove`** en `.claude/settings.json`: el primero provisiona (env, deps, puertos determinísticos), el segundo limpia al cerrar el worktree. `WorktreeRemove` es fire-and-forget — no puede bloquear el cierre. Atención al [issue #37611](https://github.com/anthropics/claude-code/issues/37611): definir `WorktreeCreate` desactiva el prompt de limpieza al salir de la sesión.
 
+### Que no se acumulen
+
+El riesgo de un stack por worktree es el bloat: sesiones que mueren sin bajar el suyo van comiendo RAM hasta que no se puede levantar nada, y alguien tiene que ir a mirar contenedores a mano.
+
+`.claude/hooks/supabase-sweep.py` corre en `SessionStart` y reconcilia. **Barrido al arranque, no limpieza al cierre**: una sesión que se muere no ejecuta su propio cleanup, así que la limpieza no puede depender de que el cierre sea limpio — y los cierres sucios son justamente los que dejan basura.
+
+Dos criterios, conservadores a propósito (parar un stack en uso es peor que dejar uno de más):
+
+| Criterio | Qué mira | Acción |
+|---|---|---|
+| huérfano | el `project_id` no corresponde a ningún `supabase/config.toml` montado en AWI | se baja |
+| inactivo | el proyecto existe, ningún checkout suyo tiene lease vigente, y lleva +8 h arriba | se baja |
+
+Todo lo demás se deja en paz. Sin Docker corriendo el hook no hace nada y sale con 0: un barrido que rompe el arranque de la sesión es peor que un stack colgado.
+
 **El Playwright MCP de Docker no resuelve esto.** Es browser automation para que un agente maneje un navegador paso a paso; no aísla bases de datos ni corre la suite del repo. Son problemas distintos.
