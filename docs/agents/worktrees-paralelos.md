@@ -50,6 +50,8 @@ Un container aísla el sistema operativo, no git: dos containers montando el mis
 
 ## Estado en newhaze-webapp
 
-Provisionado el 2026-09-04: `.env.local` symlinkeado y `node_modules` instalado en los tres worktrees, `.worktree-port` en 3000/3001/3002, y `playwright.config.ts` leyendo ese archivo. El cambio de config vive por ahora sólo en la rama `stg`.
+Provisionado el 2026-09-04: `.env.local` symlinkeado y `node_modules` instalado en los tres worktrees, `.worktree-port` en 3000/3001/3002.
+
+El `playwright.config.ts` que lee ese archivo está en la PR [#239](https://github.com/GuidoAmici/newhaze-webapp/pull/239) contra `stg`, con CI verde y sin mergear. **Hasta que entre, las tres ramas siguen resolviendo `3000` fijo.** El `.gitignore` que cubre `.worktree-port` viaja en la misma PR, así que por ahora el archivo figura untracked en los tres worktrees.
 
 Lo que se hizo a mano ese día es lo que `worktree.py provision` hace ahora en un comando — salvo `playwright.config.ts` leyendo `.worktree-port`, que es config del repo y viaja por merge como cualquier commit.

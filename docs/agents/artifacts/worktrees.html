@@ -222,28 +222,29 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <tr>
           <td class="mono">newhaze-webapp</td>
           <td class="mono">stg</td>
-          <td><span class="tag ok">3000</span></td>
+          <td><span class="tag warn">3000 · sin el fix</span></td>
           <td><span class="tag ok">propio</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
         <tr>
           <td class="mono">.claude/worktrees/issue-194</td>
           <td class="mono">docs/194-organizaciones-fantasma</td>
-          <td><span class="tag warn">3001 · config viejo</span></td>
+          <td><span class="tag warn">3001 · sin el fix</span></td>
           <td><span class="tag ok">symlink</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
         <tr>
           <td class="mono">.claude/worktrees/pedidos-b2b-whatsapp</td>
           <td class="mono">feat/pedidos-b2b-whatsapp</td>
-          <td><span class="tag warn">3002 · config viejo</span></td>
+          <td><span class="tag warn">3002 · sin el fix</span></td>
           <td><span class="tag ok">symlink</span></td>
           <td><span class="tag ok">sí</span></td>
         </tr>
       </tbody>
     </table>
   </div>
-  <p style="font-size:.93rem;color:var(--muted);margin:0">El puerto por worktree ya está escrito en <code>.worktree-port</code> de los tres, pero el <code>playwright.config.ts</code> que lo lee vive sólo en la rama <code class="mono">stg</code>. Hasta que ese cambio llegue a las otras dos ramas, ellas siguen resolviendo <code>3000</code> fijo.</p>
+  <p style="font-size:.93rem;color:var(--muted);margin:0">El <code>.worktree-port</code> de los tres ya tiene su número, pero el <code>playwright.config.ts</code> que lo lee viaja en la <a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">PR&nbsp;#239</a> — abierta contra <code class="mono">stg</code>, CI verde, sin mergear. Hasta que entre, <strong>las tres ramas siguen resolviendo <code>3000</code> fijo</strong> y la colisión sigue viva.</p>
+  <p style="font-size:.93rem;color:var(--muted);margin:0">Efecto lateral mientras tanto: el <code>.gitignore</code> que cubre <code>.worktree-port</code> viaja en esa misma PR, así que hoy el archivo aparece <strong>untracked</strong> en los tres worktrees y un <code>git add -A</code> distraído lo commitearía — justamente el archivo que nunca debe compartirse.</p>
 </section>
 
 <section class="col">
@@ -608,7 +609,7 @@ git worktree prune</code></pre>
       <tr><th>Qué entrega</th><td>Modelo mental de <code>git worktree</code> para agentes en paralelo, y los cuatro recursos compartidos que sobreviven al aislamiento</td></tr>
       <tr><th>Archivo destino</th><td><code>docs/agents/worktrees-paralelos.md</code> · <code>GuidoAmici/awi-core</code></td></tr>
       <tr><th>Estado</th><td><strong>pendiente</strong></td></tr>
-      <tr><th>Issue padre</th><td>sin crear todavía</td></tr>
+      <tr><th>Seguimiento</th><td><a href="https://github.com/GuidoAmici/newhaze-webapp/pull/239">newhaze-webapp#239</a> — el fix de puerto, en revisión</td></tr>
       <tr><th>Fuente versionado</th><td><code>docs/agents/artifacts/worktrees.html</code></td></tr>
       <tr><th>Design System</th><td>ninguno vigente para esta org</td></tr>
     </table>
