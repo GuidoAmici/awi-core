@@ -40,7 +40,7 @@ Agenda folder for this client workspace.
 - planning/    — quarterly and annual goals
 - user-profile-inference/ — session observations
 
-All files use YAML frontmatter. See AWI INSTRUCTIONS.md for file formats.
+All files use YAML frontmatter. See AWI CLAUDE.md for file formats.
 """
 
 DOCUMENTATION_ABSTRACT = "Context files: writing style, business profile, documentation.\n"

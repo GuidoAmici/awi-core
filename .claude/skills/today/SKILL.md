@@ -34,7 +34,7 @@ Corré esto **antes de leer cualquier archivo de agenda o issue**, sin preguntar
 python3 .claude/skills/shared/scripts/context_sync.py pull
 ```
 
-El día se planifica sobre lo que hicieron los demás, no sobre la copia local de ayer. Si algún repo reporta `conflicto`, mostralo y seguí con el resto — la política completa está en la sección «Contexto compartido» de INSTRUCTIONS.md.
+El día se planifica sobre lo que hicieron los demás, no sobre la copia local de ayer. Si algún repo reporta `conflicto`, mostralo y seguí con el resto — la política completa está en [`docs/agents/contexto-compartido.md`](../../../docs/agents/contexto-compartido.md).
 
 No imprimas la salida cruda si todos los repos volvieron `al-día`: una línea alcanza (`Contexto al día.`). Si alguno trajo cambios, decí cuáles.
 

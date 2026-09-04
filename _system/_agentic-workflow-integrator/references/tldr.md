@@ -1,6 +1,6 @@
 # TLDR — la bajada a marca y copy
 
-Bajada de la sección [El TLDR va primero](../INSTRUCTIONS.md#el-tldr-va-primero) al texto que lee un consumidor: una landing, un packaging, una propuesta comercial, un posteo, un mail de venta.
+Bajada de la sección [El TLDR va primero](../../../plugins/answerable/rules/answerable.md#el-tldr-va-primero) al texto que lee un consumidor: una landing, un packaging, una propuesta comercial, un posteo, un mail de venta.
 
 Concepto tomado de Alex Hormozi. Formulación original:
 

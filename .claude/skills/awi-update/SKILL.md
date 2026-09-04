@@ -82,5 +82,5 @@ El script reporta cuántos commits de `dev` no llegaron a `main`. Puede ser norm
 
 ## Qué no hace esta skill
 
-- **No sincroniza los repos de contexto** (workspaces de org y sus codebases). Eso es otro ciclo, coordinado desde `INSTRUCTIONS.md`: pull al abrir la sesión, commit y push sugeridos al cerrar.
+- **No sincroniza los repos de contexto** (workspaces de org y sus codebases). Eso es otro ciclo, coordinado desde `docs/agents/contexto-compartido.md`: pull al abrir la sesión, commit y push sugeridos al cerrar.
 - **No publica nada.** No pushea, no commitea, no toca `dev`.

@@ -1,0 +1,17 @@
+{
+  "name": "awi",
+  "owner": {
+    "name": "Guido Amici",
+    "url": "https://github.com/GuidoAmici"
+  },
+  "description": "Plugins de AWI para Claude Code.",
+  "plugins": [
+    {
+      "name": "answerable",
+      "source": "./plugins/answerable",
+      "description": "Estructura toda respuesta para que se conteste señalando una etiqueta: cinco bloques con dirección, TLDR primero, ningún identificador desnudo y comandos pegables.",
+      "category": "productivity",
+      "keywords": ["output-style", "response-format", "communication", "reporting"]
+    }
+  ]
+}

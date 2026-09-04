@@ -17,7 +17,7 @@ There is **one canonical repo**: `awi-core`, and it is public. An AWI instance i
 | Skills (`.claude/skills/`) | `_data/` — every user profile and org workspace |
 | Hooks (`.claude/hooks/`) | `user-submodules.json` — the manifest, private per operator |
 | System docs (`_system/`) | Anything naming a client or containing their data |
-| Root docs (`CLAUDE.md`, `INSTRUCTIONS.md`, ADRs) | |
+| Root docs (`CLAUDE.md`, ADRs) | |
 
 **Rule of thumb:** if the file would need editing before another operator could use it, it is private.
 
@@ -48,7 +48,7 @@ Each org workspace and each user profile is its **own git repo**, cloned inside 
 | `_data/users/<github-id>/` | the operator's `my-awi-user` |
 | `_data/organizations/<name>/` | that org's `<name>-workspace` |
 
-They are declared in `_data/users/<github-id>/user-submodules.json` and operated by the shared-context cycle (`context_sync.py`, driven from INSTRUCTIONS.md). Because awi-core versions no gitlink for them, they are ordinary nested repos as far as it is concerned.
+They are declared in `_data/users/<github-id>/user-submodules.json` and operated by the shared-context cycle (`context_sync.py`, driven from CLAUDE.md). Because awi-core versions no gitlink for them, they are ordinary nested repos as far as it is concerned.
 
 ---
 

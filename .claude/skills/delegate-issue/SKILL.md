@@ -17,7 +17,7 @@ Sin preguntar, antes de mirar el tracker:
 python3 .claude/skills/shared/scripts/context_sync.py pull
 ```
 
-Un agente se despacha contra el estado del repo, no contra la copia local: delegar sobre contexto viejo es cómo se produce trabajo que pisa el de otra persona. Una línea de reporte alcanza si todo vuelve `al-día`. Ver «Contexto compartido» en INSTRUCTIONS.md.
+Un agente se despacha contra el estado del repo, no contra la copia local: delegar sobre contexto viejo es cómo se produce trabajo que pisa el de otra persona. Una línea de reporte alcanza si todo vuelve `al-día`. Ver [`docs/agents/contexto-compartido.md`](../../../docs/agents/contexto-compartido.md).
 
 ## Step 1: Scan
 

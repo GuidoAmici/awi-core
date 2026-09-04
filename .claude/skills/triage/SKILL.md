@@ -47,7 +47,7 @@ Antes de la primera consulta al tracker en cada invocación, sin preguntar:
 python3 .claude/skills/shared/scripts/context_sync.py pull
 ```
 
-Triar es decidir sobre el estado actual del trabajo, y las notas de triage previas viven en los repos de contexto. Una línea de reporte alcanza si todo vuelve `al-día`. Ver «Contexto compartido» en INSTRUCTIONS.md.
+Triar es decidir sobre el estado actual del trabajo, y las notas de triage previas viven en los repos de contexto. Una línea de reporte alcanza si todo vuelve `al-día`. Ver [`docs/agents/contexto-compartido.md`](../../../docs/agents/contexto-compartido.md).
 
 ## Invocation
 

@@ -27,17 +27,30 @@ Use /awi-org <name> to add an organization.
 """
 
 CLAUDE_MD = """\
-# Agentic Workflow Integrator (AWI) — Claude Code
+# AWI — Agentic Workflow Integrator
 
-**All vault rules, structure, taxonomy, and commands are in [INSTRUCTIONS.md](_system/agentic-workflow-integrator/INSTRUCTIONS.md).** Read it before any vault operation.
+Este archivo es la fuente de verdad de las reglas de esta instancia. La forma de la
+respuesta la trae el plugin `answerable`, instalado aparte.
 
-> **Do NOT modify this file for vault rules.** Update `_system/_agentic-workflow-integrator/INSTRUCTIONS.md` instead — it is the single source of truth shared across all AI agents.
+## Siempre
 
-## Claude Code-specific
+- **La fecha se pregunta, no se supone:** `bash .claude/hooks/get-datetime.sh full`.
+- **Los comandos que ejecutás vos llevan rutas relativas** desde la raíz del proyecto.
+- **Commiteá en los cortes lógicos de la tarea**, en Conventional Commits con scope.
+  No hay hook de auto-commit: no dejes trabajo terminado sin commitear, ni commitees
+  después de cada `Write`.
 
-- No auto-commit hook: commit your own work at logical task boundaries using Conventional Commits with scope (not after every Write/Edit). Don't leave finished work uncommitted.
-- Skills available: `/awi-introduction`, `/awi-initialize`, `/awi-org`, `/awi-user-create`, `/awi-user-login`, `/today`, `/week`, `/new`, `/history`, `/delegate-issue`.
-- Get current date: `bash .claude/hooks/get-datetime.sh full`.
+## Estructura
+
+Cada `_data/organizations/<name>/` y cada `_data/users/<github-id>/` es un repo de git
+aparte, declarado en `user-submodules.json` y materializado por `git clone`. Nada en AWI
+es un submódulo. `_data/` está en `.gitignore` por corrección: sin eso un `git add -A`
+en la raíz se traga los hijos como repos embebidos.
+
+## Skills
+
+`/awi-introduction`, `/awi-initialize`, `/awi-org`, `/awi-user`, `/today`, `/week`,
+`/new`, `/history`, `/triage`, `/delegate-issue`, `/wrap-session`.
 """
 
 GITIGNORE = """\
@@ -54,49 +67,12 @@ GITIGNORE = """\
 *.tmp
 """
 
-INSTRUCTIONS_STUB = """\
-# Agentic Workflow Integrator (AWI)
-
-A system factory. AWI is the engine — it holds the operator's `_system/` (framework docs, users) and scaffolds `_clients/<name>/` entries for personal and company contexts. Each client follows the same `agenda/` + `documentation/` + `codebase/` structure.
-
-Always run `bash .claude/hooks/get-datetime.sh full` to get the current date and time.
-
-## Structure
-
-```
-awi/
-  .claude/                     - Claude Code config: skills, hooks, reference, settings
-  _system/                     - AWI framework (public) + vault users (private)
-    agentic-workflow-integrator/
-      INSTRUCTIONS.md          - This file — single source of truth
-    users/                     - Vault user profiles (<username>.md)
-    chief-of-staff/
-      references/
-        file-formats.md        - Full file format templates
-  _clients/                    - One submodule per company/person
-    <name>/
-      agenda/                  - Tasks, projects, people, daily, outputs, etc.
-      documentation/           - Writing style, business profile, wiki
-      codebase/                - App repos (submodules)
-```
-
-Each `_clients/<name>/` is a **separate git repo** registered as a submodule of AWI.
-
-Use `/awi-org <name>` to scaffold a new org workspace and register it in the manifest.
-"""
-
-
 def init_awi(path: Path = Path(".")):
     path = path.resolve()
 
     # Create _system dirs
     for d in SYSTEM_DIRS:
         (path / d).mkdir(parents=True, exist_ok=True)
-
-    # Write INSTRUCTIONS.md stub
-    instructions_path = path / "_system" / "agentic-workflow-integrator" / "INSTRUCTIONS.md"
-    if not instructions_path.exists():
-        instructions_path.write_text(INSTRUCTIONS_STUB)
 
     # Create _clients/
     clients_path = path / "_clients"

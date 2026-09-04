@@ -10,7 +10,7 @@ repo a mitad de una operación que hay que sacar con comandos de git.
 
 Este script es sólo la mecánica. El juicio —cuándo traer, cuándo sugerir
 publicar, cómo se llama cada commit, si hay que preguntar— vive en
-INSTRUCTIONS.md. La razón es empírica: `log_command` se invoca por instrucción en
+CLAUDE.md. La razón es empírica: `log_command` se invoca por instrucción en
 22 archivos SKILL.md y el registro subcuenta, así que sabemos que las
 instrucciones se cumplen a veces. Para un log alcanza; para traer el contexto de
 otro operador, no. Ver ADR 0014 y 0015.

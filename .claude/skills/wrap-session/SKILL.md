@@ -18,7 +18,7 @@ Steps 2–3 son automáticos: sin prompts, sin confirmaciones. Step 1 usa `AskUs
 
 ## Step 1 — Gate de hilos abiertos
 
-**El bloque `C` de la última respuesta es la lista, no un punto de partida.** La política de [los cinco bloques](../../../_system/_agentic-workflow-integrator/INSTRUCTIONS.md) hace que cada turno mantenga los hilos abiertos de la sesión entera, así que acá no se reconstruye nada: se levanta esa lista y se le da destino a cada ítem. El barrido de la conversación pasa a ser control, no fuente.
+**El bloque `C` de la última respuesta es la lista, no un punto de partida.** La política de [los cinco bloques](../../../plugins/answerable/rules/answerable.md) hace que cada turno mantenga los hilos abiertos de la sesión entera, así que acá no se reconstruye nada: se levanta esa lista y se le da destino a cada ítem. El barrido de la conversación pasa a ser control, no fuente.
 
 Para cada hilo, **una llamada a `AskUserQuestion` por vez**, esperando respuesta antes de la siguiente. No vuelques una lista en markdown ni pidas texto libre.
 
@@ -44,10 +44,10 @@ Tomá el bloque `Hilos abiertos` de la última respuesta del agente principal. P
 Recorré la sesión buscando lo que quedó a mitad de camino y no está en la lista:
 
 - Tareas empezadas y nunca cerradas
-- Issues que el trabajo de hoy resolvió, invalidó o hizo obsoletos, y que siguen abiertos sin comentario (la política está en «Issue hygiene» de INSTRUCTIONS.md — comentar y **sugerir** la disposición, no cerrar solo)
+- Issues que el trabajo de hoy resolvió, invalidó o hizo obsoletos, y que siguen abiertos sin comentario (la política está en «Closing the loop on issues» de `docs/agents/issue-tracker.md` — comentar y **sugerir** la disposición, no cerrar solo)
 - Decisiones tomadas en la conversación que ameritan un ADR y no lo tienen
 - Cambios de código sin commitear que no son contexto — el Step 3 publica los repos de contexto, no los repos de trabajo del harness
-- **Commits sin pushear, PRs esperando tests/CI, o PRs ya testeados y aprobados sin mergear.** Para código, terminado es "en el remoto compartido" — ver «Los cinco bloques son un solo eje» en INSTRUCTIONS.md. Corré `git status` y, si aplica, `gh pr status` / `gh pr checks` en los repos que la sesión tocó; no asumas que un commit local llegó a destino.
+- **Commits sin pushear, PRs esperando tests/CI, o PRs ya testeados y aprobados sin mergear.** Para código, terminado es "en el remoto compartido" — ver «Los cinco bloques son un solo eje» en [`answerable`](../../../plugins/answerable/rules/answerable.md). Corré `git status` y, si aplica, `gh pr status` / `gh pr checks` en los repos que la sesión tocó; no asumas que un commit local llegó a destino.
 
 Lo que aparezca acá y no estuviera en `C` se trata igual: misma pregunta, mismas cuatro opciones.
 

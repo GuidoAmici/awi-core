@@ -30,7 +30,7 @@ python3 .claude/skills/shared/scripts/worktree.py release <codebase>
 
 `provision` crea el worktree, symlinkea los archivos ignorados que la app necesita (`.env.local` y hermanos), le asigna un puerto libre en `.worktree-port` y avisa si el repo trae stack de base de datos.
 
-`worktree-guard.py` (PreToolUse) bloquea un `git checkout` de rama sobre un checkout principal que otra sesión tiene tomado. El lease vive en `.claude/tmp/checkout-leases.json`, vence a las 8 horas y no se versiona. La regla operativa está en INSTRUCTIONS.md, que se carga en cada sesión.
+`worktree-guard.py` (PreToolUse) bloquea un `git checkout` de rama sobre un checkout principal que otra sesión tiene tomado. El lease vive en `.claude/tmp/checkout-leases.json`, vence a las 8 horas y no se versiona. La regla operativa está en CLAUDE.md, que se carga en cada sesión.
 
 ## Lo que el worktree NO aísla
 

@@ -54,7 +54,7 @@ Agenda de este workspace.
 - planning/    — objetivos trimestrales y anuales
 - user-profile-inference/ — observaciones de sesión
 
-Todos los archivos usan frontmatter YAML. Ver INSTRUCTIONS.md en la raíz de AWI.
+Todos los archivos usan frontmatter YAML. Ver CLAUDE.md en la raíz de AWI.
 """
 
 DOCUMENTATION_ABSTRACT = "Contexto: estilo de escritura, perfil de la organización, wiki.\n"

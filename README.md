@@ -285,7 +285,7 @@ awi/
 │
 ├── _system/                            # The harness — maintained by awi-core
 │   ├── _agentic-workflow-integrator/
-│   │   └── INSTRUCTIONS.md             # Canonical source of truth for all agents
+│   │   └── references/                 # Commit format, git audit, TLDR
 │   ├── chief-of-staff/                 # Operator references
 │   └── agency-agents/                  # Agent personas (upstream clone, read-only)
 │

@@ -1,0 +1,19 @@
+{
+  "name": "answerable",
+  "version": "0.1.0",
+  "description": "Estructura toda respuesta del agente para que se pueda contestar señalando una etiqueta, en vez de reescribirla: cinco bloques con dirección, TLDR primero, ningún identificador desnudo y comandos que se pegan y corren.",
+  "author": {
+    "name": "Guido Amici",
+    "url": "https://github.com/GuidoAmici"
+  },
+  "homepage": "https://github.com/GuidoAmici/awi-core",
+  "repository": "https://github.com/GuidoAmici/awi-core",
+  "license": "MIT",
+  "keywords": [
+    "output-style",
+    "response-format",
+    "communication",
+    "reporting",
+    "productivity"
+  ]
+}
