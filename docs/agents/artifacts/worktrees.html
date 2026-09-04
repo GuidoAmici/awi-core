@@ -1,0 +1,618 @@
+<title>Un repo, varios agentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+:root{
+  --ink:#16242B;
+  --paper:#F1F4F2;
+  --surface:#FFFFFF;
+  --line:#C7D3D1;
+  --line-soft:#DFE7E5;
+  --muted:#5F7379;
+  --accent:#2E6E67;
+  --accent-soft:#DCEAE7;
+  --warn:#B0522C;
+  --warn-soft:#F6E3D9;
+  --ok:#3F7A4F;
+  --ok-soft:#DFEDE2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#DCE6E4;
+    --paper:#0D181D;
+    --surface:#15242B;
+    --line:#2C4048;
+    --line-soft:#1E313A;
+    --muted:#8DA2A7;
+    --accent:#63B7AA;
+    --accent-soft:#173730;
+    --warn:#E29066;
+    --warn-soft:#3A2318;
+    --ok:#77B588;
+    --ok-soft:#17301D;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#DCE6E4;
+  --paper:#0D181D;
+  --surface:#15242B;
+  --line:#2C4048;
+  --line-soft:#1E313A;
+  --muted:#8DA2A7;
+  --accent:#63B7AA;
+  --accent-soft:#173730;
+  --warn:#E29066;
+  --warn-soft:#3A2318;
+  --ok:#77B588;
+  --ok-soft:#17301D;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Newsreader",Georgia,"Times New Roman",serif;
+  font-size:18px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:1040px;
+  margin:0 auto;
+  padding:clamp(28px,5vw,72px) clamp(18px,4vw,40px) 96px;
+  display:flex;
+  flex-direction:column;
+  gap:56px;
+}
+.col{max-width:68ch}
+
+h1,h2,h3,.eyebrow,th,.tag,.metric b{font-family:"Chivo",system-ui,-apple-system,sans-serif}
+h1{
+  font-size:clamp(2.3rem,6vw,3.6rem);
+  font-weight:800;
+  line-height:1.02;
+  letter-spacing:-.025em;
+  margin:0;
+  text-wrap:balance;
+}
+h2{
+  font-size:clamp(1.35rem,3vw,1.75rem);
+  font-weight:700;
+  letter-spacing:-.015em;
+  line-height:1.15;
+  margin:0;
+  text-wrap:balance;
+}
+h3{font-size:1.05rem;font-weight:600;letter-spacing:-.005em;margin:0}
+p{margin:0}
+.eyebrow{
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0;
+}
+.dek{font-size:clamp(1.05rem,2.2vw,1.3rem);color:var(--muted);margin:0;max-width:60ch}
+code,kbd,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+code{background:var(--line-soft);padding:.12em .38em;border-radius:3px}
+
+header.top{display:flex;flex-direction:column;gap:18px;border-bottom:2px solid var(--ink);padding-bottom:30px}
+section{display:flex;flex-direction:column;gap:20px}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+
+/* Panel de estado — capa de escaneo */
+.status{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:4px solid var(--accent);
+  padding:clamp(18px,3vw,26px);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.table-scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-family:"Chivo",system-ui,sans-serif;font-size:.85rem}
+th{
+  text-align:left;
+  font-weight:600;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:0 14px 8px 0;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+td{padding:11px 14px 11px 0;border-bottom:1px solid var(--line-soft);vertical-align:top;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.tag{
+  display:inline-block;
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:.05em;
+  padding:.2em .55em;
+  border-radius:3px;
+  white-space:nowrap;
+}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+
+/* Figuras */
+figure{margin:0;display:flex;flex-direction:column;gap:12px}
+.fig-box{
+  background:var(--surface);
+  border:1px solid var(--line);
+  padding:clamp(16px,3vw,30px);
+  overflow-x:auto;
+}
+svg.diagram{display:block;width:100%;max-width:100%;height:auto;color:var(--ink)}
+figcaption{font-size:.92rem;color:var(--muted);max-width:64ch;line-height:1.5}
+.dg-box{fill:var(--surface);stroke:currentColor;stroke-width:1.5}
+.dg-fill{fill:var(--line-soft);stroke:currentColor;stroke-width:1.5}
+.dg-t{fill:currentColor;font-family:"Chivo",system-ui,sans-serif;font-size:13px;font-weight:600}
+.dg-s{fill:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.dg-l{fill:var(--muted);font-family:"Chivo",system-ui,sans-serif;font-size:11px;letter-spacing:.04em}
+.dg-line{stroke:currentColor;stroke-width:1.5;fill:none}
+.dg-dash{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+.dg-warn{stroke:var(--warn);stroke-width:2;fill:none}
+.dg-warn-t{fill:var(--warn);font-family:"Chivo",system-ui,sans-serif;font-size:11.5px;font-weight:600}
+.dg-warn-box{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+.dg-ok{stroke:var(--ok);stroke-width:2;fill:none}
+.dg-ok-t{fill:var(--ok);font-family:"Chivo",system-ui,sans-serif;font-size:11.5px;font-weight:600}
+.dg-ok-box{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.5}
+.dg-acc-box{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dg-acc-t{fill:var(--accent);font-family:"Chivo",system-ui,sans-serif;font-size:12px;font-weight:600}
+
+/* Bloques de código */
+pre{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  padding:16px 18px;
+  overflow-x:auto;
+  margin:0;
+  line-height:1.6;
+}
+pre code{background:none;padding:0;font-size:.82rem}
+
+/* Reglas */
+.rules{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.rule{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.rule p{font-size:.95rem;color:var(--muted);line-height:1.55}
+
+details{background:var(--surface);border:1px solid var(--line);padding:0}
+summary{
+  cursor:pointer;
+  padding:14px 18px;
+  font-family:"Chivo",system-ui,sans-serif;
+  font-weight:600;
+  font-size:.92rem;
+}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+details[open] summary{border-bottom:1px solid var(--line-soft)}
+.details-body{padding:18px;display:flex;flex-direction:column;gap:14px;font-size:.96rem}
+
+footer.entrega{border-top:2px solid var(--ink);padding-top:26px;display:flex;flex-direction:column;gap:16px}
+footer.entrega table{font-size:.82rem}
+footer.entrega th{width:170px;padding-right:20px;border-bottom:1px solid var(--line-soft)}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">AWI · Agentes en paralelo</p>
+  <h1>Un repo, varios agentes</h1>
+  <p class="dek">Cómo <code>git worktree</code> le da a cada agente su propia rama — y qué sigue compartido igual, que es donde aparecen los errores.</p>
+</header>
+
+<section class="status">
+  <h2>Estado hoy — newhaze-webapp</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Worktree</th><th>Rama</th><th>Puerto</th><th>.env.local</th><th>node_modules</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">newhaze-webapp</td>
+          <td class="mono">stg</td>
+          <td><span class="tag ok">3000</span></td>
+          <td><span class="tag ok">propio</span></td>
+          <td><span class="tag ok">sí</span></td>
+        </tr>
+        <tr>
+          <td class="mono">.claude/worktrees/issue-194</td>
+          <td class="mono">docs/194-organizaciones-fantasma</td>
+          <td><span class="tag warn">3001 · config viejo</span></td>
+          <td><span class="tag ok">symlink</span></td>
+          <td><span class="tag ok">sí</span></td>
+        </tr>
+        <tr>
+          <td class="mono">.claude/worktrees/pedidos-b2b-whatsapp</td>
+          <td class="mono">feat/pedidos-b2b-whatsapp</td>
+          <td><span class="tag warn">3002 · config viejo</span></td>
+          <td><span class="tag ok">symlink</span></td>
+          <td><span class="tag ok">sí</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:.93rem;color:var(--muted);margin:0">El puerto por worktree ya está escrito en <code>.worktree-port</code> de los tres, pero el <code>playwright.config.ts</code> que lo lee vive sólo en la rama <code class="mono">stg</code>. Hasta que ese cambio llegue a las otras dos ramas, ellas siguen resolviendo <code>3000</code> fijo.</p>
+</section>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">El problema</p>
+    <h2>Un working tree tiene un solo HEAD</h2>
+  </div>
+  <p>Un repositorio git clonado de la forma normal tiene <strong>un</strong> directorio de trabajo, y ese directorio tiene <strong>un</strong> <code>HEAD</code>: la rama que está checkouteada ahora. No es una convención ni un default configurable — es la estructura.</p>
+  <p>Cuando dos agentes comparten ese directorio, el <code>git checkout</code> del primero reescribe los archivos que el segundo está leyendo. No hay disciplina que lo arregle.</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 268" role="img" aria-label="Dos agentes que comparten un working tree se pisan el HEAD: el checkout de uno reescribe los archivos que el otro está leyendo.">
+      <defs>
+        <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+        </marker>
+        <marker id="ar1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--warn)"/>
+        </marker>
+      </defs>
+
+      <rect class="dg-box" x="40" y="16" width="230" height="52" rx="2"/>
+      <text class="dg-t" x="58" y="40">Agente A</text>
+      <text class="dg-s" x="58" y="57">feat/vista-previa</text>
+
+      <rect class="dg-box" x="470" y="16" width="230" height="52" rx="2"/>
+      <text class="dg-t" x="488" y="40">Agente B</text>
+      <text class="dg-s" x="488" y="57">docs/194-organizaciones</text>
+
+      <line class="dg-line" x1="155" y1="68" x2="300" y2="126" marker-end="url(#ar1)"/>
+      <text class="dg-l" x="118" y="104">git checkout</text>
+
+      <line class="dg-warn" x1="585" y1="68" x2="440" y2="126" marker-end="url(#ar1w)"/>
+      <text class="dg-warn-t" x="560" y="104">git checkout</text>
+
+      <rect class="dg-fill" x="230" y="130" width="280" height="76" rx="2"/>
+      <text class="dg-t" x="252" y="156">newhaze-webapp/</text>
+      <text class="dg-s" x="252" y="176">un working tree</text>
+      <text class="dg-s" x="252" y="194">HEAD → una sola rama</text>
+
+      <rect class="dg-warn-box" x="150" y="228" width="440" height="30" rx="2"/>
+      <text class="dg-warn-t" x="370" y="248" text-anchor="middle">Los archivos de A cambian solos · index.lock ocupado</text>
+    </svg>
+  </div>
+  <figcaption>Los dos agentes escriben sobre el mismo <code>HEAD</code>. El segundo <code>checkout</code> gana y el primero sigue trabajando sobre archivos que ya no son los suyos.</figcaption>
+</figure>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">El mecanismo</p>
+    <h2>Qué separa un worktree, exactamente</h2>
+  </div>
+  <p><code>git worktree</code> divide en dos lo que un clon normal tiene junto. Por un lado, el <strong>repositorio</strong>: objetos, refs, remotes, historia — sigue siendo uno solo, en un único <code>.git</code>. Por el otro, el <strong>working tree</strong>: los archivos en disco, el índice y el <code>HEAD</code> — de esos hay uno por directorio.</p>
+  <p>Por eso no cuesta casi nada: no duplica la historia ni vuelve a bajar del remote. Sólo checkoutea archivos.</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 300" role="img" aria-label="Un único .git con objetos, refs y remotes alimenta tres working trees, cada uno con su propio HEAD y su propia rama.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect class="dg-acc-box" x="30" y="72" width="192" height="156" rx="2"/>
+      <text class="dg-acc-t" x="50" y="100">.git</text>
+      <text class="dg-s" x="50" y="126">objetos</text>
+      <text class="dg-s" x="50" y="146">refs</text>
+      <text class="dg-s" x="50" y="166">remotes</text>
+      <text class="dg-s" x="50" y="186">historia</text>
+      <text class="dg-l" x="50" y="212">UNO SOLO</text>
+
+      <line class="dg-line" x1="222" y1="112" x2="392" y2="46" marker-end="url(#ar2)"/>
+      <line class="dg-line" x1="222" y1="150" x2="392" y2="150" marker-end="url(#ar2)"/>
+      <line class="dg-line" x1="222" y1="188" x2="392" y2="254" marker-end="url(#ar2)"/>
+      <text class="dg-l" x="268" y="70">HEAD propio</text>
+      <text class="dg-l" x="268" y="142">HEAD propio</text>
+      <text class="dg-l" x="268" y="248">HEAD propio</text>
+
+      <rect class="dg-box" x="400" y="20" width="310" height="52" rx="2"/>
+      <text class="dg-t" x="418" y="43">newhaze-webapp/</text>
+      <text class="dg-s" x="418" y="61">stg</text>
+
+      <rect class="dg-box" x="400" y="124" width="310" height="52" rx="2"/>
+      <text class="dg-t" x="418" y="147">.claude/worktrees/issue-194/</text>
+      <text class="dg-s" x="418" y="165">docs/194-organizaciones-fantasma</text>
+
+      <rect class="dg-box" x="400" y="228" width="310" height="52" rx="2"/>
+      <text class="dg-t" x="418" y="251">.claude/worktrees/pedidos-b2b/</text>
+      <text class="dg-s" x="418" y="269">feat/pedidos-b2b-whatsapp</text>
+    </svg>
+  </div>
+  <figcaption>Tres directorios, tres <code>HEAD</code>, un solo repositorio. Cambiar de rama en uno no toca a los otros, y un <code>commit</code> hecho en cualquiera queda visible desde todos — comparten los objetos.</figcaption>
+</figure>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">Dónde se rompe</p>
+    <h2>Lo que git no copia</h2>
+  </div>
+  <p>Acá está el 90 % de los errores. Un worktree nuevo se puebla con <strong>lo que git tiene versionado</strong>. Todo lo que está en <code>.gitignore</code> simplemente no existe del otro lado — y es precisamente lo que la app necesita para arrancar.</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 296" role="img" aria-label="Al crear un worktree cruzan los archivos versionados, pero .env.local, node_modules y .next no cruzan porque están en gitignore.">
+      <defs>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <text class="dg-l" x="30" y="20">WORKTREE PRINCIPAL</text>
+      <text class="dg-l" x="470" y="20">WORKTREE NUEVO</text>
+
+      <rect class="dg-box" x="30" y="32" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="46" y="54">src/ · package.json · tests/</text>
+      <rect class="dg-box" x="30" y="78" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="46" y="100">playwright.config.ts</text>
+
+      <rect class="dg-fill" x="30" y="140" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="46" y="162">.env.local</text>
+      <rect class="dg-fill" x="30" y="186" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="46" y="208">node_modules/</text>
+      <rect class="dg-fill" x="30" y="232" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="46" y="254">.next/ · .worktree-port</text>
+
+      <line class="dg-dash" x1="370" y1="14" x2="370" y2="288"/>
+      <text class="dg-l" x="298" y="284">git worktree add</text>
+
+      <line class="dg-line" x1="276" y1="49" x2="464" y2="49" marker-end="url(#ar3)"/>
+      <line class="dg-line" x1="276" y1="95" x2="464" y2="95" marker-end="url(#ar3)"/>
+
+      <line class="dg-warn" x1="276" y1="157" x2="352" y2="157"/>
+      <line class="dg-warn" x1="276" y1="203" x2="352" y2="203"/>
+      <line class="dg-warn" x1="276" y1="249" x2="352" y2="249"/>
+      <line class="dg-warn" x1="358" y1="150" x2="382" y2="164"/>
+      <line class="dg-warn" x1="382" y1="150" x2="358" y2="164"/>
+      <line class="dg-warn" x1="358" y1="196" x2="382" y2="210"/>
+      <line class="dg-warn" x1="382" y1="196" x2="358" y2="210"/>
+      <line class="dg-warn" x1="358" y1="242" x2="382" y2="256"/>
+      <line class="dg-warn" x1="382" y1="242" x2="358" y2="256"/>
+
+      <rect class="dg-box" x="470" y="32" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="486" y="54">src/ · package.json · tests/</text>
+      <rect class="dg-box" x="470" y="78" width="240" height="34" rx="2"/>
+      <text class="dg-s" x="486" y="100">playwright.config.ts</text>
+
+      <rect class="dg-warn-box" x="470" y="140" width="240" height="126" rx="2"/>
+      <text class="dg-warn-t" x="590" y="192" text-anchor="middle">vacío</text>
+      <text class="dg-warn-t" x="590" y="212" text-anchor="middle">la app no arranca</text>
+    </svg>
+  </div>
+  <figcaption>Lo versionado cruza; lo ignorado no. Un worktree recién creado no tiene credenciales ni dependencias, así que todo comando que compile o levante la app falla por razones que no tienen nada que ver con el código del agente.</figcaption>
+</figure>
+
+<div class="col" style="display:flex;flex-direction:column;gap:14px">
+  <h3>El arreglo</h3>
+  <pre><code># credenciales: symlink relativo, no copia — así siguen a la fuente
+ln -sfn ../../../.env.local .claude/worktrees/&lt;wt&gt;/.env.local
+
+# dependencias: instalación propia por worktree
+(cd .claude/worktrees/&lt;wt&gt; && npm install)</code></pre>
+  <p style="font-size:.95rem;color:var(--muted)">El symlink es preferible a copiar: cuando rote una credencial, los tres worktrees la ven al instante. <code>node_modules</code> no se puede symlinkear con la misma tranquilidad — los binarios compilados y la resolución de módulos dependen de la ruta real.</p>
+</div>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">El error silencioso</p>
+    <h2>Dos agentes, un puerto</h2>
+  </div>
+  <p>Este es el peor de todos, porque no falla: <strong>miente</strong>. Playwright levanta el dev server con <code>reuseExistingServer</code>, que significa «si ya hay algo escuchando en el puerto, usalo». Con los dos worktrees apuntando a <code>3000</code>, el segundo agente encuentra ocupado el puerto y <em>reusa la app del primero</em>.</p>
+  <p>Sus tests corren, pasan o fallan, y reportan sobre el código de la otra rama.</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 300" role="img" aria-label="Antes, dos worktrees en el puerto 3000 hacen que el segundo agente teste la app del primero. Después, cada worktree tiene su puerto y su propia app.">
+      <defs>
+        <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+        </marker>
+        <marker id="ar4w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--warn)"/>
+        </marker>
+        <marker id="ar4o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--ok)"/>
+        </marker>
+      </defs>
+
+      <text class="dg-warn-t" x="30" y="20">ANTES · PORT = 3000 fijo</text>
+      <rect class="dg-box" x="30" y="34" width="140" height="44" rx="2"/>
+      <text class="dg-s" x="44" y="61">worktree A</text>
+      <rect class="dg-box" x="30" y="118" width="140" height="44" rx="2"/>
+      <text class="dg-s" x="44" y="145">worktree B</text>
+
+      <line class="dg-line" x1="176" y1="56" x2="242" y2="86" marker-end="url(#ar4)"/>
+      <line class="dg-warn" x1="176" y1="140" x2="242" y2="110" marker-end="url(#ar4w)"/>
+
+      <rect class="dg-fill" x="248" y="76" width="96" height="44" rx="2"/>
+      <text class="dg-s" x="264" y="103">:3000</text>
+
+      <text class="dg-warn-t" x="30" y="196">B testea la app de A</text>
+      <text class="dg-s" x="30" y="216">reuseExistingServer</text>
+      <text class="dg-s" x="30" y="234">encuentra el puerto</text>
+      <text class="dg-s" x="30" y="252">ocupado y lo reusa</text>
+
+      <line class="dg-dash" x1="384" y1="10" x2="384" y2="290"/>
+
+      <text class="dg-ok-t" x="412" y="20">DESPUÉS · PORT por worktree</text>
+      <rect class="dg-box" x="412" y="34" width="140" height="44" rx="2"/>
+      <text class="dg-s" x="426" y="61">worktree A</text>
+      <rect class="dg-box" x="412" y="118" width="140" height="44" rx="2"/>
+      <text class="dg-s" x="426" y="145">worktree B</text>
+
+      <line class="dg-ok" x1="558" y1="56" x2="618" y2="56" marker-end="url(#ar4o)"/>
+      <line class="dg-ok" x1="558" y1="140" x2="618" y2="140" marker-end="url(#ar4o)"/>
+
+      <rect class="dg-ok-box" x="624" y="34" width="88" height="44" rx="2"/>
+      <text class="dg-s" x="640" y="61">:3000</text>
+      <rect class="dg-ok-box" x="624" y="118" width="88" height="44" rx="2"/>
+      <text class="dg-s" x="640" y="145">:3001</text>
+
+      <text class="dg-ok-t" x="412" y="196">Cada uno su app</text>
+      <text class="dg-s" x="412" y="216">.worktree-port fija</text>
+      <text class="dg-s" x="412" y="234">el número; next dev</text>
+      <text class="dg-s" x="412" y="252">y Playwright lo leen</text>
+    </svg>
+  </div>
+  <figcaption>El puerto es el recurso compartido más fácil de olvidar, porque nada lo declara: está implícito en un default. Fijarlo por worktree convierte una colisión silenciosa en dos procesos independientes.</figcaption>
+</figure>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">La pregunta siguiente</p>
+    <h2>¿No alcanzaría con un container por agente?</h2>
+  </div>
+  <p>Un container aísla el <strong>sistema operativo</strong>: procesos, puertos, red, dependencias. No aísla git. Si dos containers montan el mismo directorio del host, adentro sigue habiendo un working tree con un solo <code>HEAD</code>, y los agentes se pisan igual que antes — ahora con una capa más entre el error y vos.</p>
+  <p>Las dos herramientas no compiten: resuelven capas distintas y se combinan.</p>
+</section>
+
+<figure>
+  <div class="fig-box">
+    <svg class="diagram" viewBox="0 0 740 268" role="img" aria-label="Dos containers que montan el mismo directorio siguen compartiendo un working tree; montando cada uno su propio worktree, el aislamiento es completo.">
+      <defs>
+        <marker id="ar5w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--warn)"/>
+        </marker>
+        <marker id="ar5o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--ok)"/>
+        </marker>
+      </defs>
+
+      <text class="dg-warn-t" x="30" y="20">CONTAINER SOBRE EL MISMO DIRECTORIO</text>
+      <rect class="dg-box" x="30" y="34" width="118" height="40" rx="2"/>
+      <text class="dg-s" x="44" y="59">container A</text>
+      <rect class="dg-box" x="30" y="92" width="118" height="40" rx="2"/>
+      <text class="dg-s" x="44" y="117">container B</text>
+
+      <line class="dg-warn" x1="154" y1="54" x2="212" y2="76" marker-end="url(#ar5w)"/>
+      <line class="dg-warn" x1="154" y1="112" x2="212" y2="90" marker-end="url(#ar5w)"/>
+      <text class="dg-l" x="156" y="150">mount</text>
+
+      <rect class="dg-warn-box" x="218" y="62" width="126" height="42" rx="2"/>
+      <text class="dg-s" x="232" y="80">un working</text>
+      <text class="dg-s" x="232" y="96">tree · un HEAD</text>
+
+      <text class="dg-warn-t" x="30" y="196">Sigue roto</text>
+      <text class="dg-s" x="30" y="218">el container aísla el SO,</text>
+      <text class="dg-s" x="30" y="236">no el checkout de git</text>
+
+      <line class="dg-dash" x1="384" y1="10" x2="384" y2="258"/>
+
+      <text class="dg-ok-t" x="412" y="20">CONTAINER SOBRE SU PROPIO WORKTREE</text>
+      <rect class="dg-box" x="412" y="34" width="118" height="40" rx="2"/>
+      <text class="dg-s" x="426" y="59">container A</text>
+      <rect class="dg-box" x="412" y="92" width="118" height="40" rx="2"/>
+      <text class="dg-s" x="426" y="117">container B</text>
+
+      <line class="dg-ok" x1="536" y1="54" x2="592" y2="54" marker-end="url(#ar5o)"/>
+      <line class="dg-ok" x1="536" y1="112" x2="592" y2="112" marker-end="url(#ar5o)"/>
+
+      <rect class="dg-ok-box" x="598" y="34" width="114" height="40" rx="2"/>
+      <text class="dg-s" x="612" y="59">worktree A</text>
+      <rect class="dg-ok-box" x="598" y="92" width="114" height="40" rx="2"/>
+      <text class="dg-s" x="612" y="117">worktree B</text>
+
+      <text class="dg-ok-t" x="412" y="196">Aislamiento completo</text>
+      <text class="dg-s" x="412" y="218">git separa las ramas,</text>
+      <text class="dg-s" x="412" y="236">el container los procesos</text>
+    </svg>
+  </div>
+  <figcaption>El container no reemplaza al worktree: lo complementa. La combinación que funciona es un worktree por rama, y un container montando ese worktree cuando además hacen falta puertos, procesos o un stack de base de datos propios.</figcaption>
+</figure>
+
+<div class="col">
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Qué aísla</th><th>Worktree</th><th>Container</th></tr></thead>
+      <tbody>
+        <tr><td>HEAD y archivos en disco</td><td><span class="tag ok">sí</span></td><td><span class="tag warn">no, si monta el mismo dir</span></td></tr>
+        <tr><td>Puertos y procesos</td><td><span class="tag warn">no</span></td><td><span class="tag ok">sí</span></td></tr>
+        <tr><td>Stack de base de datos</td><td><span class="tag warn">no</span></td><td><span class="tag ok">sí</span></td></tr>
+        <tr><td>Costo de arranque</td><td><span class="tag ok">segundos</span></td><td><span class="tag warn">minutos + RAM</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<section class="col">
+  <div class="sec-head">
+    <p class="eyebrow">Operación</p>
+    <h2>Las reglas de la casa</h2>
+  </div>
+</section>
+
+<div class="rules col">
+  <div class="rule">
+    <h3>Una rama vive en un solo worktree</h3>
+    <p>Git rechaza checkoutear la misma rama en dos worktrees. No es una limitación: es la colisión que querés evitar, detectada temprano.</p>
+  </div>
+  <div class="rule">
+    <h3>Todo lo ignorado se provisiona a mano</h3>
+    <p><code>.env.local</code>, <code>node_modules</code>, <code>.worktree-port</code>. Si la app no arranca en un worktree nuevo, empezá por acá antes de sospechar del código.</p>
+  </div>
+  <div class="rule">
+    <h3>Los recursos de máquina siguen siendo uno</h3>
+    <p>El stack local de Supabase es único: dos agentes migrando en paralelo se pisan, worktrees o no. Ese trabajo se serializa o se mueve a branches de Supabase.</p>
+  </div>
+  <div class="rule">
+    <h3>Un cambio de config no viaja solo</h3>
+    <p>Arreglar <code>playwright.config.ts</code> en una rama no lo arregla en las otras. Los archivos versionados se propagan por merge, como cualquier commit.</p>
+  </div>
+</div>
+
+<details class="col">
+  <summary>Comandos de referencia</summary>
+  <div class="details-body">
+    <pre><code># crear un worktree con rama nueva
+git worktree add .claude/worktrees/&lt;nombre&gt; -b &lt;rama&gt;
+
+# ver todos los worktrees del repo y en qué rama está cada uno
+git worktree list
+
+# eliminar uno cuando terminó el trabajo
+git worktree remove .claude/worktrees/&lt;nombre&gt;
+
+# limpiar registros de worktrees borrados a mano
+git worktree prune</code></pre>
+    <p>En Claude Code, <code>EnterWorktree</code> hace el <code>add</code> y muda la sesión al directorio nuevo; al cerrar pregunta si conservarlo. Para subagentes, <code>isolation: "worktree"</code> le da a cada uno el suyo y lo limpia si no cambió nada.</p>
+    <p>Los worktrees de Claude Code viven en <code>.claude/worktrees/</code> y ramifican desde <code>origin/&lt;default-branch&gt;</code>. Para que salgan del <code>HEAD</code> local: <code>worktree.baseRef: "head"</code> en <code>.claude/settings.json</code>.</p>
+  </div>
+</details>
+
+<footer class="entrega col">
+  <h2>Entrega</h2>
+  <div class="table-scroll">
+    <table>
+      <tr><th>Qué entrega</th><td>Modelo mental de <code>git worktree</code> para agentes en paralelo, y los cuatro recursos compartidos que sobreviven al aislamiento</td></tr>
+      <tr><th>Archivo destino</th><td><code>docs/agents/worktrees-paralelos.md</code> · <code>GuidoAmici/awi-core</code></td></tr>
+      <tr><th>Estado</th><td><strong>pendiente</strong></td></tr>
+      <tr><th>Issue padre</th><td>sin crear todavía</td></tr>
+      <tr><th>Fuente versionado</th><td><code>docs/agents/artifacts/worktrees.html</code></td></tr>
+      <tr><th>Design System</th><td>ninguno vigente para esta org</td></tr>
+    </table>
+  </div>
+</footer>
+
+</div>
