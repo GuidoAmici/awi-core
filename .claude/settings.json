@@ -1,8 +1,4 @@
 {
-  "enabledMcpjsonServers": [
-    "github",
-    "vercel"
-  ],
   "permissions": {
     "allow": [
       "Bash(git add:*)",
@@ -26,6 +22,10 @@
       "mcp__supabase__apply_migration"
     ]
   },
+  "enabledMcpjsonServers": [
+    "github",
+    "vercel"
+  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -97,8 +97,10 @@
     ]
   },
   "enabledPlugins": {
-    "claude-hud@claude-hud": true,
+    "claude-hud@claude-hud": false,
     "vercel@claude-plugins-official": true,
-    "mattpocock-skills@mattpocock": true
+    "mattpocock-skills@mattpocock": true,
+    "superpowers@claude-plugins-official": true,
+    "github@claude-plugins-official": true
   }
 }
