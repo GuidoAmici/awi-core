@@ -15,6 +15,11 @@
       "args": ["-Command", "meta-ads-mcp"],
       "type": "stdio"
     },
+    "sketchup": {
+      "command": "powershell",
+      "args": ["-Command", "uvx sketchup-mcp"],
+      "type": "stdio"
+    },
     "github": {
       "command": "bash",
       "args": [".claude/hooks/github-mcp-server.sh"],
