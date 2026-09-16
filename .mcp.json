@@ -17,7 +17,7 @@
     },
     "sketchup": {
       "command": "powershell.exe",
-      "args": ["-Command", "uvx sketchup-mcp"],
+      "args": ["-Command", "uvx --with mcp==1.3.0 sketchup-mcp"],
       "type": "stdio"
     },
     "github": {
