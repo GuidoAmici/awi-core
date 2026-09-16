@@ -16,7 +16,7 @@
       "type": "stdio"
     },
     "sketchup": {
-      "command": "powershell",
+      "command": "powershell.exe",
       "args": ["-Command", "uvx sketchup-mcp"],
       "type": "stdio"
     },
