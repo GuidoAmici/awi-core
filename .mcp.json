@@ -20,6 +20,11 @@
       "args": ["-Command", "uvx --with mcp==1.3.0 sketchup-mcp"],
       "type": "stdio"
     },
+    "blender": {
+      "command": "powershell.exe",
+      "args": ["-Command", "uvx mcp-for-blender --port 9877"],
+      "type": "stdio"
+    },
     "github": {
       "command": "bash",
       "args": [".claude/hooks/github-mcp-server.sh"],
