@@ -11,7 +11,7 @@
       "type": "stdio"
     },
     "meta-ads": {
-      "command": "powershell",
+      "command": "powershell.exe",
       "args": ["-Command", "meta-ads-mcp"],
       "type": "stdio"
     },
