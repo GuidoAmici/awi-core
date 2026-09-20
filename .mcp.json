@@ -84,7 +84,8 @@
         "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npx-cli.js",
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "D:\\ps-work"
+        "D:\\Photoshop-work",
+        "D:\\Blender-work"
       ],
       "type": "stdio"
     }
