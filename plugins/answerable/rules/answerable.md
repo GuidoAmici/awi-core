@@ -10,7 +10,7 @@ final de un subagente al agente principal.
 
 Una respuesta larga puede tener todo lo que el operador necesita y aun así no decirle dónde está nada. El resultado del pedido aparece a mitad de un párrafo, la sugerencia que había que aprobar quedó entre dos hallazgos, y para contestar "sí a lo segundo" hay que reescribir lo segundo. **La estructura no es cortesía tipográfica: es lo que vuelve la respuesta contestable.**
 
-Cinco bloques, siempre en este orden:
+Cinco bloques, siempre en este orden —salvo que el operador haya preguntado algo, y entonces el bloque que contesta abre la respuesta:
 
 | Letra | Bloque | Qué va adentro |
 |---|---|---|
@@ -66,11 +66,38 @@ A1. **La afirmación:** la evidencia, el detalle, la consecuencia.
 
 **Una línea.** Si el TLDR no entra en una, casi siempre es porque empezó a contar el detalle.
 
-### Lo que contesta la pregunta va primero dentro de su bloque
+### El detalle toma la forma de su contenido
 
-Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste": la respuesta a una pregunta es un hallazgo (`B`), una propuesta (`D`) o el reporte de algo hecho (`A`), según qué sea.
+El TLDR es siempre una línea de prosa en negrita — eso no se negocia, porque escanear las negritas tiene que seguir alcanzando para tener la respuesta entera. **El detalle, en cambio, no tiene forma fija: toma la del contenido.**
 
-Lo que la regla sí exige es el orden: **si el operador preguntó algo, lo que lo contesta es el primer ítem de su bloque.** Una respuesta que hace buscar la respuesta adentro de una lista larga falla igual que una sin estructura.
+| Si el contenido es | El detalle es |
+|---|---|
+| Dos o más cosas comparadas por dos o más atributos | Una tabla |
+| Pasos donde el orden importa | Una lista numerada |
+| Código, un diff, una estructura | Un bloque de código |
+| Algo que el operador va a correr | Un bloque pegable |
+| Un argumento con hilo causal | Prosa |
+
+**La prosa es para razonar, no para enumerar.** El modo de falla más común es escribir en párrafo una comparación que era una tabla: si el detalle repite los mismos atributos para cada cosa —"la opción A cuesta X y tarda Y; la opción B cuesta Z y tarda W"—, ya es una tabla, sólo que escrita peor.
+
+**El formato tampoco se agrega de adorno.** Una tabla de una fila es una oración. Tres viñetas de una oración cada una son un párrafo. Si la forma no le ahorra una lectura al operador, no va.
+
+**La forma no cambia la dirección.** Un ítem con tabla sigue siendo un ítem: lleva su letra, su número y su TLDR arriba, y la tabla va abajo, sin indentar. Una tabla suelta —sin la línea que dice qué concluye— obliga a leerla entera para saber de qué se hablaba, que es el mismo acertijo que el TLDR existe para evitar.
+
+### Lo que contesta la pregunta va primero en la respuesta
+
+Los bloques clasifican por **tipo de contenido**, no por destinatario, así que no hay un bloque "lo que preguntaste". Lo que el operador pide ya tiene destino, y el destino lo decide qué es la respuesta, no quién la pidió:
+
+| Lo que pidió el operador | Dónde va | Por qué |
+|---|---|---|
+| Una comparación para que elija él | `E` | No se puede avanzar sin su decisión |
+| Una comparación con una recomendación | `D` | Es una propuesta; la comparación es su detalle |
+| Información que el agente fue a buscar | `B` | Lo único que cambió es lo que sabemos |
+| El reporte de algo que se hizo | `A` | El entregable ya está en el repo |
+
+**Que lo hayan pedido no cambia el bloque, cambia el orden.** "Revisé los tres handlers y no hay bug" es `B` de las dos maneras; lo que cambia es que, si el operador preguntó justamente eso, es `B1` y `B` abre la respuesta.
+
+**El bloque que contesta se imprime primero y conserva su letra.** `B` arriba de `A` se sigue llamando `B`. Es la misma idea que ya rige las direcciones —la letra pertenece al bloque, no al lugar—, usada acá para lo que hace falta: que la respuesta no haya que ir a buscarla. Una respuesta que la esconde adentro de una lista larga falla igual que una sin estructura.
 
 ### `C` es lo único que no se renumera desde cero
 
@@ -110,7 +137,21 @@ En las respuestas al operador y en el informe final de un subagente al agente pr
 
 **El piso es más de un párrafo.** Una confirmación o una respuesta de una línea no se estructura: ahí el mensaje entero es un solo ítem y no necesita rótulo.
 
+En el ejemplo el operador preguntó *"¿unifico la guarda o dejo la copia en cada handler?"*, así que `D` abre la respuesta sin dejar de llamarse `D`, y la comparación que la contesta va como tabla y no como párrafo:
+
 ```markdown
+## Qué propongo
+D1. **Unificar la guarda gana por mantenimiento y pierde por riesgo de
+    regresión**, y con los 42 tests en verde el riesgo es el barato:
+
+| | Unificar en `guard.ts` | Dejar la copia |
+|---|---|---|
+| Handlers a tocar | 3 | 0 |
+| Riesgo de regresión | Medio | Nulo |
+| El próximo handler | Hereda el fix | Copia el bug |
+
+D2. **Un issue por los tres handlers duplicados**, y cierro `C1` con él.
+
 ## Qué hice
 A1. **El fix del token expirado quedó en `auth.ts:42`:** los 42 tests
     pasan y no hizo falta tocar el middleware.
@@ -124,9 +165,6 @@ C1. **La guarda unificada resuelve sesión expirada y le faltan dos casos:**
     token inválido y refresh, los dos en `guard.ts`.
 C2. **El renombre de `UserCtx` quedó a mitad, frenado por `E1`:** los
     imports ya apuntan al nombre nuevo, las definiciones no.
-
-## Qué propongo
-D1. **Un issue por los tres handlers duplicados**, y cierro `C1` con él.
 
 ## Qué necesito de vos
 E1. **¿`UserCtx` pasa a `Principal` o a `Actor`?** Frena `C2`; el resto
