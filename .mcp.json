@@ -25,6 +25,11 @@
       "args": ["-Command", "uvx mcp-for-blender --port 9877"],
       "type": "stdio"
     },
+    "blender-3": {
+      "command": "powershell.exe",
+      "args": ["-Command", "uvx mcp-for-blender --port 9879"],
+      "type": "stdio"
+    },
     "github": {
       "command": "bash",
       "args": [".claude/hooks/github-mcp-server.sh"],
