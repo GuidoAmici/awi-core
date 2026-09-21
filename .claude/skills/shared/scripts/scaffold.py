@@ -33,7 +33,7 @@ from paths import ORGANIZATIONS_RELDIR, USER_SUBMODULES_FILE
 #: Subdirectorios de `agenda/`. El orden es el del documento que los describe.
 AGENDA_FOLDERS = (
     "tasks", "projects", "people", "ideas",
-    "daily", "weekly", "outputs", "planning",
+    "daily", "weekly", "outputs", "handoffs", "planning",
     "user-profile-inference",
 )
 
@@ -51,6 +51,7 @@ Agenda de este workspace.
 - daily/       — notas diarias (YYYY-MM-DD.md)
 - weekly/      — revisiones semanales (YYYY-WNN.md)
 - outputs/     — entregables e informes (YYYY-MM-DD-<slug>.md)
+- handoffs/    — traspasos entre sesiones; los consumidos van a handoffs/consumidos/
 - planning/    — objetivos trimestrales y anuales
 - user-profile-inference/ — observaciones de sesión
 

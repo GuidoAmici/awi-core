@@ -9,6 +9,8 @@ Any architectural decision, infrastructure change, or significant vault improvem
 
 The output file should cover: what changed, why, and any trade-offs considered.
 
+A session-to-session handoff is not an output: it goes to `agenda/handoffs/`, with `estado:` and `supersedes:` — see [file-formats.md § Handoff](../../_system/chief-of-staff/references/examples/file-formats.md#handoff).
+
 # ADR status lifecycle
 
 Every ADR must carry a `status:` field in its YAML frontmatter:

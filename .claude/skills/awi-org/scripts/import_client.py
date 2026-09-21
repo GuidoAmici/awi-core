@@ -19,7 +19,7 @@ from paths import ORGANIZATIONS_RELDIR
 
 AGENDA_FOLDERS = [
     "tasks", "projects", "people", "ideas",
-    "daily", "weekly", "outputs", "planning",
+    "daily", "weekly", "outputs", "handoffs", "planning",
     "user-profile-inference",
 ]
 
@@ -37,6 +37,7 @@ Agenda folder for this client workspace.
 - daily/       — daily notes (YYYY-MM-DD.md)
 - weekly/      — weekly reviews (YYYY-WNN.md)
 - outputs/     — deliverables and reports (YYYY-MM-DD-<slug>.md)
+- handoffs/    — session-to-session handoffs; consumed ones move to handoffs/consumidos/
 - planning/    — quarterly and annual goals
 - user-profile-inference/ — session observations
 

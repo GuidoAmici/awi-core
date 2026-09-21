@@ -7,6 +7,7 @@ La forma de la respuesta no vive acá: la trae el plugin [`answerable`](plugins/
 ## Siempre
 
 - **La fecha se pregunta, no se supone:** `bash .claude/hooks/get-datetime.sh full`.
+- **Medí el artefacto antes de citar lo que se escribió sobre él.** El `.blend`, la base, el repo son la verdad; un handoff o un output son afirmaciones sobre ella, y envejecen solas. Antes de medir, fijate si tenés el original o una copia (una exportación, un `.xlsx` bajado). Si es copia y el original no se puede leer, la fecha de la copia va en la primera línea del resultado.
 - **Los comandos que ejecutás vos llevan rutas relativas** desde la raíz del proyecto. Una ruta absoluta puede pedir un permiso que la relativa ya tiene.
 - **Commiteá en los cortes lógicos de la tarea**, en [Conventional Commits con scope](_system/_agentic-workflow-integrator/references/commit-format.md) — `docs(newhaze): …`, `chore(sync): …`. No hay hook de auto-commit: no dejes trabajo terminado sin commitear, ni commitees después de cada `Write`.
 - **`<user-root>` se resuelve leyendo** `_data/users/current-user.json` → campo `user`. De ahí salen todas las rutas de agenda; `<agenda-base>` es `<user-root>agenda/`.

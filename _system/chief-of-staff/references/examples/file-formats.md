@@ -166,6 +166,39 @@ affects:
 - Leave empty (`affects: []`) only if the output is purely analytical (audit, research, UX mapping) with no permanent changes.
 - If the output *should* update a wiki file but hasn't yet, list it anyway — it signals a pending sync.
 
+## Handoff
+
+Un handoff es un traspaso entre sesiones: «esto está a medias, seguí desde acá». **Vive en `agenda/handoffs/`, nunca en `outputs/`**, porque envejece al revés que un output: un output es verdad hasta que otra decisión lo revoca; un handoff deja de serlo en cuanto alguien hace el trabajo que describe. Guardados juntos, pesan igual en el filetree y un agente toma por verdad un traspaso que ya se ejecutó.
+
+```markdown
+---
+tipo: handoff
+estado: vigente            # vigente | parcialmente-superado | consumido
+supersedes:                # secciones de OTROS documentos que este deja viejas
+  - outputs/2026-09-18-storytelling-video-pack-ph#6
+descripcion: Qué traspasa y desde dónde se sigue.
+last-updated: YYYY-MM-DD
+---
+```
+
+**`estado`** — el campo que se lee antes que el cuerpo:
+
+| Valor | Significa | Dónde vive |
+|---|---|---|
+| `vigente` | Todo lo que afirma sigue siendo cierto | `agenda/handoffs/` |
+| `parcialmente-superado` | Hay secciones que otro documento desmintió; el resto sigue | `agenda/handoffs/` |
+| `consumido` | El trabajo que pedía está hecho | `agenda/handoffs/consumidos/` |
+
+`ls agenda/handoffs/` muestra sólo lo que todavía está en juego: lo consumido sale de la carpeta con `git mv`.
+
+**`supersedes`** apunta a **secciones** (`<carpeta>/<archivo-sin-.md>#<n.º de sección>`), no a archivos: lo normal es que un documento caduque en tres párrafos y siga vigente en el resto. Lo lleva el documento **nuevo**; el viejo sólo cambia su `estado`. Para saber qué secciones de un documento `parcialmente-superado` murieron:
+
+```bash
+grep -rn "supersedes" -A5 _data/*/*/agenda --include=*.md | grep "<slug-del-documento>"
+```
+
+`estado` y `supersedes` también valen en un output. Ahí son opcionales: sin `estado`, el output está vigente.
+
 ## Daily Note
 
 ```markdown

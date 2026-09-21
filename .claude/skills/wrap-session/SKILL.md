@@ -178,6 +178,18 @@ Si la sesión produjo outputs (planes, diseños, decisiones, informes), guardalo
 
 Sólo creá archivos de output para contenido que se produjo de verdad, no para el session log en sí.
 
+**Un traspaso a otra sesión no es un output: es un handoff**, y va a `agenda/handoffs/` con el formato de [file-formats.md § Handoff](../../../_system/chief-of-staff/references/examples/file-formats.md#handoff). Si algo de lo que afirma desmiente una sección de otro documento, nombrala en su `supersedes`.
+
+### 2g — Vigencia de los handoffs
+
+Por cada `agenda/handoffs/*.md` del usuario y de las orgs tocadas que la sesión trabajó:
+
+- **Se hizo todo lo que pedía** → `estado: consumido` y `git mv` a `agenda/handoffs/consumidos/`.
+- **La sesión desmintió alguna sección** → `estado: parcialmente-superado`, y la sección entra en el `supersedes` del documento que la desmiente (el handoff o el output de hoy).
+- **Ni una ni otra** → queda como está.
+
+Aplica igual a un output que la sesión dejó viejo: `estado` en el viejo, `supersedes` en el nuevo. Cada cambio de estado es una línea en el Step 4.
+
 ---
 
 ## Step 3 — Publicar el contexto compartido
