@@ -2,7 +2,7 @@
 
 All files use YAML frontmatter with markdown body.
 
-All files live under `_documentation/_agenda/` subfolders.
+All files live under `agenda/` subfolders — `<user-root>agenda/` for the operator, `_data/organizations/<name>/agenda/` for each organization.
 
 ## Task
 
@@ -148,7 +148,7 @@ type: output
 date: YYYY-MM-DD
 tags: [tag1, tag2]
 affects:
-  - wiki/arquitectura-digital/stack  # wiki files updated as a result of this decision
+  - operaciones/servicio-tecnico  # wiki files updated as a result of this decision
 ---
 
 # Output Title
@@ -162,7 +162,7 @@ affects:
 
 **`affects` field:**
 - List every wiki file whose content was updated as a result of this output.
-- Use paths relative to `_documentation/_context/company-wiki/` without the `.md` extension.
+- Use paths relative to the organization's `documentation/` folder without the `.md` extension. A file outside `documentation/` (an ADR, a harness file) takes its repo-relative path.
 - Leave empty (`affects: []`) only if the output is purely analytical (audit, research, UX mapping) with no permanent changes.
 - If the output *should* update a wiki file but hasn't yet, list it anyway — it signals a pending sync.
 
