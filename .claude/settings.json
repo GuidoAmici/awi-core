@@ -101,6 +101,27 @@
     "vercel@claude-plugins-official": true,
     "mattpocock-skills@mattpocock": true,
     "superpowers@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "answerable@awi": true
+  },
+  "extraKnownMarketplaces": {
+    "awi": {
+      "source": {
+        "source": "github",
+        "repo": "GuidoAmici/awi-core"
+      }
+    },
+    "mattpocock": {
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills"
+      }
+    },
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      }
+    }
   }
 }
