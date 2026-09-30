@@ -90,7 +90,8 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "D:\\Photoshop-work",
-        "D:\\Blender-work"
+        "D:\\Blender-work",
+        "D:\\Google Drive\\newhazetek@gmail.com"
       ],
       "type": "stdio"
     }
