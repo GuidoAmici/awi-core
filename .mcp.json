@@ -30,6 +30,11 @@
       "args": ["-Command", "uvx mcp-for-blender --port 9877"],
       "type": "stdio"
     },
+    "blender-3": {
+      "command": "powershell.exe",
+      "args": ["-Command", "uvx mcp-for-blender --port 9878"],
+      "type": "stdio"
+    },
     "blender-4": {
       "command": "powershell.exe",
       "args": ["-Command", "uvx mcp-for-blender --port 9879"],
