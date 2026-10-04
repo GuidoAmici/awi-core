@@ -20,17 +20,17 @@
       "args": ["-Command", "uvx --with mcp==1.3.0 sketchup-mcp"],
       "type": "stdio"
     },
-    "blender0": {
+    "blender-1": {
       "command": "powershell.exe",
       "args": ["-Command", "uvx mcp-for-blender --port 9876"],
       "type": "stdio"
     },
-    "blender1": {
+    "blender-2": {
       "command": "powershell.exe",
       "args": ["-Command", "uvx mcp-for-blender --port 9877"],
       "type": "stdio"
     },
-    "blender-3": {
+    "blender-4": {
       "command": "powershell.exe",
       "args": ["-Command", "uvx mcp-for-blender --port 9879"],
       "type": "stdio"
