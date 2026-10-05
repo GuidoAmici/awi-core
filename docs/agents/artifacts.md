@@ -198,9 +198,9 @@ En HTML:
   <h2>Entrega</h2>
   <table>
     <tr><th>Qué entrega</th><td>Arquitectura de marca — 3 niveles y criterio de nombres</td></tr>
-    <tr><th>Archivo destino</th><td><code>documentation/identidad/marca.md</code> · <code>GuidoAmici/newhaze-workspace</code></td></tr>
+    <tr><th>Archivo destino</th><td><code>documentation/identidad/marca.md</code> · <code>GuidoAmici/newhaze-org</code></td></tr>
     <tr><th>Estado</th><td><strong>pendiente</strong></td></tr>
-    <tr><th>Issue padre</th><td>GuidoAmici/newhaze-workspace#128</td></tr>
+    <tr><th>Issue padre</th><td>GuidoAmici/newhaze-org#128</td></tr>
     <tr><th>Fuente versionado</th><td><code>documentation/identidad/artifacts/arquitectura-de-marca.html</code></td></tr>
     <tr><th>Design System</th><td>New Haze Design System (v2)</td></tr>
   </table>
@@ -219,9 +219,9 @@ En Markdown:
 | | |
 |---|---|
 | **Qué entrega** | Arquitectura de marca — 3 niveles y criterio de nombres |
-| **Archivo destino** | `documentation/identidad/marca.md` · `GuidoAmici/newhaze-workspace` |
+| **Archivo destino** | `documentation/identidad/marca.md` · `GuidoAmici/newhaze-org` |
 | **Estado** | **pendiente** |
-| **Issue padre** | GuidoAmici/newhaze-workspace#128 |
+| **Issue padre** | GuidoAmici/newhaze-org#128 |
 | **Fuente versionado** | `documentation/identidad/artifacts/arquitectura-de-marca.html` |
 | **Design System** | New Haze Design System (v2) |
 ```

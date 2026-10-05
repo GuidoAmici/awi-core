@@ -9,7 +9,7 @@ Issues live in GitHub Issues, distributed by scope. Use the `gh` CLI for all ope
 | Scope | Repo | When to use |
 |-------|------|-------------|
 | Código (features, bugs, tests, deuda técnica) | El repo del codebase (e.g. `GuidoAmici/newhaze-webapp`) | Todo lo que se implementa en ese repo: features de app, fixes, infraestructura de tests, refactors. Ejemplos reales: variantes de producto (`newhaze-webapp#63`), pgTAP (`#65`), E2E (`#66`). |
-| Negocio / proyectos / decisiones de una org | `GuidoAmici/newhaze-workspace`, `GuidoAmici/afin-workspace`, `GuidoAmici/rabbitek-workspace` | Estrategia, pricing, lanzamientos (BDR), operaciones, tareas humanas, épicas cross-repo. Ejemplos reales: promos de lanzamiento (`newhaze-workspace#90`), packs en el sheet (`#61`). Label `repo:<codebase>` si referencia código. |
+| Negocio / proyectos / decisiones de una org | `GuidoAmici/newhaze-org`, `GuidoAmici/afin-org`, `GuidoAmici/rabbitek-workspace` | Estrategia, pricing, lanzamientos (BDR), operaciones, tareas humanas, épicas cross-repo. Ejemplos reales: promos de lanzamiento (`newhaze-org#90`), packs en el sheet (`#61`). Label `repo:<codebase>` si referencia código. |
 | AWI harness | `GuidoAmici/awi-core` | Changes to the AWI system itself: skills, CLAUDE.md, hooks, documentation standards, agent behavior. |
 | Personal | `GuidoAmici/my-awi-user` | Strictly personal work (agenda, goals, personal projects). Never for harness or cross-org work. |
 
