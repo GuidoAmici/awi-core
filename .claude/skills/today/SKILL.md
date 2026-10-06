@@ -204,7 +204,7 @@ Parse the JSON. Display the top `priority:high` issues (up to 10) as a numbered 
   2. newhaze-webapp#22 — completar la pantalla de consentimiento de Google para salir de modo testing
 
 **rabbitek**
-  3. rabbitek-workspace#14 — rehacer el picker diario del Q4 como TUI curses
+  3. rabbitek-org#14 — rehacer el picker diario del Q4 como TUI curses
 
 Which issues are you committing to today? Type up to 3 numbers (e.g. "1, 3"). Press Enter with no input to skip.
 ```

@@ -87,9 +87,9 @@ Leé `_data/users/current-user.json` para obtener `<user-root>`.
 
 Una org se tocó si se cumple alguna de estas:
 1. Se editaron archivos bajo `_data/organizations/<name>/`
-2. Se referenciaron issues del repo de la org (p. ej. `GuidoAmici/newhaze-org`, `GuidoAmici/rabbitek-workspace`)
+2. Se referenciaron issues del repo de la org (p. ej. `GuidoAmici/newhaze-org`, `GuidoAmici/rabbitek-org`)
 
-El nombre de la org es la clave del manifiesto (`user-submodules.json`) cuyo `url` apunta a ese repo — no se deduce del sufijo, porque conviven `-org` y `-workspace`. Armá la lista de orgs tocadas — se usa en los pasos 2d y 2e.
+El nombre de la org es la clave del manifiesto (`user-submodules.json`) cuyo `url` apunta a ese repo — no se deduce del sufijo, así no depende de cómo se llame el repo. Armá la lista de orgs tocadas — se usa en los pasos 2d y 2e.
 
 ### 2c — Archivo de inferencias del usuario
 
