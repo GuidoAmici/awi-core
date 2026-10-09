@@ -53,3 +53,6 @@ supabase/
 
 # Test runner scratch
 test-results/
+
+# Generado por mcp_compose.py: se edita .mcp.base.json o el mcp.json de cada org
+.mcp.json

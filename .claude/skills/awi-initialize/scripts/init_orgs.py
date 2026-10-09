@@ -36,6 +36,7 @@ from manifest import (
     materialise_target,
     plan,
 )
+import mcp_compose
 
 
 def run_pass(repos: list[Repo], errors: list[str]) -> int:
@@ -115,6 +116,9 @@ def main() -> int:
 
     total = len(top) + len(codebases)
     print(f"\nAll {total} repo(s) on disk.")
+
+    # The orgs on disk bring their own MCP servers; .mcp.json is rebuilt from them.
+    mcp_compose.main([])
 
     # Inactive but still mounted — reported, never removed.
     mounted = [
