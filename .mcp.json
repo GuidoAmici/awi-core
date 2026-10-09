@@ -57,6 +57,11 @@
       "args": ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "${AFIN_SUPABASE_PAT}"],
       "type": "stdio"
     },
+    "supabase-newhaze": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "${NEWHAZE_SUPABASE_EDIT}"],
+      "type": "stdio"
+    },
     "doppler": {
       "command": "npx",
       "args": ["-y", "@dopplerhq/mcp-server"],
