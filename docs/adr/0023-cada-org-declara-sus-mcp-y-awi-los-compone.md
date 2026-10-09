@@ -39,10 +39,12 @@ que trabaje desde AWI.
 |---|---|---|
 | `supabase` (Afin, `${AFIN_SUPABASE_PAT}`) | `.mcp.json` de AWI | `afin-org/mcp.json` |
 | `supabase-newhaze` (`${NEWHAZE_SUPABASE_EDIT}`) | `.mcp.json` de AWI | `newhaze-org/mcp.json` |
+| `mercadopago` | `.mcp.json` de AWI | `afin-org/mcp.json` |
+| `meta-ads`, `arca-afip` | `.mcp.json` de AWI | `newhaze-org/mcp.json` |
 
-El resto quedó en la base. Algunos podrían ser de una org (`arca-afip`, `mercadopago`,
-`meta-ads`, el `filesystem` con la carpeta Blender de New Haze); moverlos es decisión
-del operador, y se hace llevando su bloque al `mcp.json` de la org y corriendo el script.
+El resto quedó en la base. El operador asignó los dudosos el 2026-10-09: `mercadopago`
+es de Afin, `meta-ads` y `arca-afip` de New Haze, y `filesystem` es de AWI. Mover otro
+es llevar su bloque al `mcp.json` de la org y correr el script.
 
 ## Consecuencias
 

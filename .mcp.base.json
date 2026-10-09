@@ -14,14 +14,6 @@
       },
       "type": "stdio"
     },
-    "meta-ads": {
-      "command": "powershell.exe",
-      "args": [
-        "-Command",
-        "meta-ads-mcp"
-      ],
-      "type": "stdio"
-    },
     "sketchup": {
       "command": "powershell.exe",
       "args": [
@@ -87,24 +79,6 @@
     "notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"
-    },
-    "mercadopago": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.mercadopago.com/mcp",
-        "18999"
-      ],
-      "type": "stdio"
-    },
-    "arca-afip": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-arca-afip"
-      ],
-      "type": "stdio"
     },
     "gmail": {
       "command": "npx",
