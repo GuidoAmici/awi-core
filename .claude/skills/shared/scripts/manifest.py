@@ -111,11 +111,19 @@ def active_codebases(entry: dict) -> list[str] | None:
 # ── codebases.json ────────────────────────────────────────────────────────────
 
 def load_codebases(org_root: Path) -> dict:
-    """Read one org workspace's shared codebase manifest. Missing file → {}."""
+    """Read one org workspace's shared codebase manifest. Missing file → {}.
+
+    Accepts both shapes: the flat `{name: {url, branch}}` most orgs carry, and the
+    `{"_comment": ..., "codebases": {...}}` that scaffold.py writes. Keys starting
+    with `_` are metadata, never codebases.
+    """
     manifest = org_root / CODEBASES_FILE
     if not manifest.exists():
         return {}
-    return json.loads(manifest.read_text())
+    data = json.loads(manifest.read_text())
+    if isinstance(data.get("codebases"), dict):
+        data = data["codebases"]
+    return {name: entry for name, entry in data.items() if not name.startswith("_")}
 
 
 # ── Materialisation ───────────────────────────────────────────────────────────
