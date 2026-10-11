@@ -45,7 +45,8 @@ La dirección existe para que el operador conteste sin reescribir. «`D3`, aplic
 - **Los cinco bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
 - **Los bloques se citan entre sí por dirección.** Un hilo frenado por una decisión lo dice: «`C2` … frenado por `E1`». Es la ventaja de tener direcciones y no cuesta nada.
 - **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
-- **Valen para el último turno.** Cada respuesta renumera desde `1`. Si el operador se refiere a un turno anterior, el agente confirma qué entendió antes de actuar.
+- **`A`, `B` y `D` valen para el último turno.** Cada respuesta los renumera desde `1`. Si el operador se refiere a uno de un turno anterior, el agente confirma qué entendió antes de actuar.
+- **`C` y `E` son de la sesión y no se renumeran:** ver más abajo.
 
 ### Cada ítem abre con su TLDR en negrita
 
@@ -99,9 +100,20 @@ Los bloques clasifican por **tipo de contenido**, no por destinatario, así que 
 
 **El bloque que contesta se imprime primero y conserva su letra.** `B` arriba de `A` se sigue llamando `B`. Es la misma idea que ya rige las direcciones —la letra pertenece al bloque, no al lugar—, usada acá para lo que hace falta: que la respuesta no haya que ir a buscarla. Una respuesta que la esconde adentro de una lista larga falla igual que una sin estructura.
 
-### `C` es lo único que no se renumera desde cero
+### `E` tiene número fijo: la pregunta 22 es siempre la 22
 
-Los otros cuatro bloques valen para el último turno. **Los hilos abiertos son de la sesión entera:** un hilo que se abrió en el tercer turno sigue apareciendo en el noveno hasta que se cierre. La numeración se rehace en cada respuesta; la lista, no.
+**Cada pregunta al operador recibe el próximo número libre de la sesión y lo conserva hasta que se contesta.** Si se renumerara en cada turno, el operador que contesta un mensaje viejo y el agente que ya mandó uno nuevo cuentan distinto. Pasó: «8. B» quería decir la pregunta que el agente había numerado 10, y hubo que deducirlo por el contenido.
+
+- **Un número no se reusa.** Una pregunta contestada se va y su número queda vacío. Si quedan sólo la 21 y la 23, se escriben 21 y 23, sin correrlas.
+- **Lo que no se contestó vuelve en cada turno, con su número**, en una línea por pregunta: el número y de qué se trata. Una pregunta que dejó de importar se retira diciéndolo, no dejándola de nombrar.
+- **El operador contesta con el número solo:** «22. Sí» es `E22`. Por eso, en el texto al operador las preguntas se escriben como `22.` y no como `E22`: es el único bloque que contesta en cada turno, y escribe como lee.
+- **Al actuar sobre una respuesta, el agente nombra la pregunta en pocas palabras** («22, el ADR de delegación: lo escribo»). Si el número que usó el operador no coincide con ninguna pregunta abierta, confirma antes de actuar.
+- **La numeración sobrevive a la sesión.** El traspaso a la sesión siguiente lleva las preguntas abiertas con su número, y la sesión nueva sigue desde el más alto. Así un número no significa dos cosas en el mismo hilo de trabajo.
+- **En una cadena de agentes, el número lo pone quien le habla al operador.** Un subagente o una sesión de trabajo le pasa sus preguntas a quien coordina, sin numerarlas, y éste las numera al juntarlas.
+
+### `C` tampoco se renumera desde cero
+
+**Los hilos abiertos son de la sesión entera:** un hilo que se abrió en el tercer turno sigue apareciendo en el noveno hasta que se cierre. La numeración se rehace en cada respuesta; la lista, no.
 
 Esa persistencia es todo el punto del bloque. Sin ella, repartir el trabajo entre sesiones obliga a reconstruir al final lo que se fue abriendo al principio — y en una sesión larga los primeros hilos ya no están en contexto para reconstruirlos.
 
