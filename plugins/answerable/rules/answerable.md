@@ -39,13 +39,15 @@ Un bloque que necesita un "y después" adentro de su definición son dos bloques
 
 Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `D1`, `D2`, `D3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
 
+**El título de un bloque es un encabezado Markdown (`##`), más grande que el texto.** Una línea en negrita se pierde entre los TLDR de los ítems, que también van en negrita; el encabezado es lo que deja saltar de bloque en bloque.
+
 La dirección existe para que el operador conteste sin reescribir. «`D3`, aplicalo, el resto no» es una respuesta completa.
 
 - **La letra pertenece al bloque, no al lugar.** Las propuestas son `D` aunque falten `A`, `B` y `C`. Una dirección que cambia de significado según el turno no es una dirección.
 - **Los cinco bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
 - **Los bloques se citan entre sí por dirección.** Un hilo frenado por una decisión lo dice: «`C2` … frenado por `E1`». Es la ventaja de tener direcciones y no cuesta nada.
 - **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
-- **`A`, `B` y `D` valen para el último turno.** Cada respuesta los renumera desde `1`. Si el operador se refiere a uno de un turno anterior, el agente confirma qué entendió antes de actuar.
+- **`A`, `B` y `D` valen hasta que el operador contesta.** Ver «El reporte se acumula hasta que el operador contesta». Si el operador se refiere a un ítem de un reporte que ya contestó, el agente confirma qué entendió antes de actuar.
 - **`C` y `E` son de la sesión y no se renumeran:** ver más abajo.
 
 ### Cada ítem abre con su TLDR en negrita
@@ -105,11 +107,19 @@ Los bloques clasifican por **tipo de contenido**, no por destinatario, así que 
 **Cada pregunta al operador recibe el próximo número libre de la sesión y lo conserva hasta que se contesta.** Si se renumerara en cada turno, el operador que contesta un mensaje viejo y el agente que ya mandó uno nuevo cuentan distinto. Pasó: «8. B» quería decir la pregunta que el agente había numerado 10, y hubo que deducirlo por el contenido.
 
 - **Un número no se reusa.** Una pregunta contestada se va y su número queda vacío. Si quedan sólo la 21 y la 23, se escriben 21 y 23, sin correrlas.
-- **Lo que no se contestó vuelve en cada turno, con su número**, en una línea por pregunta: el número y de qué se trata. Una pregunta que dejó de importar se retira diciéndolo, no dejándola de nombrar.
+- **Lo que no se contestó vuelve en cada turno, escrito entero:** el número, la pregunta, el contexto, las opciones y la recomendación, igual que la primera vez. El operador contesta desde el último mensaje, sin subir a buscar qué era cada número. «Siguen abiertas las 26, 27 y 29 a 34» lo manda a buscarlas: pasó el 2026-10-11 y lo pidió dos veces en el mismo mensaje. Una pregunta que dejó de importar se retira diciéndolo.
+- **El número va como texto dentro de la negrita del TLDR:** `**52. ¿La página enlaza al tema 5?**`. Una línea que empieza con `52.` es para Markdown un ítem de lista numerada, y el visor renumera la lista en secuencia: 55, 56, 52, 53 se muestran como 55, 56, 57, 58. Pasó el 2026-10-11 y el operador contestó «57» a la pregunta 52.
+- **`E` se agrupa por módulo**, con un subtítulo `###` por cada uno (webapp, juego, panel, infraestructura, design system…). Cada pregunta conserva su número fijo adentro de su grupo; el orden corrido de los números se pierde y no importa.
 - **El operador contesta con el número solo:** «22. Sí» es `E22`. Por eso, en el texto al operador las preguntas se escriben como `22.` y no como `E22`: es el único bloque que contesta en cada turno, y escribe como lee.
 - **Al actuar sobre una respuesta, el agente nombra la pregunta en pocas palabras** («22, el ADR de delegación: lo escribo»). Si el número que usó el operador no coincide con ninguna pregunta abierta, confirma antes de actuar.
 - **La numeración sobrevive a la sesión.** El traspaso a la sesión siguiente lleva las preguntas abiertas con su número, y la sesión nueva sigue desde el más alto. Así un número no significa dos cosas en el mismo hilo de trabajo.
 - **En una cadena de agentes, el número lo pone quien le habla al operador.** Un subagente o una sesión de trabajo le pasa sus preguntas a quien coordina, sin numerarlas, y éste las numera al juntarlas.
+
+### El reporte se acumula hasta que el operador contesta
+
+**Mientras el operador no contestó, cada mensaje nuevo es el mismo reporte con lo nuevo agregado.** Los ítems de `A`, `B` y `D` del reporte anterior siguen ahí, con su dirección, y los nuevos se suman al final de su bloque marcados con «(nuevo)». Así el último mensaje alcanza: nadie tiene que buscar reportes anteriores sepultados por los avisos que llegaron después.
+
+El reporte se corta cuando el operador contesta. La respuesta siguiente abre un reporte nuevo: `A`, `B` y `D` vuelven a numerarse desde `1` y llevan sólo lo ocurrido desde esa respuesta. `C` y `E` siguen su propia regla, que ya es acumulativa.
 
 ### `C` tampoco se renumera desde cero
 
