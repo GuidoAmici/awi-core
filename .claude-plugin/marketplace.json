@@ -9,7 +9,7 @@
     {
       "name": "answerable",
       "source": "./plugins/answerable",
-      "description": "Estructura toda respuesta para que se conteste señalando una etiqueta: cinco bloques con dirección, TLDR primero, ningún identificador desnudo y comandos pegables.",
+      "description": "Estructura toda respuesta para que se conteste con el número de la pregunta: cinco bloques, TLDR primero, ningún identificador desnudo y comandos pegables.",
       "category": "productivity",
       "keywords": ["output-style", "response-format", "communication", "reporting"]
     }

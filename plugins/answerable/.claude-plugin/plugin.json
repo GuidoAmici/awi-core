@@ -1,7 +1,7 @@
 {
   "name": "answerable",
   "version": "0.1.0",
-  "description": "Estructura toda respuesta del agente para que se pueda contestar señalando una etiqueta, en vez de reescribirla: cinco bloques con dirección, TLDR primero, ningún identificador desnudo y comandos que se pegan y corren.",
+  "description": "Estructura toda respuesta del agente para que se pueda contestar con el número de la pregunta, en vez de reescribirla: cinco bloques, TLDR primero, ningún identificador desnudo y comandos que se pegan y corren.",
   "author": {
     "name": "Guido Amici",
     "url": "https://github.com/GuidoAmici"

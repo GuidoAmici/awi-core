@@ -1,6 +1,6 @@
 # El operador contesta por dirección, no reescribiendo
 
-> **Estado: aceptado (2026-08-28), enmendado tres veces (2026-08-29, 2026-08-30).**
+> **Estado: aceptado (2026-08-28), enmendado tres veces (2026-08-29, 2026-08-30), reemplazado en parte por el [ADR 0025](0025-las-preguntas-llevan-numero-y-los-items-no-llevan-letra.md) (2026-10-16):** los ítems ya no llevan letra; sólo las preguntas llevan número.
 > Las direcciones siguen siendo el mecanismo; cambió el corte de los bloques y después
 > la forma del ítem. Ver [La primera taxonomía duró un día](#la-primera-taxonomía-duró-un-día),
 > [Los hilos abiertos son un bloque, no una nota al pie](#los-hilos-abiertos-son-un-bloque-no-una-nota-al-pie)

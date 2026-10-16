@@ -18,11 +18,11 @@ Steps 2–3 son automáticos: sin prompts, sin confirmaciones. Step 1 usa `AskUs
 
 ## Step 1 — Gate de hilos abiertos
 
-**El bloque `C` de la última respuesta es la lista, no un punto de partida.** La política de [los cinco bloques](../../../plugins/answerable/rules/answerable.md) hace que cada turno mantenga los hilos abiertos de la sesión entera, así que acá no se reconstruye nada: se levanta esa lista y se le da destino a cada ítem. El barrido de la conversación pasa a ser control, no fuente.
+**El bloque «Hilos abiertos» de la última respuesta es la lista, no un punto de partida.** La política de [los cinco bloques](../../../plugins/answerable/rules/answerable.md) hace que cada turno mantenga los hilos abiertos de la sesión entera, así que acá no se reconstruye nada: se levanta esa lista y se le da destino a cada ítem. El barrido de la conversación pasa a ser control, no fuente.
 
 Para cada hilo, **una llamada a `AskUserQuestion` por vez**, esperando respuesta antes de la siguiente. No vuelques una lista en markdown ni pidas texto libre.
 
-### 1a — Destino de cada hilo de `C`
+### 1a — Destino de cada hilo abierto
 
 Tomá el bloque `Hilos abiertos` de la última respuesta del agente principal. Para cada ítem, preguntá con estas cuatro opciones:
 
@@ -33,13 +33,13 @@ Tomá el bloque `Hilos abiertos` de la última respuesta del agente principal. P
 | **Dejarlo para mañana** | Queda sólo en el daily, sin issue | Va a «Hilos abiertos» del `2d` — decile al operador que si mañana no lo levanta, se pierde |
 | **Abandonarlo** | No va | Confirmalo y no lo escribas en ningún lado |
 
-**«Terminarlo ahora» va primero cuando el hilo es corto.** El bloque `C` suele decir exactamente qué falta —«faltan `billing.ts` y `webhooks.ts`, mismo patrón»—; si eso entra en la sesión, cerrarlo cuesta menos que filear un issue y volver a cargarlo mañana.
+**«Terminarlo ahora» va primero cuando el hilo es corto.** El bloque «Hilos abiertos» suele decir exactamente qué falta —«faltan `billing.ts` y `webhooks.ts`, mismo patrón»—; si eso entra en la sesión, cerrarlo cuesta menos que filear un issue y volver a cargarlo mañana.
 
 **Un hilo que se descompone en varias unidades entregables no es un issue, es una épica:** issue padre con sub-issues, en el workspace repo de la org, que es donde `issue-tracker.md` ya ubica las épicas cross-repo. Preguntalo como parte de la opción "Convertirlo en issue", no como una quinta opción.
 
-**Si no hay bloque `C` disponible** —la sesión no usó los bloques, o esta skill corre sin la conversación— saltá a `1b` y usalo como fuente.
+**Si no hay bloque «Hilos abiertos» disponible** —la sesión no usó los bloques, o esta skill corre sin la conversación— saltá a `1b` y usalo como fuente.
 
-### 1b — Verificación: lo que `C` no registró
+### 1b — Verificación: lo que los hilos abiertos no registraron
 
 Recorré la sesión buscando lo que quedó a mitad de camino y no está en la lista:
 
@@ -49,11 +49,11 @@ Recorré la sesión buscando lo que quedó a mitad de camino y no está en la li
 - Cambios de código sin commitear que no son contexto — el Step 3 publica los repos de contexto, no los repos de trabajo del harness
 - **Commits sin pushear, PRs esperando tests/CI, o PRs ya testeados y aprobados sin mergear.** Para código, terminado es "en el remoto compartido" — ver «Los cinco bloques son un solo eje» en [`answerable`](../../../plugins/answerable/rules/answerable.md). Corré `git status` y, si aplica, `gh pr status` / `gh pr checks` en los repos que la sesión tocó; no asumas que un commit local llegó a destino.
 
-Lo que aparezca acá y no estuviera en `C` se trata igual: misma pregunta, mismas cuatro opciones.
+Lo que aparezca acá y no estuviera en los hilos abiertos se trata igual: misma pregunta, mismas cuatro opciones.
 
 **Si lo que encontraste no es de esta sesión, no asumas que quedó abandonado.** Antes de proponer una acción, corré `ListAgents` y fijate si hay una sesión de Claude Code interactiva que pueda seguir trabajándolo — sesiones iniciadas hace pocas horas son candidatas reales; una órfana de días no lo es. Si hay duda, decilo como hallazgo y dejá que el operador decida, no lo toques por tu cuenta.
 
-**Si el barrido encuentra bastante que `C` no tenía, decilo en el Step 5.** Significa que el bloque no se mantuvo durante la sesión, y es lo único que puede detectarlo.
+**Si el barrido encuentra bastante que los hilos abiertos no tenían, decilo en el Step 5.** Significa que el bloque no se mantuvo durante la sesión, y es lo único que puede detectarlo.
 
 ### 1c — Información sin guardar
 
@@ -149,7 +149,7 @@ Agregá una sección `## Session Log` con:
 
 **Agregado esta sesión** — cada tarea, decisión o idea creada. Para cada una: prioridad (`critical` / `high` / `medium` / `low`) y una marca: **[strategic]** o **[reactive]**.
 
-**Hilos abiertos** — el destino que el Step 1 le dio a cada hilo de `C`, no sólo lo diferido. Los que se convirtieron en issue van con su número y no vuelven a esta lista; los que quedaron para mañana van sin enlace, para que el handoff los levante.
+**Hilos abiertos** — el destino que el Step 1 le dio a cada hilo abierto, no sólo lo diferido. Los que se convirtieron en issue van con su número y no vuelven a esta lista; los que quedaron para mañana van sin enlace, para que el handoff los levante.
 
 **Impulse check** — una línea: ¿la sesión fue mayormente estratégica o reactiva? Si dominó lo reactivo, decilo sin rodeos.
 
@@ -230,7 +230,7 @@ Publicado:
 
 3–6 viñetas sobre acciones tomadas e hilos que quedan abiertos. Resultados, no proceso.
 
-Si el `1b` encontró trabajo a medias que el bloque `C` no tenía, decilo acá en una línea con el número: es la señal de que los hilos no se mantuvieron durante la sesión.
+Si el `1b` encontró trabajo a medias que el bloque «Hilos abiertos» no tenía, decilo acá en una línea con el número: es la señal de que los hilos no se mantuvieron durante la sesión.
 
 ```
 ## Session summary

@@ -6,49 +6,46 @@ en vez de reescribirla.
 Estas reglas rigen desde este turno, en toda respuesta al operador y en el informe
 final de un subagente al agente principal.
 
-## Toda respuesta tiene cinco bloques con dirección
+## Toda respuesta tiene cinco bloques
 
 Una respuesta larga puede tener todo lo que el operador necesita y aun así no decirle dónde está nada. El resultado del pedido aparece a mitad de un párrafo, la sugerencia que había que aprobar quedó entre dos hallazgos, y para contestar "sí a lo segundo" hay que reescribir lo segundo. **La estructura no es cortesía tipográfica: es lo que vuelve la respuesta contestable.**
 
 Cinco bloques, siempre en este orden —salvo que el operador haya preguntado algo, y entonces el bloque que contesta abre la respuesta:
 
-| Letra | Bloque | Qué va adentro |
-|---|---|---|
-| `A` | **Qué hice** | Lo que creé, modifiqué o borré, y dónde |
-| `B` | **Qué tenés que saber** | Lo que averigüé o detecté y el operador no sabía |
-| `C` | **Hilos abiertos** | Lo que esta sesión empezó y no terminó |
-| `D` | **Qué propongo** | Lo que el agente podría hacer después y no empezó |
-| `E` | **Qué necesito de vos** | Lo que el agente no puede resolver solo |
+| Bloque | Qué va adentro |
+|---|---|
+| **Qué hice** | Lo que creé, modifiqué o borré, y dónde |
+| **Qué tenés que saber** | Lo que averigüé o detecté y el operador no sabía |
+| **Hilos abiertos** | Lo que esta sesión empezó y no terminó |
+| **Qué propongo** | Lo que el agente podría hacer después y no empezó |
+| **Qué necesito de vos** | Lo que el agente no puede resolver solo |
 
 ### Los cinco bloques son un solo eje
 
-El eje es **el grado de cierre**. `A` y `B` están cerrados: lo hecho no vuelve a hacerse y un hallazgo no pide nada. `C` está abierto y empezado. `D` y `E` están abiertos y sin empezar — y de esos dos, `D` lo puede cerrar el agente y `E` sólo el operador.
+El eje es **el grado de cierre**. «Qué hice» y «Qué tenés que saber» están cerrados: lo hecho no vuelve a hacerse y un hallazgo no pide nada. «Hilos abiertos» está abierto y empezado. «Qué propongo» y «Qué necesito de vos» están abiertos y sin empezar — el primero lo puede cerrar el agente y el segundo sólo el operador.
 
 **Ningún ítem cae en dos bloques**, porque cada frontera es una pregunta binaria que se contesta al escribir el ítem:
 
-- **`A` o `B` — ¿quedó algo distinto?** Si el disco, el repo o un issue quedaron cambiados, es `A`. Si no —leí, busqué, medí, deduje—, es `B`. "Revisé los tres handlers y no hay bug" es `B`: lo único que cambió es lo que sabemos.
-- **`A` o `C` — ¿quedó terminado?** Un trabajo a medias produce las dos cosas: `A` reporta la parte que sí quedó y es verificable en el repo, `C` dice qué falta. El hilo no repite lo hecho.
-- **`C` o `D` — ¿ya empezó?** Una propuesta que nunca se tocó es `D`. En cuanto se empieza —o el operador acepta un `D` y todavía no se ejecutó— pasa a ser un hilo.
-- **`D` o `E` — ¿puedo avanzar sin la respuesta?** Ver más abajo.
+- **«Qué hice» o «Qué tenés que saber» — ¿quedó algo distinto?** Si el disco, el repo o un issue quedaron cambiados, es «Qué hice». Si no —leí, busqué, medí, deduje—, es «Qué tenés que saber». "Revisé los tres handlers y no hay bug" es un hallazgo: lo único que cambió es lo que sabemos.
+- **«Qué hice» o «Hilos abiertos» — ¿quedó terminado?** Un trabajo a medias produce las dos cosas: «Qué hice» reporta la parte que sí quedó y es verificable en el repo, el hilo dice qué falta. El hilo no repite lo hecho.
+- **«Hilos abiertos» o «Qué propongo» — ¿ya empezó?** Una propuesta que nunca se tocó es una propuesta. En cuanto se empieza —o el operador la acepta y todavía no se ejecutó— pasa a ser un hilo.
+- **«Qué propongo» o «Qué necesito de vos» — ¿puedo avanzar sin la respuesta?** Ver más abajo.
 
 Un bloque que necesita un "y después" adentro de su definición son dos bloques.
 
-**Para código, "terminado" es "en el remoto compartido", no "committeado localmente".** Un commit sin pushear, un PR abierto esperando tests o CI, o un PR ya testeado y aprobado sin mergear son `C`, aunque el commit ya exista y esté reportado en `A`. El ítem de `A` cuenta qué se hizo; el de `C` dice que todavía no llegó a destino, citando la dirección del primero: «`C3`. El commit de `A2` sigue sin pushear — CI de `newhaze-webapp` corriendo».
+**Para código, "terminado" es "en el remoto compartido", no "committeado localmente".** Un commit sin pushear, un PR abierto esperando tests o CI, o un PR ya testeado y aprobado sin mergear son hilos abiertos, aunque el commit ya exista y esté reportado en «Qué hice». Ese ítem cuenta qué se hizo; el hilo dice que todavía no llegó a destino: «El commit [`3f2a91c`](https://github.com/GuidoAmici/newhaze-webapp/commit/3f2a91c) sigue sin pushear — CI de `newhaze-webapp` corriendo».
 
-### Cada ítem lleva su dirección
-
-Los ítems se numeran dentro de su bloque, y **el tag va en el ítem, no en el título**: el bloque se titula `## Qué propongo` y sus ítems son `D1`, `D2`, `D3`. Repetir la letra en el encabezado no agrega nada — el ítem ya la trae.
+### Encabezado para el bloque, número para la pregunta
 
 **El título de un bloque es un encabezado Markdown (`##`), más grande que el texto.** Una línea en negrita se pierde entre los TLDR de los ítems, que también van en negrita; el encabezado es lo que deja saltar de bloque en bloque.
 
-La dirección existe para que el operador conteste sin reescribir. «`D3`, aplicalo, el resto no» es una respuesta completa.
+**Los ítems son viñetas, sin letras ni códigos.** El TLDR en negrita ya dice de qué trata cada uno; un rótulo como `D3` o `B2` es una capa más que el operador tiene que decodificar. La respuesta queda más limpia a la vista y igual de contestable (decisión del operador, 2026-10-16, [ADR 0025](../../../docs/adr/0025-las-preguntas-llevan-numero-y-los-items-no-llevan-letra.md)).
 
-- **La letra pertenece al bloque, no al lugar.** Las propuestas son `D` aunque falten `A`, `B` y `C`. Una dirección que cambia de significado según el turno no es una dirección.
-- **Los cinco bloques numeran sus ítems**, `B` incluido. Un hallazgo que no se puede citar no se puede objetar.
-- **Los bloques se citan entre sí por dirección.** Un hilo frenado por una decisión lo dice: «`C2` … frenado por `E1`». Es la ventaja de tener direcciones y no cuesta nada.
+**El número es para lo que el operador contesta: las preguntas de «Qué necesito de vos».** Cada pregunta tiene un número fijo (ver más abajo), y ese número es la referencia con la que el operador contesta —«191. A»— y con la que el resto de la respuesta la cita: «el merge de #370 queda frenado por la 191». Un hilo, un hallazgo o una propuesta se citan por su tema en pocas palabras («el hilo del CI de stg»), no por su posición en la lista.
+
 - **Sin tope de ítems.** Curar sigue siendo parte del trabajo, pero esconder una propuesta para respetar un número es peor que una lista larga.
-- **`A`, `B` y `D` valen hasta que el operador contesta.** Ver «El reporte se acumula hasta que el operador contesta». Si el operador se refiere a un ítem de un reporte que ya contestó, el agente confirma qué entendió antes de actuar.
-- **`C` y `E` son de la sesión y no se renumeran:** ver más abajo.
+- **«Qué hice», «Qué tenés que saber» y «Qué propongo» valen hasta que el operador contesta.** Ver «El reporte se acumula hasta que el operador contesta». Si el operador se refiere a algo de un reporte que ya contestó, el agente confirma qué entendió antes de actuar.
+- **Los hilos abiertos y las preguntas son de la sesión:** ver más abajo.
 
 ### Cada ítem abre con su TLDR en negrita
 
@@ -57,7 +54,7 @@ La dirección existe para que el operador conteste sin reescribir. «`D3`, aplic
 El formato es fijo:
 
 ```markdown
-A1. **La afirmación:** la evidencia, el detalle, la consecuencia.
+- **La afirmación:** la evidencia, el detalle, la consecuencia.
 ```
 
 - **El TLDR afirma, no anuncia.** Si le podés poner "Sobre" adelante y suena a título de sección, es un rótulo y no sirve. *"La tercera vía de salida es la que resuelve tu problema"* anuncia; *"Un hilo que no cerrás hoy sale como issue, y ese issue es el handoff"* afirma. El rótulo obliga a leer el párrafo para saber de qué se hablaba, que es exactamente lo que el formato existe para evitar.
@@ -65,7 +62,7 @@ A1. **La afirmación:** la evidencia, el detalle, la consecuencia.
 - **Nombrá la cosa, no su categoría.** El dato entra en el TLDR: el número, el archivo, el nombre, la decisión. "Faltan `billing.ts` y `webhooks.ts`" y no "quedaron archivos pendientes".
 - **Sin pronombres de suspenso.** "Esto", "la clave acá", "lo que resuelve el problema", "el punto importante" — todos refieren a algo que sólo aparece en el detalle. Es la forma más común del acertijo y la más fácil de detectar al releer.
 - **Una sola negrita por ítem, la del TLDR.** Si el detalle también resalta, no queda nada que escanear.
-- **El detalle es opcional.** Un ítem que entra en una oración es todo TLDR y no lleva negrita: `A5. Commit 8139bcc, en dev.` El formato aplica cuando hay algo que resumir.
+- **El detalle es opcional.** Un ítem que entra en una oración es todo TLDR y no lleva negrita: `- Commit [8139bcc](https://github.com/GuidoAmici/my-awi-instance/commit/8139bcc), en dev.` El formato aplica cuando hay algo que resumir.
 
 **Una línea.** Si el TLDR no entra en una, casi siempre es porque empezó a contar el detalle.
 
@@ -85,7 +82,7 @@ El TLDR es siempre una línea de prosa en negrita — eso no se negocia, porque 
 
 **El formato tampoco se agrega de adorno.** Una tabla de una fila es una oración. Tres viñetas de una oración cada una son un párrafo. Si la forma no le ahorra una lectura al operador, no va.
 
-**La forma no cambia la dirección.** Un ítem con tabla sigue siendo un ítem: lleva su letra, su número y su TLDR arriba, y la tabla va abajo, sin indentar. Una tabla suelta —sin la línea que dice qué concluye— obliga a leerla entera para saber de qué se hablaba, que es el mismo acertijo que el TLDR existe para evitar.
+**La forma no cambia el ítem.** Un ítem con tabla sigue siendo un ítem: su TLDR arriba y la tabla abajo, sin indentar. Una tabla suelta —sin la línea que dice qué concluye— obliga a leerla entera para saber de qué se hablaba, que es el mismo acertijo que el TLDR existe para evitar.
 
 ### Lo que contesta la pregunta va primero en la respuesta
 
@@ -93,37 +90,35 @@ Los bloques clasifican por **tipo de contenido**, no por destinatario, así que 
 
 | Lo que pidió el operador | Dónde va | Por qué |
 |---|---|---|
-| Una comparación para que elija él | `E` | No se puede avanzar sin su decisión |
-| Una comparación con una recomendación | `D` | Es una propuesta; la comparación es su detalle |
-| Información que el agente fue a buscar | `B` | Lo único que cambió es lo que sabemos |
-| El reporte de algo que se hizo | `A` | El entregable ya está en el repo |
+| Una comparación para que elija él | Qué necesito de vos | No se puede avanzar sin su decisión |
+| Una comparación con una recomendación | Qué propongo | Es una propuesta; la comparación es su detalle |
+| Información que el agente fue a buscar | Qué tenés que saber | Lo único que cambió es lo que sabemos |
+| El reporte de algo que se hizo | Qué hice | El entregable ya está en el repo |
 
-**Que lo hayan pedido no cambia el bloque, cambia el orden.** "Revisé los tres handlers y no hay bug" es `B` de las dos maneras; lo que cambia es que, si el operador preguntó justamente eso, es `B1` y `B` abre la respuesta.
+**Que lo hayan pedido no cambia el bloque, cambia el orden.** "Revisé los tres handlers y no hay bug" es un hallazgo de las dos maneras; lo que cambia es que, si el operador preguntó justamente eso, «Qué tenés que saber» abre la respuesta, con su encabezado de siempre. Una respuesta que la esconde adentro de una lista larga falla igual que una sin estructura.
 
-**El bloque que contesta se imprime primero y conserva su letra.** `B` arriba de `A` se sigue llamando `B`. Es la misma idea que ya rige las direcciones —la letra pertenece al bloque, no al lugar—, usada acá para lo que hace falta: que la respuesta no haya que ir a buscarla. Una respuesta que la esconde adentro de una lista larga falla igual que una sin estructura.
-
-### `E` tiene número fijo: la pregunta 22 es siempre la 22
+### Las preguntas tienen número fijo: la 22 es siempre la 22
 
 **Cada pregunta al operador recibe el próximo número libre de la sesión y lo conserva hasta que se contesta.** Si se renumerara en cada turno, el operador que contesta un mensaje viejo y el agente que ya mandó uno nuevo cuentan distinto. Pasó: «8. B» quería decir la pregunta que el agente había numerado 10, y hubo que deducirlo por el contenido.
 
 - **Un número no se reusa.** Una pregunta contestada se va y su número queda vacío. Si quedan sólo la 21 y la 23, se escriben 21 y 23, sin correrlas.
 - **Lo que no se contestó vuelve en cada turno, escrito entero:** el número, la pregunta, el contexto, las opciones y la recomendación, igual que la primera vez. El operador contesta desde el último mensaje, sin subir a buscar qué era cada número. «Siguen abiertas las 26, 27 y 29 a 34» lo manda a buscarlas: pasó el 2026-10-11 y lo pidió dos veces en el mismo mensaje. Una pregunta que dejó de importar se retira diciéndolo.
-- **El número va como texto dentro de la negrita del TLDR:** `**52. ¿La página enlaza al tema 5?**`. Una línea que empieza con `52.` es para Markdown un ítem de lista numerada, y el visor renumera la lista en secuencia: 55, 56, 52, 53 se muestran como 55, 56, 57, 58. Pasó el 2026-10-11 y el operador contestó «57» a la pregunta 52.
-- **`E` se agrupa por módulo**, con un subtítulo `###` por cada uno (webapp, juego, panel, infraestructura, design system…). Cada pregunta conserva su número fijo adentro de su grupo; el orden corrido de los números se pierde y no importa.
-- **El operador contesta con el número solo:** «22. Sí» es `E22`. Por eso, en el texto al operador las preguntas se escriben como `22.` y no como `E22`: es el único bloque que contesta en cada turno, y escribe como lee.
+- **El número va como texto dentro de la negrita del TLDR:** `- **52. ¿La página enlaza al tema 5?**`. Una línea que empieza con `52.` es para Markdown un ítem de lista numerada, y el visor renumera la lista en secuencia: 55, 56, 52, 53 se muestran como 55, 56, 57, 58. Pasó el 2026-10-11 y el operador contestó «57» a la pregunta 52.
+- **Las preguntas se agrupan por módulo**, con un subtítulo `###` por cada uno (webapp, juego, panel, infraestructura, design system…). Cada pregunta conserva su número fijo adentro de su grupo; el orden corrido de los números se pierde y no importa.
+- **El operador contesta con el número solo:** «22. Sí» contesta la pregunta 22.
 - **Al actuar sobre una respuesta, el agente nombra la pregunta en pocas palabras** («22, el ADR de delegación: lo escribo»). Si el número que usó el operador no coincide con ninguna pregunta abierta, confirma antes de actuar.
 - **La numeración sobrevive a la sesión.** El traspaso a la sesión siguiente lleva las preguntas abiertas con su número, y la sesión nueva sigue desde el más alto. Así un número no significa dos cosas en el mismo hilo de trabajo.
 - **En una cadena de agentes, el número lo pone quien le habla al operador.** Un subagente o una sesión de trabajo le pasa sus preguntas a quien coordina, sin numerarlas, y éste las numera al juntarlas.
 
 ### El reporte se acumula hasta que el operador contesta
 
-**Mientras el operador no contestó, cada mensaje nuevo es el mismo reporte con lo nuevo agregado.** Los ítems de `A`, `B` y `D` del reporte anterior siguen ahí, con su dirección, y los nuevos se suman al final de su bloque marcados con «(nuevo)». Así el último mensaje alcanza: nadie tiene que buscar reportes anteriores sepultados por los avisos que llegaron después.
+**Mientras el operador no contestó, cada mensaje nuevo es el mismo reporte con lo nuevo agregado.** Lo que ya estaba en «Qué hice», «Qué tenés que saber» y «Qué propongo» sigue ahí, y lo nuevo se suma al final de su bloque marcado con «(nuevo)». Así el último mensaje alcanza: nadie tiene que buscar reportes anteriores sepultados por los avisos que llegaron después.
 
-El reporte se corta cuando el operador contesta. La respuesta siguiente abre un reporte nuevo: `A`, `B` y `D` vuelven a numerarse desde `1` y llevan sólo lo ocurrido desde esa respuesta. `C` y `E` siguen su propia regla, que ya es acumulativa.
+El reporte se corta cuando el operador contesta. La respuesta siguiente abre un reporte nuevo, con sólo lo ocurrido desde esa respuesta. Los hilos abiertos y las preguntas siguen su propia regla, que ya es acumulativa.
 
-### `C` tampoco se renumera desde cero
+### Los hilos abiertos tampoco empiezan de cero
 
-**Los hilos abiertos son de la sesión entera:** un hilo que se abrió en el tercer turno sigue apareciendo en el noveno hasta que se cierre. La numeración se rehace en cada respuesta; la lista, no.
+**Los hilos abiertos son de la sesión entera:** un hilo que se abrió en el tercer turno sigue apareciendo en el noveno hasta que se cierre.
 
 Esa persistencia es todo el punto del bloque. Sin ella, repartir el trabajo entre sesiones obliga a reconstruir al final lo que se fue abriendo al principio — y en una sesión larga los primeros hilos ya no están en contexto para reconstruirlos.
 
@@ -131,27 +126,27 @@ Esa persistencia es todo el punto del bloque. Sin ella, repartir el trabajo entr
 
 **Un hilo sale de la lista de tres maneras**, y sólo de esas tres:
 
-1. **Se cierra** — pasa a `A` en el turno que lo termina, y desaparece de `C`.
+1. **Se cierra** — pasa a «Qué hice» en el turno que lo termina, y desaparece de los hilos.
 2. **Se abandona** — el operador dice que no va, y el agente lo confirma antes de borrarlo.
 3. **Se convierte en issue** — si el hilo va a sobrevivir a la sesión, deja de ser un hilo y pasa al tracker, con su enlace. Es la vía normal para repartir trabajo entre sesiones.
 
-`C` es lo que consume el ritual de cierre de sesión, que sin esa lista la reconstruye barriendo la conversación entera al cerrar. Mantenerla turno a turno hace ese barrido una verificación en vez de una reconstrucción.
+Los hilos abiertos son lo que consume el ritual de cierre de sesión, que sin esa lista la reconstruye barriendo la conversación entera al cerrar. Mantenerla turno a turno hace ese barrido una verificación en vez de una reconstrucción.
 
-### Los bloques vacíos se omiten, menos `E`
+### Los bloques vacíos se omiten, menos «Qué necesito de vos»
 
-Un bloque sin contenido no se rotula. Si el agente no tocó nada, `A` no aparece y la respuesta abre en `B`.
+Un bloque sin contenido no se rotula. Si el agente no tocó nada, «Qué hice» no aparece y la respuesta abre en «Qué tenés que saber».
 
-**`E` es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
+**«Qué necesito de vos» es la excepción: cuando está vacío, se declara.** "No necesito nada de vos, sigo" es información; borrar el bloque deja al operador preguntándose si le toca algo. Es la misma razón por la que la línea 2 del TLDR nunca se omite.
 
 ### Propuesta y decisión se separan por una sola pregunta
 
-**¿Puedo avanzar sin la respuesta?** Si sí, es `D`. Si no, es `E`.
+**¿Puedo avanzar sin la respuesta?** Si sí, es «Qué propongo». Si no, es «Qué necesito de vos», con número.
 
 El criterio es binario y se evalúa al escribir el ítem, no al terminar la respuesta. Una propuesta que el operador ignora no traba nada; una decisión que ignora deja trabajo detenido — y por eso las dos no pueden vivir en el mismo bloque, aunque las dos terminen en "¿lo hago?".
 
-**`E` no es sólo información.** Una decisión entre dos caminos, la conformidad sobre algo ya hecho y un dato que sólo el operador tiene son los tres el mismo bloque: cosas que el agente no puede resolver por su cuenta.
+**«Qué necesito de vos» no es sólo información.** Una decisión entre dos caminos, la conformidad sobre algo ya hecho y un dato que sólo el operador tiene son los tres el mismo bloque: cosas que el agente no puede resolver por su cuenta.
 
-**Con `E` abierto el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y `E` dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
+**Con preguntas abiertas el agente no se sienta a esperar.** Hace todo lo que no dependa de la respuesta, frena únicamente lo que sí, y cada pregunta dice qué quedó detenido y qué siguió igual. Volver con las manos vacías por una pregunta que afectaba a un tercio del trabajo es un modo de falla, no prudencia.
 
 ### Dónde aplica
 
@@ -159,12 +154,12 @@ En las respuestas al operador y en el informe final de un subagente al agente pr
 
 **El piso es más de un párrafo.** Una confirmación o una respuesta de una línea no se estructura: ahí el mensaje entero es un solo ítem y no necesita rótulo.
 
-En el ejemplo el operador preguntó *"¿unifico la guarda o dejo la copia en cada handler?"*, así que `D` abre la respuesta sin dejar de llamarse `D`, y la comparación que la contesta va como tabla y no como párrafo:
+En el ejemplo el operador preguntó *"¿unifico la guarda o dejo la copia en cada handler?"*, así que «Qué propongo» abre la respuesta, y la comparación que la contesta va como tabla y no como párrafo:
 
 ```markdown
 ## Qué propongo
-D1. **Unificar la guarda gana por mantenimiento y pierde por riesgo de
-    regresión**, y con los 42 tests en verde el riesgo es el barato:
+- **Unificar la guarda gana por mantenimiento y pierde por riesgo de
+  regresión**, y con los 42 tests en verde el riesgo es el barato:
 
 | | Unificar en `guard.ts` | Dejar la copia |
 |---|---|---|
@@ -172,25 +167,26 @@ D1. **Unificar la guarda gana por mantenimiento y pierde por riesgo de
 | Riesgo de regresión | Medio | Nulo |
 | El próximo handler | Hereda el fix | Copia el bug |
 
-D2. **Un issue por los tres handlers duplicados**, y cierro `C1` con él.
+- **Un issue por los tres handlers duplicados**, y con él cierro el hilo de
+  la guarda unificada.
 
 ## Qué hice
-A1. **El fix del token expirado quedó en `auth.ts:42`:** los 42 tests
-    pasan y no hizo falta tocar el middleware.
+- **El fix del token expirado quedó en `auth.ts:42`:** los 42 tests
+  pasan y no hizo falta tocar el middleware.
 
 ## Qué tenés que saber
-B1. **El mismo bug vive en `billing.ts`, `webhooks.ts` y `export.ts`:**
-    los tres copian la guarda en vez de llamarla.
+- **El mismo bug vive en `billing.ts`, `webhooks.ts` y `export.ts`:**
+  los tres copian la guarda en vez de llamarla.
 
 ## Hilos abiertos
-C1. **La guarda unificada resuelve sesión expirada y le faltan dos casos:**
-    token inválido y refresh, los dos en `guard.ts`.
-C2. **El renombre de `UserCtx` quedó a mitad, frenado por `E1`:** los
-    imports ya apuntan al nombre nuevo, las definiciones no.
+- **La guarda unificada resuelve sesión expirada y le faltan dos casos:**
+  token inválido y refresh, los dos en `guard.ts`.
+- **El renombre de `UserCtx` quedó a mitad, frenado por la 14:** los
+  imports ya apuntan al nombre nuevo, las definiciones no.
 
 ## Qué necesito de vos
-E1. **¿`UserCtx` pasa a `Principal` o a `Actor`?** Frena `C2`; el resto
-    del renombre no depende de la respuesta y siguió.
+- **14. ¿`UserCtx` pasa a `Principal` o a `Actor`?** Frena el renombre;
+  el resto no depende de la respuesta y siguió.
 ```
 
 Las otras reglas de escritura siguen valiendo adentro de los bloques: ningún identificador viaja desnudo, y un comando dirigido al operador se pega y corre.
@@ -218,7 +214,7 @@ La plantilla nace de una oferta, así que en un reporte hay que traducirla: la l
 
 En la apertura de cualquier **texto escrito** que un humano vaya a leer y que sea más largo que un párrafo: cuerpos de issues y PRs, PRD, BDR, ADR, outputs, briefs a subagentes, artifacts —arriba de la capa de escaneo— y copy de marca. En un artifact o un issue el TLDR puede ser un bloque de cuatro líneas rotuladas; en un output suele ser un párrafo corto que las contiene sin rotularlas.
 
-**No aplica a los turnos de conversación** —respuestas al operador, informe final de un subagente—. Ahí manda el orden de la sección anterior: `A1` o `B1` ya abren diciendo de qué va, y encimarles un TLDR duplica la apertura. La regla es "¿es un turno o es un documento?".
+**No aplica a los turnos de conversación** —respuestas al operador, informe final de un subagente—. Ahí manda el orden de la sección anterior: el primer ítem ya abre diciendo de qué va, y encimarle un TLDR duplica la apertura. La regla es "¿es un turno o es un documento?".
 
 Tampoco aplica a mensajes de commit —el scope de Conventional Commits ya cumple esa función y el subject tiene límite—, ni a textos de una línea o confirmaciones, donde el mensaje entero ya es el TLDR.
 
@@ -232,11 +228,25 @@ La bajada a copy de cara al consumidor —headline, CTA, promesa, prueba— est�
 
 Un `#63`, un `ADR 0021` o un `d0f96fd` no dicen nada por sí mismos: son direcciones, no información. El operador no memoriza el backlog, y un agente que escribe "esto lo cubre #47" está pidiendo que alguien vaya a buscar qué plantea #47 para poder seguir la frase.
 
-**Todo identificador que traiga el agente a la conversación va acompañado de qué plantea.** Si el identificador lo escribió el operador, ya sabe de qué habla — no hace falta repetírselo.
+**Todo identificador que traiga el agente a la conversación va enlazado y acompañado de qué plantea.** El enlace le ahorra al operador ir a buscarlo; la paráfrasis le ahorra abrirlo para saber de qué se habla. Si el identificador lo escribió el operador, ya sabe de qué habla — la paráfrasis sobra, el enlace no.
 
 ### Qué cubre
 
-Cualquier identificador opaco: issues, PRs, ADR, BDR, PRD, SHAs de commit, milestones. No es una lista cerrada; el criterio es si el identificador, leído solo, dice de qué se trata.
+Cualquier identificador opaco: issues, PRs, ADR, BDR, PRD, SHAs de commit, corridas de CI, milestones. No es una lista cerrada; el criterio es si el identificador, leído solo, dice de qué se trata.
+
+### El enlace
+
+Un link Markdown cuyo texto es el identificador y cuyo destino es la URL completa. El agente la arma, no la pide:
+
+| Identificador | Destino |
+|---|---|
+| Issue | `https://github.com/<owner>/<repo>/issues/<n>` |
+| PR | `https://github.com/<owner>/<repo>/pull/<n>` |
+| Commit | `https://github.com/<owner>/<repo>/commit/<sha>` |
+| Corrida de CI | `https://github.com/<owner>/<repo>/actions/runs/<id>` |
+| ADR, BDR, output | La ruta del archivo, relativa al repo |
+
+Un identificador que se repite en la misma respuesta se enlaza la primera vez.
 
 ### Qué acompaña al identificador
 
@@ -244,13 +254,13 @@ Una **paráfrasis de una frase**, en el idioma de la conversación — no el tí
 
 Referencia primero, tema después:
 
-```
-newhaze-webapp#63 — soporte de variantes de producto en el panel B2B
-ADR 0021 — la progresión se registra como eventos, no como estado
-d0f96fd — el commit que sacó los codebases del ciclo automático de sync
+```markdown
+[newhaze-webapp#63](https://github.com/GuidoAmici/newhaze-webapp/issues/63) — soporte de variantes de producto en el panel B2B
+[ADR 0021](docs/adr/0021-el-operador-contesta-por-direccion-no-reescribiendo.md) — el operador contesta por dirección
+[d0f96fd](https://github.com/GuidoAmici/my-awi-instance/commit/d0f96fd) — el commit que sacó los codebases del ciclo automático de sync
 ```
 
-Cross-repo, el identificador lleva el repo: `newhaze-webapp#63`. Dentro del repo en curso, `#63` alcanza.
+Cross-repo, el texto del enlace lleva el repo: `newhaze-webapp#63`. Dentro del repo en curso, `#63` alcanza.
 
 ### Leer antes de mencionar
 
@@ -320,4 +330,3 @@ Qué agrega cada pieza:
 ### Cuándo no hace falta
 
 Cuando el comando no es para pegar sino una **cita** —mostrar qué corriste, o qué hace un script— no lleva `cd` ni se lo trata como bloque ejecutable. Si el operador lo va a correr, es pegable; si es ilustración, decilo en la línea que lo introduce.
-
