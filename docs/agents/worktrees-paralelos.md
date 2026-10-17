@@ -2,7 +2,7 @@
 tipo: agentes
 capa: operacion
 descripcion: Aislar agentes que trabajan en ramas distintas del mismo repo con git worktree.
-last-updated: 2026-09-04
+last-updated: 2026-10-17
 artifacts:
   - url: null
     entrega: Modelo mental de git worktree para agentes en paralelo, y los recursos compartidos que sobreviven al aislamiento
@@ -26,9 +26,23 @@ python3 .claude/skills/shared/scripts/worktree.py provision <codebase> <rama>
 python3 .claude/skills/shared/scripts/worktree.py list      # quién tiene qué
 python3 .claude/skills/shared/scripts/worktree.py status    # quién tomó cada checkout principal
 python3 .claude/skills/shared/scripts/worktree.py release <codebase>
+python3 .claude/skills/shared/scripts/worktree.py sweep [--dry-run]   # borra los de PRs cerrados
 ```
 
 `provision` crea el worktree, symlinkea los archivos ignorados que la app necesita (`.env.local` y hermanos), le asigna un puerto libre en `.worktree-port` y avisa si el repo trae stack de base de datos.
+
+### Un worktree terminado se borra
+
+Nadie suelta el worktree que provisionó: el 2026-10-17 había 106 en cuatro codebases, ~10 GB adentro del VHDX de WSL, la mayoría de ramas ya mergeadas. Esa misma noche C: llegó a 0 bytes libres. `sweep` borra un worktree sólo si no puede perder nada:
+
+| Condición | Por qué |
+|---|---|
+| El PR de la rama está mergeado o cerrado hace más de 2 h | Un PR abierto es trabajo vivo; las 2 h cubren a la sesión que todavía está cerrando |
+| `git status` limpio, sin contar `.worktree-port` ni los symlinks de `provision` | Lo sin commitear no está en ningún otro lado |
+| HEAD es el del PR o está en alguna rama remota | Un commit posterior al merge sólo existe acá |
+| Ningún proceso tiene su directorio de trabajo adentro | Un dev server o un agente lo está usando |
+
+Con el PR mergeado se borra también la rama local; con el PR cerrado sin mergear la rama queda, porque es lo único que queda de ese trabajo. Sin PR, el worktree no se toca.
 
 `worktree-guard.py` (PreToolUse) bloquea un `git checkout` de rama sobre un checkout principal que otra sesión tiene tomado. El lease vive en `.claude/tmp/checkout-leases.json`, vence a las 8 horas y no se versiona. La regla operativa está en CLAUDE.md, que se carga en cada sesión.
 

@@ -18,6 +18,7 @@ Uso:
     python3 worktree.py list
     python3 worktree.py status [<codebase>]
     python3 worktree.py release <codebase>
+    python3 worktree.py sweep [--dry-run]
 """
 
 import argparse
@@ -27,6 +28,7 @@ import socket
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from paths import AWI_ROOT, ORGANIZATIONS_DIR
@@ -285,6 +287,182 @@ def cmd_status(codebase: str | None) -> int:
     return 0
 
 
+# ── Barrido de worktrees terminados ───────────────────────────────────────────
+#
+# Cada worktree es una copia entera del repo, y nadie los borra: el 2026-10-17
+# había 106 worktrees y ~10 GB en los cuatro codebases, la mayoría de ramas ya
+# mergeadas. Ese disco es parte de lo que dejó C: en 0 bytes esa noche.
+#
+# Se borra sólo lo que no puede perder nada: el PR de la rama ya se cerró hace
+# más de SWEEP_GRACE_HOURS, no hay cambios sin commitear y cada commit del
+# worktree está también en el remoto. Ante cualquier duda, el worktree queda.
+
+SWEEP_GRACE_HOURS = 2
+
+# Lo que `provision` agrega y git no conoce. No es trabajo sin guardar: se
+# borra antes de soltar el worktree, para que `git worktree remove` lo acepte.
+PROVISIONED_FILES = {PORT_FILE, *LINKED_IGNORED_FILES}
+
+
+def prs_by_branch(repo: Path) -> dict[str, dict] | None:
+    """Último PR de cada rama, o None si `gh` no responde para este repo."""
+    try:
+        rc = subprocess.run(
+            ["gh", "pr", "list", "--state", "all", "--limit", "1000",
+             "--json", "number,headRefName,headRefOid,state,closedAt"],
+            cwd=repo, capture_output=True, text=True, timeout=30,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    if rc.returncode != 0:
+        return None
+    mapa: dict[str, dict] = {}
+    for pr in json.loads(rc.stdout or "[]"):
+        previo = mapa.get(pr["headRefName"])
+        # Un PR abierto manda: la rama sigue viva aunque tenga uno viejo cerrado.
+        if previo is None or pr["state"] == "OPEN" or (
+            previo["state"] != "OPEN" and pr["number"] > previo["number"]
+        ):
+            mapa[pr["headRefName"]] = pr
+    return mapa
+
+
+def secondary_worktrees(principal: Path) -> list[dict]:
+    """Worktrees bajo `.claude/worktrees/` del repo, con su rama y su HEAD."""
+    rc = git(["worktree", "list", "--porcelain"], cwd=principal)
+    raiz = (principal / WORKTREES_SUBDIR).resolve()
+    encontrados, actual = [], {}
+    for linea in rc.stdout.splitlines() + [""]:
+        if not linea:
+            if actual.get("path") and actual["path"].resolve().parent == raiz:
+                encontrados.append(actual)
+            actual = {}
+        elif linea.startswith("worktree "):
+            actual["path"] = Path(linea.split(" ", 1)[1])
+        elif linea.startswith("HEAD "):
+            actual["head"] = linea.split(" ", 1)[1]
+        elif linea.startswith("branch refs/heads/"):
+            actual["branch"] = linea.removeprefix("branch refs/heads/")
+    return encontrados
+
+
+def processes_inside(path: Path) -> list[str]:
+    """Procesos cuyo directorio de trabajo está dentro de `path`."""
+    raiz = str(path.resolve())
+    nombres = []
+    for proc in Path("/proc").glob("[0-9]*"):
+        try:
+            cwd = os.readlink(proc / "cwd")
+        except OSError:
+            continue
+        if cwd == raiz or cwd.startswith(raiz + "/"):
+            try:
+                nombres.append((proc / "comm").read_text().strip())
+            except OSError:
+                nombres.append(proc.name)
+    return nombres
+
+
+def unsaved_work(worktree: Path) -> str | None:
+    rc = git(["status", "--porcelain", "--untracked-files=all"], cwd=worktree)
+    if rc.returncode != 0:
+        return "git status falló"
+    pendientes = [l for l in rc.stdout.splitlines() if l[3:].strip() not in PROVISIONED_FILES]
+    return f"{len(pendientes)} archivo(s) sin commitear" if pendientes else None
+
+
+def only_local_commits(worktree: Path, head: str, pr: dict) -> bool:
+    """True si HEAD tiene commits que no están en ningún lado más que acá."""
+    if head == pr.get("headRefOid"):
+        return False
+    rc = git(["branch", "-r", "--contains", head], cwd=worktree)
+    return not rc.stdout.strip()
+
+
+def hours_since(iso: str | None) -> float:
+    if not iso:
+        return 0.0
+    cerrado = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+    return (datetime.now(timezone.utc) - cerrado).total_seconds() / 3600
+
+
+def sweep_verdict(wt: dict, pr: dict | None) -> str | None:
+    """Motivo para conservar el worktree, o None si se puede borrar."""
+    if not wt.get("branch"):
+        return "con HEAD suelto"
+    if pr is None:
+        return "sin PR"
+    if pr["state"] == "OPEN":
+        return "con PR abierto"
+    if hours_since(pr.get("closedAt")) < SWEEP_GRACE_HOURS:
+        return f"con PR cerrado hace menos de {SWEEP_GRACE_HOURS} h"
+    if unsaved_work(wt["path"]):
+        return "con cambios sin commitear"
+    if only_local_commits(wt["path"], wt.get("head", ""), pr):
+        return "con commits que no están en el remoto"
+    if processes_inside(wt["path"]):
+        return "en uso por un proceso"
+    return None
+
+
+def remove_worktree(principal: Path, wt: dict, pr: dict) -> str | None:
+    """Borra el worktree; devuelve el error, o None si salió bien."""
+    for nombre in PROVISIONED_FILES:
+        extra = wt["path"] / nombre
+        # Hubo ramas que commitearon `.worktree-port`: borrarlo ahí sería un
+        # cambio, y `git worktree remove` lo rechaza con razón.
+        versionado = git(["ls-files", "--error-unmatch", nombre], cwd=wt["path"]).returncode == 0
+        if not versionado and (extra.is_symlink() or extra.is_file()):
+            extra.unlink()
+    rc = git(["worktree", "remove", str(wt["path"])], cwd=principal)
+    if rc.returncode != 0:
+        return rc.stderr.strip().splitlines()[-1] if rc.stderr.strip() else "git worktree remove falló"
+    # La rama local se va sólo si todo lo suyo entró por el merge. Un PR cerrado
+    # sin mergear conserva la rama: es lo único que queda de ese trabajo.
+    if pr["state"] == "MERGED" and wt.get("head") == pr.get("headRefOid"):
+        git(["branch", "-D", wt["branch"]], cwd=principal)
+    return None
+
+
+def cmd_sweep(dry_run: bool) -> int:
+    borrados, conservados, errores = [], {}, []
+    for nombre, repo in sorted(all_codebases().items()):
+        if "/" in nombre:
+            continue
+        principal = main_checkout(repo)
+        git(["worktree", "prune"], cwd=principal)
+        worktrees = secondary_worktrees(principal)
+        if not worktrees:
+            continue
+        prs = prs_by_branch(principal)
+        if prs is None:
+            conservados["sin respuesta de gh"] = conservados.get("sin respuesta de gh", 0) + len(worktrees)
+            continue
+        for wt in worktrees:
+            pr = prs.get(wt.get("branch", ""))
+            if motivo := sweep_verdict(wt, pr):
+                conservados[motivo] = conservados.get(motivo, 0) + 1
+                continue
+            etiqueta = f"{nombre}/{wt['path'].name} (PR #{pr['number']} {pr['state'].lower()})"
+            if dry_run:
+                borrados.append(etiqueta)
+            elif error := remove_worktree(principal, wt, pr):
+                errores.append(f"{etiqueta}: {error}")
+            else:
+                borrados.append(etiqueta)
+
+    verbo = "Se borrarían" if dry_run else "Borrados"
+    if borrados:
+        print(f"{verbo} {len(borrados)} worktree(s) de ramas terminadas:")
+        print("\n".join(f"  {b}" for b in borrados))
+    for e in errores:
+        print(f"  no pude borrar {e}")
+    if conservados and (dry_run or borrados or errores):
+        resumen = ", ".join(f"{n} {m}" for m, n in sorted(conservados.items(), key=lambda x: -x[1]))
+        print(f"Conservados: {resumen}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Worktrees de AWI: un directorio por rama.")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -303,6 +481,9 @@ def main() -> int:
     p = sub.add_parser("release", help="Soltar el lease del checkout principal")
     p.add_argument("codebase")
 
+    p = sub.add_parser("sweep", help="Borrar los worktrees de ramas cuyo PR ya se cerró")
+    p.add_argument("--dry-run", action="store_true", help="Sólo listar lo que se borraría")
+
     args = parser.parse_args()
 
     if args.cmd == "provision":
@@ -315,6 +496,8 @@ def main() -> int:
         checkout = main_checkout(resolve_codebase(args.codebase))
         print("Lease liberado." if release(checkout) else "No había lease.")
         return 0
+    if args.cmd == "sweep":
+        return cmd_sweep(args.dry_run)
     return 1
 
 
