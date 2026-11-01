@@ -21,11 +21,13 @@ Un agente se despacha contra el estado del repo, no contra la copia local: deleg
 
 ## Step 1: Scan
 
-One call covers every active org tracker plus the operator's personal repo — `fetch_issues.py` resolves them from `user-submodules.json`:
+One call covers every active org tracker, each org's active codebases and the operator's personal repo — `fetch_issues.py` resolves them from `user-submodules.json` and each org's `codebases.json`:
 
 ```bash
-python3 .claude/skills/shared/scripts/fetch_issues.py --label ready-for-agent --comments
+python3 .claude/skills/shared/scripts/fetch_issues.py --label ready-for-agent --comments --codebases
 ```
+
+`--codebases` is not optional here: work that is ready for an agent mostly lives in the codebase repos, not in the org trackers.
 
 Parse the JSON: `{"issues": [...], "errors": [...]}`. Surface any `errors` before continuing — an unreachable tracker means its issues are missing from the list, not that it has none.
 

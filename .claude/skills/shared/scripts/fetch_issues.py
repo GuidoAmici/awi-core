@@ -5,11 +5,13 @@ Every skill that needs issues goes through here, so a run costs one authorised
 call instead of one per org. Two ways in:
 
     import  — fetch_all_issues(orgs=..., labels=..., include_personal=...)
-    CLI     — python3 fetch_issues.py [--org NAME]... [--label NAME]... [--no-personal]
+    CLI     — python3 fetch_issues.py [--org NAME]... [--label NAME]... [--no-personal] [--codebases]
 
 Where issues live follows from the manifest, not from a second registry:
 `user-submodules.json` entries typed `org-workspace` and marked active name the
 org trackers, and each one's GitHub slug is derived from its `url` at runtime.
+With `--codebases`, each org's active codebases (its `codebases.json`) are read
+too.
 The operator's own repo holds personal issues and nothing else — there is no
 cross-org routing, no `org:` label to interpret. See ADR 0006.
 """
@@ -22,7 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from paths import AWI_ROOT
-from manifest import active_entries, entry_type, load_submodules
+from manifest import active_entries, entry_type, load_submodules, resolve_org_codebases
 
 GH_FIELDS = ["number", "title", "labels", "body"]
 GH_LIMIT = "200"
@@ -81,6 +83,39 @@ def org_trackers(raw: dict, orgs: list[str] | None = None) -> tuple[dict, list[s
             )
 
     return trackers, errors
+
+
+def codebase_trackers(
+    awi_root: Path, raw: dict, orgs: list[str]
+) -> tuple[list[tuple[str, str]], list[str]]:
+    """(slug, org name) for the codebases each of `orgs` has active.
+
+    A codebase repo carries its own issues — the work on that code — and they
+    count as the org's: `org` stays the org name, `source_repo` tells them apart.
+    The org workspace must be on disk, since its codebases.json is where the
+    urls live.
+    """
+    targets: list[tuple[str, str]] = []
+    errors: list[str] = []
+    active = active_entries(raw)
+
+    for name in orgs:
+        repos, unknown = resolve_org_codebases(awi_root, name, active[name])
+        for cb in unknown:
+            errors.append(
+                f"org '{name}': codebase '{cb}' is active in user-submodules.json "
+                f"but not declared in its codebases.json"
+            )
+        for repo in repos:
+            slug = repo_slug(repo.url)
+            if slug is None:
+                errors.append(
+                    f"codebase '{repo.name}': cannot derive a GitHub repo from url {repo.url!r}"
+                )
+                continue
+            targets.append((slug, name))
+
+    return targets, errors
 
 
 # ── Normalisation ─────────────────────────────────────────────────────────────
@@ -158,15 +193,20 @@ def fetch_all_issues(
     labels: list[str] | None = None,
     include_personal: bool = True,
     include_comments: bool = False,
+    include_codebases: bool = False,
     awi_root: Path = AWI_ROOT,
 ) -> tuple[list[dict], list[str]]:
     """Issues across the operator's active org trackers, plus their own repo.
 
-    orgs             — restrict to these org names; None means all active ones.
-    labels           — only issues carrying every one of these labels.
-    include_personal — whether to also read the operator's personal repo.
-    include_comments — attach each issue's comments; off by default because
-                       only /delegate-issue needs them and they are bulky.
+    orgs              — restrict to these org names; None means all active ones.
+    labels            — only issues carrying every one of these labels.
+    include_personal  — whether to also read the operator's personal repo.
+    include_comments  — attach each issue's comments; off by default because
+                        only /delegate-issue needs them and they are bulky.
+    include_codebases — also read each org's active codebase repos. Off by
+                        default: /today plans from the org trackers, and a
+                        codebase backlog would bury them; /delegate-issue needs
+                        it, because ready-for-agent work lives in the codebases.
 
     Returns (issues, errors). One unreachable tracker degrades that tracker
     only; the rest of the day's issues still come back.
@@ -175,6 +215,10 @@ def fetch_all_issues(
     trackers, errors = org_trackers(raw, orgs)
 
     targets = [(slug, name) for name, slug in trackers.items()]
+    if include_codebases:
+        found, errs = codebase_trackers(awi_root, raw, list(trackers))
+        targets.extend(t for t in found if t not in targets)
+        errors.extend(errs)
     if include_personal and user_repo:
         targets.append((user_repo, None))
 
@@ -203,6 +247,8 @@ def main() -> None:
                         help="skip the operator's personal repo")
     parser.add_argument("--comments", action="store_true", dest="include_comments",
                         help="attach each issue's comments (needed for agent briefs)")
+    parser.add_argument("--codebases", action="store_true", dest="include_codebases",
+                        help="also read each org's active codebase repos")
     args = parser.parse_args()
 
     issues, errors = fetch_all_issues(
@@ -210,6 +256,7 @@ def main() -> None:
         labels=args.labels,
         include_personal=args.include_personal,
         include_comments=args.include_comments,
+        include_codebases=args.include_codebases,
     )
     print(json.dumps({"issues": issues, "errors": errors},
                      indent=2, ensure_ascii=False))
