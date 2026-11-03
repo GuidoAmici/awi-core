@@ -11,7 +11,7 @@
 
 El [ADR 0015](0015-dos-ramas-porque-el-gate-vive-en-el-servidor.md) separó las ramas por un argumento que sigue siendo cierto: si las instancias tiran de la punta de la rama, el gate no puede impedir nada. **Un push directo a `main` con tests rojos le llega a quien corra `/awi-update`.** La decisión acepta ese costo; no lo resuelve.
 
-Entre el 2026-10-11 y el 2026-11-03 el gate retuvo 20 commits de `dev` por dos tests que leían un archivo en `.gitignore`. Ningún commit rojo llegó a las instancias, y tampoco ninguno de los 20. Esa retención deja de existir.
+Hasta el 2026-11-03 el gate retuvo 20 commits de `dev`; desde el 2026-10-11 lo frenaban dos tests que leían un archivo en `.gitignore`. Ningún commit rojo llegó a las instancias, y tampoco ninguno de los 20. Esa retención deja de existir.
 
 ## Consecuencias
 
