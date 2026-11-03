@@ -36,10 +36,10 @@ Esto importa sobre todo en máquinas que estuvieron meses sin actualizarse, dond
 
 | Estás en | Operación | Destructivo |
 |---|---|---|
-| `main` (distribución) | `reset --hard origin/main` | Sí, por diseño — ahí no hay trabajo local legítimo |
+| `main` (distribución) | `reset --hard origin/main` | Sí, por diseño — con el trabajo local ya rescatado |
 | Cualquier otra | `merge --ff-only origin/<rama>` | **No, por construcción** |
 
-Esto importa por dos razones. En la instancia del mantenedor, que trabaja en `dev`, un reset borraría commits sin pushear; el fast-forward no puede. Y si la instancia de un compañero termina en `dev` por accidente, obtiene una operación segura en lugar de un merge con conflictos — que es justo lo que esta skill existe para que nadie vea.
+En `main` el reset corre aunque trabajes ahí, como el mantenedor: sus commits sin pushear van a `respaldo/` y hay que recuperarlos desde esa rama. En cualquier otra rama, una que se quedó afuera obtiene una operación segura en lugar de un merge con conflictos — que es justo lo que esta skill existe para que nadie vea.
 
 ---
 
@@ -51,7 +51,7 @@ Esto importa por dos razones. En la instancia del mantenedor, que trabaja en `de
 python3 .claude/skills/awi-update/scripts/awi_update.py --check
 ```
 
-Reporta sin modificar nada: qué versión hay y qué versión viene, los cambios agrupados por tipo, qué archivos locales se van a descartar, y si la promoción de `dev` a `main` está colgada.
+Reporta sin modificar nada: qué versión hay y qué versión viene, los cambios agrupados por tipo y qué archivos locales se van a rescatar.
 
 **Mostrale al operador ese reporte y esperá.** No apliques la actualización sin que la haya visto, salvo que la haya pedido explícitamente sin revisión.
 
@@ -76,11 +76,7 @@ python3 .claude/skills/shared/scripts/log_command.py awi-update completed
 | `0` | Actualizado, o ya estaba al día | Seguir |
 | `1` | No se pudo: remoto inalcanzable, rama divergida o árbol sucio | Nada se tocó. Si es de red, reintentar. Si la rama divergió, mostrale el mensaje al operador — traerla requeriría decidir qué versión gana, y esa decisión no es de esta skill |
 
-## Si el diagnóstico avisa que la promoción está colgada
-
-El script reporta cuántos commits de `dev` no llegaron a `main`. Puede ser normal —están esperando que pasen los tests— o puede ser que la promoción se rompió. Es diagnóstico, no un gate: si el número no baja entre sesiones, avisale al operador de que revise el CI. La promoción anterior falló en 4 de 4 corridas durante días sin que nadie lo notara, y esta línea existe para que eso no se repita.
-
 ## Qué no hace esta skill
 
 - **No sincroniza los repos de contexto** (workspaces de org y sus codebases). Eso es otro ciclo, coordinado desde `docs/agents/contexto-compartido.md`: pull al abrir la sesión, commit y push sugeridos al cerrar.
-- **No publica nada.** No pushea, no commitea, no toca `dev`.
+- **No publica nada.** No pushea ni commitea.

@@ -1,5 +1,7 @@
 # Dos ramas, porque el gate de distribución vive en el servidor
 
+> **Estado: reemplazado por [ADR 0026](0026-una-sola-rama-main.md) (2026-11-03).**
+
 > **Enmienda a [ADR 0014](0014-el-problema-era-la-distribucion-no-la-composicion.md).** Reemplaza su
 > decisión de *"una sola rama de distribución"*. El resto del 0014 queda intacto: el reencuadre a
 > distribución, las dos fases, el criterio de reversibilidad y todo lo demás.
