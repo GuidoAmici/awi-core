@@ -87,13 +87,13 @@ git ls-tree -r only --name-only -- _data | grep -v -E '/(organizations|users)/[^
 ### 4. Switch to awi-core
 
 ```bash
-git checkout -B dev origin/dev
+git checkout -B main origin/main
 ```
 
 If it refuses because of untracked files that also exist on the target branch, compare them first — if identical, remove the local copies and retry:
 
 ```bash
-git diff --no-index <file> <(git show origin/dev:<file>)
+git diff --no-index <file> <(git show origin/main:<file>)
 ```
 
 ### 5. Restore what step 3 listed

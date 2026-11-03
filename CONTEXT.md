@@ -91,7 +91,7 @@ El código de AWI: skills, hooks, scripts compartidos y sus tests. Lo mantiene `
 _Evitar_: framework, sistema, el repo.
 
 **Rama de Distribución**:
-`main`. Es lo que reciben las instancias, y sólo avanza por fast-forward desde un commit de `dev` que pasó los tests: un commit rojo no le puede llegar a nadie. Ver [ADR 0015](docs/adr/0015-dos-ramas-porque-el-gate-vive-en-el-servidor.md).
+`main`. Es la única rama de awi-core: ahí se trabaja y eso reciben las instancias. Los tests corren en cada push y en cada PR, pero un push directo llega a las instancias aunque falle. Ver [ADR 0026](docs/adr/0026-una-sola-rama-main.md).
 _Evitar_: prod, stg (ambas eliminadas), rama estable.
 
 **Consumidor del Harness**:
@@ -247,4 +247,4 @@ _Evitar_: scanner, linter de seguridad.
 - **«issues cross-org»** (issues en el repo del usuario con etiquetas `org:`) — resuelto: concepto eliminado. El repo del usuario tiene issues personales; los de una org viven en el tracker de esa org. El org de un issue es el tracker del que vino, nunca una etiqueta.
 - **`employees.json`** era el registro de personas-agente — resuelto: eliminado, las personas-agente se descubren desde `_system/agency-agents/`, como decidió el [ADR 0008](docs/adr/0008-agent-discovery-desde-agency-agents.md).
 - **`/awi-sync`** era el comando de sincronización — resuelto: reemplazado por el Ciclo de contexto (`context_sync.py`), porque dejaba repos a mitad de un rebase fallido.
-- **`prod` y `stg`** eran ramas del camino de distribución — resuelto: dos ramas, `dev` y `main`, con `main` como Rama de Distribución. Ver [ADR 0015](docs/adr/0015-dos-ramas-porque-el-gate-vive-en-el-servidor.md).
+- **`prod`, `stg` y `dev`** eran ramas del camino de distribución — resuelto: una sola rama, `main`. Ver [ADR 0026](docs/adr/0026-una-sola-rama-main.md).

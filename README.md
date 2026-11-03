@@ -108,7 +108,7 @@ python3 -m pytest -q tests && \
 python3 .claude/skills/shared/scripts/vocab_check.py
 ```
 
-240 tests y un chequeo de vocabulario que falla si un documento reintroduce un término que describe un mecanismo eliminado. Los dos corren en CI sobre `dev`; `main` es la rama que reciben las instancias y sólo avanza desde un commit que pasó ([ADR 0015](docs/adr/0015-dos-ramas-porque-el-gate-vive-en-el-servidor.md)).
+240 tests y un chequeo de vocabulario que falla si un documento reintroduce un término que describe un mecanismo eliminado. Los dos corren en CI en cada push y PR a `main`, la única rama y la que reciben las instancias ([ADR 0026](docs/adr/0026-una-sola-rama-main.md)).
 
 Toda decisión de arquitectura se registra como ADR en [docs/adr/](docs/adr/) antes de implementarse.
 

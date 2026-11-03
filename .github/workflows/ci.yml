@@ -1,25 +1,15 @@
-name: CI — test, promoción a main y Release PR
+name: CI — test y Release PR
 
-# Dos ramas: dev es donde se trabaja, main es lo que reciben las instancias.
-# main sólo avanza cuando los tests pasan, así que un commit rojo no puede
-# llegarle a nadie. Ver ADR 0014 y 0015.
-#
-# Antes eran cuatro workflows sobre dev → stg → prod, y la promoción tenía dos
-# eslabones manuales o condicionales en serie dentro del camino de distribución:
-# había que mergear a mano un PR de release-please, y ese PR sólo se generaba si
-# el token de la GitHub App estaba configurado. Resultado: prod, que es lo que
-# recibe cualquiera que clona, quedó 11 commits atrás y CHANGELOG.md nunca
-# existió.
-#
-# Acá la promoción no depende de ningún secreto opcional: main no está cubierta
-# por el ruleset del repo, así que el GITHUB_TOKEN alcanza. Y no hay ningún
-# `if: has_app` que la saltee en silencio — si el push falla, el job falla.
+# Una sola rama: main es donde se trabaja y lo que reciben las instancias.
+# Un push directo a main llega a las instancias sin esperar a los tests: acá el
+# job test avisa, no impide. Lo que tenga que probarse antes de llegarle a nadie
+# va por PR. Ver ADR 0026.
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   pull_request:
-    branches: [dev]
+    branches: [main]
 
 permissions:
   contents: write
@@ -81,39 +71,15 @@ jobs:
           PYTHONPATH=.claude/skills/shared/scripts \
             python3 .claude/skills/shared/scripts/vocab_check.py --raiz .
 
-  promote:
-    name: Promover dev → main
-    needs: test
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      # fetch-depth: 0 es obligatorio. Con la profundidad 1 por defecto, el
-      # runner no tiene la ascendencia de main y `git push <sha>:refs/heads/main`
-      # se rechaza con "fetch first" aunque el fast-forward sea posible: git no
-      # puede probar la relación que el servidor exige.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Fast-forward puro: main queda idéntica a un commit de dev que pasó los
-      # tests, sin commit de merge. Si no puede ser fast-forward, el push se
-      # rechaza y el job falla — que es lo que queremos, porque significa que
-      # alguien escribió en main por fuera de esta promoción.
-      - name: Fast-forward main al commit testeado
-        run: git push origin ${{ github.sha }}:refs/heads/main
-
   release-please:
     name: Release PR
     needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      # Apunta a dev, no a main: así el bump de versión y la entrada de
-      # CHANGELOG.md viajan aguas abajo con el resto de los cambios. Apuntándolo
-      # a main, sus commits quedarían sólo ahí y divergirían de dev.
       - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target-branch: dev
+          target-branch: main
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

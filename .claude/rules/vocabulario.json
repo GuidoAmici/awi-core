@@ -119,8 +119,8 @@
     {
       "nombre": "ramas-de-distribucion-viejas",
       "categoria": "vocabulario-eliminado",
-      "descripcion": "El camino de distribución era dev → stg → prod. Hoy son dos ramas: dev y main (ADR 0015).",
-      "remedio": "La rama de distribución es main; se trabaja en dev.",
+      "descripcion": "El camino de distribución era dev → stg → prod. Hoy hay una sola rama: main (ADR 0026).",
+      "remedio": "La rama de distribución es main, y ahí se trabaja.",
       "contenido": "^(?!.*_Evitar_)(?!.*_Avoid_).*(?:\\borigin/(?:stg|prod)\\b|\\brama\\s+(?:stg|prod)\\b|\\bbranch\\s+(?:stg|prod)\\b).*$",
       "excepto_rutas": [
         "^docs/adr/",

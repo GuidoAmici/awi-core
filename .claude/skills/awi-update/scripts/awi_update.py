@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Traer la última versión del harness a esta instancia.
 
-Las instancias consumidoras siguen `main`, que sólo avanza por fast-forward
-desde un commit de `dev` que pasó los tests (ADR 0015). Actualizar es entonces
-un reset duro a `origin/main`: los compañeros son consumidores del harness, no
+Las instancias consumidoras siguen `main`, la única rama de awi-core (ADR 0026).
+Actualizar es entonces un reset duro a `origin/main`: los compañeros son consumidores del harness, no
 coautores (ADR 0014), así que no hay merge y por lo tanto no hay conflicto que
 mostrarle a alguien que no usa git.
 
@@ -41,7 +40,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts
 from paths import AWI_ROOT
 
 DISTRIBUTION_BRANCH = "main"
-WORK_BRANCH = "dev"
 
 TYPE_LABELS = {
     "feat": "Nuevo",
@@ -168,17 +166,6 @@ def rescue(branch: str, target: str, dirty: bool) -> list[str]:
     return rescued
 
 
-def promotion_lag() -> int | None:
-    """Cuántos commits de `dev` no llegaron a `main` todavía.
-
-    Diagnóstico, no gate: la promoción anterior falló en 4 de 4 corridas durante
-    días sin que nadie lo notara (ADR 0015). Si se vuelve a colgar, tiene que
-    verse desde acá aunque el CI esté callado.
-    """
-    r = git("rev-list", "--count", f"origin/{DISTRIBUTION_BRANCH}..origin/{WORK_BRANCH}")
-    return int(r.stdout.strip()) if r.returncode == 0 and r.stdout.strip().isdigit() else None
-
-
 def main() -> None:
     ap = argparse.ArgumentParser(description="Actualizar el harness de AWI")
     ap.add_argument("--check", action="store_true", help="Sólo reportar, sin tocar nada")
@@ -195,7 +182,7 @@ def main() -> None:
         die("no se pudo contactar el remoto. ¿Hay conexión?")
 
     # La rama decide el ref *y* la operación. Reset duro sólo en la rama de
-    # distribución, donde no hay trabajo local legítimo. En cualquier otra,
+    # distribución, con el trabajo local ya rescatado. En cualquier otra,
     # fast-forward: no puede destruir nada, y si divergió falla y lo dice.
     # Cambiar sólo el ref y seguir reseteando rompería el trabajo del
     # mantenedor igual — el ref no es lo que hace daño, la operación sí.
@@ -210,7 +197,6 @@ def main() -> None:
     v_before, v_after = version_at("HEAD"), version_at(target)
     commits = incoming(before, after)
     dirty = local_changes()
-    lag = promotion_lag()
 
     if not consuming:
         print(f"  Estás en '{branch}', no en '{DISTRIBUTION_BRANCH}': fast-forward, sin reset.")
@@ -235,13 +221,6 @@ def main() -> None:
             "    El harness lo mantiene awi-core; si necesitás un cambio, pedilo."
             if consuming
             else "    Commiteálos o guardálos antes: el fast-forward no corre con el árbol sucio."
-        )
-
-    if lag:
-        print(
-            f"\n  ⚠ Diagnóstico: '{WORK_BRANCH}' tiene {lag} commit(s) que no llegaron a "
-            f"'{DISTRIBUTION_BRANCH}'.\n"
-            f"    O están esperando que pasen los tests, o la promoción se colgó."
         )
 
     if args.check:
