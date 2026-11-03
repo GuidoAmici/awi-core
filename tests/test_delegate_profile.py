@@ -42,6 +42,10 @@ def test_el_perfil_por_defecto_no_alcanza_ningun_servidor_sensible(catalogo):
     assert "gmail" not in servidores
 
 
+@pytest.mark.skipif(
+    not (AWI_ROOT / ".mcp.json").exists(),
+    reason=".mcp.json está en .gitignore: sólo existe en la máquina del operador",
+)
 def test_la_configuracion_heredada_del_operador_si_los_tiene():
     """La contraparte que hace que el test anterior valga algo.
 

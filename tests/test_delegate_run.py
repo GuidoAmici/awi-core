@@ -57,6 +57,10 @@ def test_la_linea_de_comandos_no_deja_llegar_a_doppler():
     assert servidores == {"github"}
 
 
+@pytest.mark.skipif(
+    not (AWI_ROOT / ".mcp.json").exists(),
+    reason=".mcp.json está en .gitignore: sólo existe en la máquina del operador",
+)
 def test_sin_strict_mcp_config_la_configuracion_del_operador_se_sumaria():
     """La contraparte que hace que el test anterior pruebe algo.
 
