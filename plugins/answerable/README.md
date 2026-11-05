@@ -23,6 +23,8 @@ Y adentro de la sesión:
 /plugin install answerable@awi
 ```
 
+El plugin no tiene repo propio: `GuidoAmici/answerable` no existe. Se instala desde `GuidoAmici/awi-core`, cuyo marketplace se llama `awi`. No hace falta estar logueado en GitHub.
+
 ## Qué hace
 
 Un hook de `SessionStart` inyecta [`rules/answerable.md`](rules/answerable.md) al
