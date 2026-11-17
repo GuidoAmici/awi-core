@@ -32,33 +32,75 @@ from paths import ORGANIZATIONS_RELDIR, USER_SUBMODULES_FILE
 
 #: Subdirectorios de `agenda/`. El orden es el del documento que los describe.
 AGENDA_FOLDERS = (
-    "tasks", "projects", "people", "ideas",
-    "daily", "weekly", "outputs", "handoffs", "planning",
+    "tasks", "projects", "people", "companies", "ideas",
+    "daily", "weekly", "outputs", "deliverables", "handoffs", "planning",
     "user-profile-inference",
 )
 
-AGENDA_ABSTRACT = "Tareas, proyectos, personas, notas diarias y entregables de esta organización.\n"
+AGENDA_ABSTRACT = (
+    "Lo que pasó o falta que pase en esta organización: tareas, proyectos, "
+    "relaciones, diario, análisis y entregas. Fechado; envejece solo.\n"
+)
 
 AGENDA_OVERVIEW = """\
-Agenda de este workspace.
+Agenda de este workspace: lo que pasó o falta que pase. Va fechado, se acumula
+y envejece solo. Lo que es verdad hoy y se mantiene al día va a documentation/.
 
 ## Estructura
 
-- tasks/       — unidades atómicas de trabajo
-- projects/    — iniciativas con plazo
-- people/      — perfiles de personas y seguimientos
-- ideas/       — exploración y modelos mentales
-- daily/       — notas diarias (YYYY-MM-DD.md)
-- weekly/      — revisiones semanales (YYYY-WNN.md)
-- outputs/     — entregables e informes (YYYY-MM-DD-<slug>.md)
-- handoffs/    — traspasos entre sesiones; los consumidos van a handoffs/consumidos/
-- planning/    — objetivos trimestrales y anuales
+- tasks/        — unidades atómicas de trabajo
+- projects/     — iniciativas con plazo; su bitácora va en el archivo del proyecto
+- people/       — perfiles de personas y seguimientos
+- companies/    — empresas con las que hay relación: clientes, proveedores
+- ideas/        — exploración y modelos mentales
+- daily/        — notas diarias (YYYY-MM-DD.md)
+- weekly/       — revisiones semanales (YYYY-WNN.md)
+- outputs/      — análisis, investigaciones e informes fechados (YYYY-MM-DD-<slug>.md).
+                  Una decisión vigente no va acá: va a documentation/adr/ o bdr/
+- deliverables/ — piezas entregadas o publicadas a un tercero: propuestas,
+                  listas de precios, guiones (YYYY-MM-DD-<slug>)
+- handoffs/     — traspasos entre sesiones; los consumidos van a handoffs/consumidos/
+- planning/     — objetivos trimestrales y anuales
 - user-profile-inference/ — observaciones de sesión
 
-Todos los archivos usan frontmatter YAML. Ver CLAUDE.md en la raíz de AWI.
+Todos los archivos usan frontmatter YAML. Ver ADR 0027 y file-formats.md en AWI.
 """
 
-DOCUMENTATION_ABSTRACT = "Contexto: estilo de escritura, perfil de la organización, wiki.\n"
+DOCUMENTATION_ABSTRACT = (
+    "Lo que es verdad hoy en esta organización: perfil, marca, procedimientos, "
+    "productos y decisiones vigentes. Se mantiene al día.\n"
+)
+
+DOCUMENTATION_OVERVIEW = """\
+Documentación de este workspace: lo que es verdad hoy. Se sobrescribe cuando
+cambia y se lee para actuar. Lo fechado —lo que pasó, lo que se entregó— va a
+agenda/.
+
+## Cómo se ordena
+
+Por tema permanente, nunca por proyecto: el proyecto termina y lo que se supo
+sigue valiendo. El proyecto vive en agenda/projects/; lo que se sabe del
+producto, en documentation/productos/<producto>/.
+
+- org-profile.md — misión, visión y valores
+- _index.md      — mapa de esta carpeta
+- _glosario.md   — términos del dominio
+- adr/           — decisiones de arquitectura vigentes (NNNN-<slug>.md)
+- bdr/           — decisiones de negocio vigentes (NNNN-<slug>.md)
+- identidad/     — marca, Design System y tokens. Se quedan acá aunque haya
+                   código que los use: cualquiera que trabaje la org tiene que
+                   poder leerlos
+- productos/, operaciones/, ventas/, legal/ … — una carpeta por tema
+
+Lo que lleva package.json, scripts de build o dependencias es un codebase, no
+documentación.
+
+## Cambios
+
+Cada documento cierra con una sección `## Cambios`: una línea por cambio de
+fondo, con fecha, qué era y qué es, y el enlace a la decisión que lo causó.
+Erratas no. Ver ADR 0027 en AWI.
+"""
 
 CLAUDE_MD = """\
 # {titulo} — Org Workspace de AWI
@@ -71,8 +113,10 @@ por `git clone` desde lo que declara el manifiesto del operador.
 
 ## Estructura
 
-- **Agenda:** `agenda/` — tareas, proyectos, personas, diario, semanal
-- **Documentación:** `documentation/` — estilo de escritura, perfil, wiki
+- **Agenda:** `agenda/` — lo fechado, que envejece: tareas, proyectos, relaciones,
+  diario, análisis y entregas
+- **Documentación:** `documentation/` — lo vigente, que se mantiene: perfil, marca,
+  procedimientos, productos y decisiones (`adr/`, `bdr/`)
 - **Codebase:** `codebase/` — cada repo de código, su propio clon
 - **Manifiesto:** `codebases.json` — de qué repos está hecha esta organización
 
@@ -155,6 +199,7 @@ def crear_arbol(nombre: str, destino: Path) -> Resultado:
         path / "agenda" / ".abstract.md": AGENDA_ABSTRACT,
         path / "agenda" / ".overview.md": AGENDA_OVERVIEW,
         path / "documentation" / ".abstract.md": DOCUMENTATION_ABSTRACT,
+        path / "documentation" / ".overview.md": DOCUMENTATION_OVERVIEW,
         path / "CLAUDE.md": CLAUDE_MD.format(titulo=_titulo(nombre)),
         path / ".gitignore": GITIGNORE,
         path / "codebases.json": json.dumps(CODEBASES_JSON, ensure_ascii=False, indent=2) + "\n",

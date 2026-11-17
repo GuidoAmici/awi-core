@@ -35,6 +35,7 @@ def test_crea_la_estructura_esperada(tmp_path):
     for folder in scaffold.AGENDA_FOLDERS:
         assert (r.path / "agenda" / folder).is_dir(), folder
     assert (r.path / "documentation").is_dir()
+    assert (r.path / "documentation" / ".overview.md").is_file()
     assert (r.path / "codebase").is_dir()
     assert (r.path / "CLAUDE.md").is_file()
     assert (r.path / ".gitignore").is_file()
@@ -75,6 +76,36 @@ def test_completa_un_scaffolding_a_medias(tmp_path):
     assert (segunda.path / "codebases.json").is_file()
     assert (segunda.path / "agenda" / "tasks").is_dir()
     assert any("codebases.json" in a for a in segunda.acciones)
+
+
+def test_el_canon_separa_lo_fechado_de_lo_vigente():
+    """ADR 0027: las carpetas que el uso real de newhaze probó necesarias."""
+    assert "companies" in scaffold.AGENDA_FOLDERS
+    assert "deliverables" in scaffold.AGENDA_FOLDERS
+    assert "sales-proposals" not in scaffold.AGENDA_FOLDERS
+    assert "## Cambios" in scaffold.DOCUMENTATION_OVERVIEW
+
+
+def test_importar_una_org_deja_la_misma_estructura_que_crearla(tmp_path):
+    """`import_client.py` tenía su propia copia de las constantes. Una org
+    importada no puede quedar con un canon viejo."""
+    import importlib.util
+
+    ruta = Path(__file__).resolve().parents[1] / ".claude/skills/awi-org/scripts/import_client.py"
+    spec = importlib.util.spec_from_file_location("import_client", ruta)
+    import_client = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(import_client)
+
+    importada = tmp_path / "importada"
+    importada.mkdir()
+    import_client.scaffold_missing(importada, "acme")
+    nueva = scaffold.crear_arbol("acme", tmp_path / "nueva").path
+
+    def arbol(raiz: Path) -> set[str]:
+        return {str(p.relative_to(raiz)) for p in raiz.rglob("*")
+                if ".git" not in p.parts and p.name not in (".gitignore", "codebases.json")}
+
+    assert arbol(importada) == arbol(nueva)
 
 
 def test_no_pisa_un_archivo_editado(tmp_path):

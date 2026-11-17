@@ -6,7 +6,7 @@ How the engineering skills should consume this repo's domain documentation when 
 
 - **`CONTEXT-MAP.md`** at the repo root — points to one `CONTEXT.md` per context. Read each one relevant to the topic.
 - **`docs/adr/`** — system-wide architectural decisions.
-- Per-context ADRs live alongside each context's `CONTEXT.md`.
+- Per-org decisions live in the org's `documentation/adr/` (architecture) and `documentation/bdr/` (business); a codebase keeps its own in its `docs/adr/`. See [ADR 0027](../adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md).
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The producer skill (`/grill-with-docs`) creates them lazily when terms or decisions actually get resolved.
 
@@ -20,13 +20,15 @@ This is a multi-context repo. `CONTEXT-MAP.md` at the root points to per-context
 ├── docs/adr/                             ← system-wide decisions
 ├── _data/organizations/newhaze/
 │   ├── CONTEXT.md                        ← newhaze domain language
-│   └── docs/adr/                         ← newhaze-specific decisions
+│   └── documentation/
+│       ├── adr/                          ← newhaze architecture decisions
+│       └── bdr/                          ← newhaze business decisions
 ├── _data/organizations/afin/
 │   ├── CONTEXT.md
-│   └── docs/adr/
+│   └── documentation/adr/  documentation/bdr/
 └── _data/organizations/rabbitek/
     ├── CONTEXT.md
-    └── docs/adr/
+    └── documentation/adr/  documentation/bdr/
 ```
 
 ## Use the glossary's vocabulary

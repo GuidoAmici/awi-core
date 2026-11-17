@@ -17,54 +17,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared" / "scripts"))
 from paths import ORGANIZATIONS_RELDIR
 
-AGENDA_FOLDERS = [
-    "tasks", "projects", "people", "ideas",
-    "daily", "weekly", "outputs", "handoffs", "planning",
-    "user-profile-inference",
-]
-
-AGENDA_ABSTRACT = "Tasks, projects, people, daily notes, and outputs for this client.\n"
-
-AGENDA_OVERVIEW = """\
-Agenda folder for this client workspace.
-
-## Structure
-
-- tasks/       — atomic work items
-- projects/    — time-bound initiatives
-- people/      — person profiles and follow-ups
-- ideas/       — brainstorming and mental models
-- daily/       — daily notes (YYYY-MM-DD.md)
-- weekly/      — weekly reviews (YYYY-WNN.md)
-- outputs/     — deliverables and reports (YYYY-MM-DD-<slug>.md)
-- handoffs/    — session-to-session handoffs; consumed ones move to handoffs/consumidos/
-- planning/    — quarterly and annual goals
-- user-profile-inference/ — session observations
-
-All files use YAML frontmatter. See AWI CLAUDE.md for file formats.
-"""
-
-DOCUMENTATION_ABSTRACT = "Context files: writing style, business profile, documentation.\n"
-
-CLAUDE_MD = """\
-# {name_title} — AWI Client
-
-This is a client workspace managed by AWI.
-All vault rules, structure, taxonomy, and commands are in the parent AWI repo.
-
-## Structure
-
-- **Agenda:** `agenda/` — tasks, projects, people, daily, weekly
-- **Documentation:** `documentation/` — writing style, business profile, context
-- **Codebase:** `codebase/` — app submodules
-
-## Get current date
-
-Run from the AWI repo root:
-```bash
-bash .claude/hooks/get-datetime.sh full
-```
-"""
+# Las constantes son las de `scaffold`: una org importada tiene que quedar con la
+# misma estructura que una nueva. Tenía su propia copia, y era la que se iba a
+# quedar atrás la próxima vez que cambiara el canon (ADR 0027).
+from scaffold import (
+    AGENDA_ABSTRACT,
+    AGENDA_FOLDERS,
+    AGENDA_OVERVIEW,
+    CLAUDE_MD,
+    DOCUMENTATION_ABSTRACT,
+    DOCUMENTATION_OVERVIEW,
+)
 
 
 def scaffold_missing(path: Path, name: str) -> list[str]:
@@ -81,12 +44,12 @@ def scaffold_missing(path: Path, name: str) -> list[str]:
     # agenda context files
     agenda_abstract = path / "agenda" / ".abstract.md"
     if not agenda_abstract.exists():
-        agenda_abstract.write_text(AGENDA_ABSTRACT)
+        agenda_abstract.write_text(AGENDA_ABSTRACT, encoding="utf-8")
         created.append(str(agenda_abstract.relative_to(path)))
 
     agenda_overview = path / "agenda" / ".overview.md"
     if not agenda_overview.exists():
-        agenda_overview.write_text(AGENDA_OVERVIEW)
+        agenda_overview.write_text(AGENDA_OVERVIEW, encoding="utf-8")
         created.append(str(agenda_overview.relative_to(path)))
 
     # documentation/
@@ -95,10 +58,12 @@ def scaffold_missing(path: Path, name: str) -> list[str]:
         doc_dir.mkdir(parents=True, exist_ok=True)
         created.append("documentation/")
 
-    doc_abstract = path / "documentation" / ".abstract.md"
-    if not doc_abstract.exists():
-        doc_abstract.write_text(DOCUMENTATION_ABSTRACT)
-        created.append(str(doc_abstract.relative_to(path)))
+    for nombre, contenido in ((".abstract.md", DOCUMENTATION_ABSTRACT),
+                              (".overview.md", DOCUMENTATION_OVERVIEW)):
+        archivo = path / "documentation" / nombre
+        if not archivo.exists():
+            archivo.write_text(contenido, encoding="utf-8")
+            created.append(str(archivo.relative_to(path)))
 
     # codebase/
     codebase = path / "codebase"
@@ -109,8 +74,7 @@ def scaffold_missing(path: Path, name: str) -> list[str]:
     # CLAUDE.md
     claude_md = path / "CLAUDE.md"
     if not claude_md.exists():
-        name_title = name.replace("-", " ").title()
-        claude_md.write_text(CLAUDE_MD.format(name_title=name_title))
+        claude_md.write_text(CLAUDE_MD.format(titulo=name.replace("-", " ").title()), encoding="utf-8")
         created.append("CLAUDE.md")
 
     return created

@@ -172,11 +172,16 @@ Agregá una sección `## Session Log` que resuma el trabajo hecho para esa org.
 
 ### 2f — Outputs
 
-Si la sesión produjo outputs (planes, diseños, decisiones, informes), guardalos en:
-- `<user-root>agenda/outputs/YYYY-MM-DD-<slug>.md` para outputs personales
-- `_data/organizations/<name>/agenda/outputs/YYYY-MM-DD-<slug>.md` para outputs de una org
+Si la sesión produjo algo que tiene que quedar, cada cosa va a su lugar según el [ADR 0027](../../../docs/adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md):
 
-Sólo creá archivos de output para contenido que se produjo de verdad, no para el session log en sí.
+| Qué produjo la sesión | Dónde va |
+|---|---|
+| Un análisis, una investigación, un informe | `agenda/outputs/YYYY-MM-DD-<slug>.md` del usuario o de la org |
+| Una pieza entregada o publicada a un tercero | `agenda/deliverables/YYYY-MM-DD-<slug>` de la org |
+| Una decisión que queda vigente | `documentation/adr/` o `documentation/bdr/` de la org, o `docs/adr/` del repo que gobierna |
+| Un cambio a algo que es verdad hoy | El documento de `documentation/`, más una línea en su `## Cambios` |
+
+Sólo creá archivos para contenido que se produjo de verdad, no para el session log en sí.
 
 **Un traspaso a otra sesión no es un output: es un handoff**, y va a `agenda/handoffs/` con el formato de [file-formats.md § Handoff](../../../_system/chief-of-staff/references/examples/file-formats.md#handoff). Si algo de lo que afirma desmiente una sección de otro documento, nombrala en su `supersedes`.
 

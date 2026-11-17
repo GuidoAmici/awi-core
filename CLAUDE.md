@@ -67,9 +67,11 @@ La persona-agente aporta el rol; **el brief aporta el stack**, porque el roster 
 
 ### Registrar una decisión
 
-Toda decisión de arquitectura o cambio de convención va como output en `<user-root>agenda/outputs/`, y un ADR lleva `status:` en su frontmatter. El campo `affects:` conecta el output con el wiki que actualiza. `docs/agents/decisiones.md`.
+Una decisión vigente es documentación: va al registro del repo que gobierna —`docs/adr/` del harness, `documentation/adr/` o `documentation/bdr/` de la org, `docs/adr/` del codebase—, con `status:` en su frontmatter. El análisis que la fundamentó es un output fechado y la enlaza. `affects:` conecta los dos con los documentos que cambian. `docs/agents/decisiones.md`.
 
 ## Estructura
+
+**Agenda o documentación se decide con una pregunta: ¿envejece solo?** Lo fechado —lo que pasó, lo que se entregó, lo que se averiguó— va a `agenda/`. Lo que es verdad hoy y se mantiene al día va a `documentation/`, ordenado por tema y nunca por proyecto, y cierra con una sección `## Cambios`. Qué va en cada carpeta: [ADR 0027](docs/adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md).
 
 Cada `_data/organizations/<name>/` y cada `_data/users/<github-id>/` es **un repo de git aparte**, declarado en `user-submodules.json` y materializado por `git clone`. Nada en AWI es un submódulo — ver [ADR 0009](docs/adr/0009-manifiestos-json-en-lugar-de-submodulos.md). `_data/` está en `.gitignore` por corrección, no por higiene: sin eso un `git add -A` en la raíz se traga los hijos como repos embebidos.
 
