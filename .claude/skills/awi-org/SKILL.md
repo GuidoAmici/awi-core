@@ -54,13 +54,13 @@ python3 .claude/skills/awi-org/scripts/init_org.py <name>
 
 Creates under `_data/organizations/<name>/`:
 ```
-agenda/
-  tasks/   projects/  people/   ideas/
-  daily/   weekly/    outputs/  planning/
-  user-profile-inference/
+agenda/                ← lo fechado, que envejece
+  tasks/   projects/  people/   companies/  ideas/
+  daily/   weekly/    outputs/  deliverables/
+  handoffs/  planning/  user-profile-inference/
   .abstract.md   .overview.md
-documentation/
-  .abstract.md
+documentation/         ← lo vigente, que se mantiene (ADR 0027)
+  .abstract.md   .overview.md
 codebase/
 CLAUDE.md
 .gitignore
@@ -140,8 +140,8 @@ Output:
 ```
 <name> organization ready.
 
-  _data/organizations/<name>/agenda/         ← tasks, projects, people, daily, weekly, outputs
-  _data/organizations/<name>/documentation/  ← context files, topic folders
+  _data/organizations/<name>/agenda/         ← lo fechado: tasks, projects, companies, outputs, deliverables
+  _data/organizations/<name>/documentation/  ← lo vigente: perfil, marca, adr/, bdr/, una carpeta por tema
   _data/organizations/<name>/codebase/       ← each codebase is cloned here
 
 Next steps:

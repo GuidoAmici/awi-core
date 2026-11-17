@@ -1,15 +1,22 @@
 # Documenting Decisions
 
-Any architectural decision, infrastructure change, or significant vault improvement **must** be recorded as an output file in `<user-root>agenda/outputs/` using the format `YYYY-MM-DD-<slug>.md`. This includes:
+A decision that is in force is **documentation**, not agenda: it is true today. It goes to the decision register of the repo it governs ([ADR 0027](../adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md)):
 
-- Changes to vault structure or conventions (new folders, naming rules, taxonomy updates)
-- Changes to agent context files (`.abstract.md`, `.overview.md`, `CLAUDE.md`)
-- Codebase-wide tooling or workflow decisions (CI changes, new patterns, dependency choices)
-- Any decision that a future agent or collaborator would need to understand *why* something is the way it is
+| La decisión gobierna… | Va a |
+|---|---|
+| El harness de AWI (skills, hooks, convenciones del vault) | `docs/adr/NNNN-<slug>.md` en awi-core |
+| La arquitectura de una organización | `_data/organizations/<org>/documentation/adr/NNNN-<slug>.md` |
+| El negocio de una organización (precios, canales, productos) | `_data/organizations/<org>/documentation/bdr/NNNN-<slug>.md` — [plantilla BDR](../../_system/chief-of-staff/references/bdr-template.md) |
+| El código de un codebase | `docs/adr/` de ese codebase |
 
-The output file should cover: what changed, why, and any trade-offs considered.
+Each record covers what was decided, why, and the trade-offs considered. It is immutable except for its status: a reversed decision gets a new record that supersedes it.
 
-A session-to-session handoff is not an output: it goes to `agenda/handoffs/`, with `estado:` and `supersedes:` — see [file-formats.md § Handoff](../../_system/chief-of-staff/references/examples/file-formats.md#handoff).
+**What is not a decision record:**
+
+- The analysis or research that led to the decision is an **output** (`agenda/outputs/YYYY-MM-DD-<slug>.md`), dated, and links to the record.
+- A session-to-session handoff goes to `agenda/handoffs/`, with `estado:` and `supersedes:` — see [file-formats.md § Handoff](../../_system/chief-of-staff/references/examples/file-formats.md#handoff).
+
+When a decision changes a living document, that document gets a line in its `## Cambios` section linking to the record — see [file-formats.md § Documento vigente](../../_system/chief-of-staff/references/examples/file-formats.md#documento-vigente).
 
 # ADR status lifecycle
 
@@ -22,18 +29,18 @@ Every ADR must carry a `status:` field in its YAML frontmatter:
 | `Superseded` | Replaced by a newer ADR (link to successor in body) |
 | `Deprecated` | No longer applies; not replaced by anything specific |
 
-# Output → Wiki sync rule
+# Output and decision → documentation sync rule
 
-Every output that changes something permanent **must** include an `affects:` frontmatter field listing the wiki files updated as a result.
+Every output or decision record that changes something permanent **must** include an `affects:` frontmatter field listing the documentation files updated as a result.
 
 ```yaml
 affects:
-  - wiki/arquitectura-digital/stack
-  - wiki/identidad/identidad-visual
+  - arquitectura-digital/stack
+  - identidad/marca
 ```
 
-- Paths are relative to the workspace's wiki root, no `.md` extension.
+- Paths are relative to the organization's `documentation/` folder, no `.md` extension.
 - Purely analytical outputs (audits, research, UX mapping) with no permanent changes use `affects: []`.
-- If the wiki *should* be updated but hasn't been yet, list the file anyway — it flags a pending sync.
+- If the documentation *should* be updated but hasn't been yet, list the file anyway — it flags a pending sync.
 
 ---

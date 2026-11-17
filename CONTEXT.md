@@ -200,6 +200,28 @@ _Evitar_: perfil de negocio, contexto de la org.
 Documento privado por org en el espacio del operador, que captura la intersección estratégica entre su Professional Identity y el Org Profile: dónde alinean, dónde friccionan, y cómo avanzar. Vive en `_data/users/<github-id>/org-engagement/<org-name>.md`.
 _Evitar_: relación usuario-org, charter.
 
+### Contenido de un Org Workspace
+
+**Agenda**:
+La capa de lo fechado en un Org Workspace (`agenda/`): lo que pasó o falta que pase. Se acumula y envejece solo. Ver [ADR 0027](docs/adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md).
+_Evitar_: vault, notas.
+
+**Documentación**:
+La capa de lo vigente (`documentation/`): lo que es verdad hoy. Se sobrescribe cuando cambia, se ordena por tema permanente y nunca por proyecto, y cada documento cierra con su sección `## Cambios`.
+_Evitar_: wiki, info.
+
+**Output**:
+Un análisis, investigación o informe fechado, en `agenda/outputs/`. Registra lo que se averiguó; no es una decisión.
+_Evitar_: entregable, decisión.
+
+**Deliverable**:
+Una pieza entregada o publicada a un tercero —propuesta, lista de precios, guion—, en `agenda/deliverables/`. Envejece: dice lo que se entregó ese día.
+_Evitar_: output, propuesta de venta como carpeta aparte.
+
+**Registro de decisiones**:
+Las decisiones vigentes de un repo: `documentation/adr/` y `documentation/bdr/` en una org, `docs/adr/` en el harness y en cada codebase. Inmutables salvo su estado.
+_Evitar_: output de decisión.
+
 ### Material sensible
 
 **Material Sensible**:

@@ -2,7 +2,9 @@
 
 All files use YAML frontmatter with markdown body.
 
-All files live under `agenda/` subfolders — `<user-root>agenda/` for the operator, `_data/organizations/<name>/agenda/` for each organization.
+Most formats here live under `agenda/` subfolders — `<user-root>agenda/` for the operator, `_data/organizations/<name>/agenda/` for each organization. The exception is [Documento vigente](#documento-vigente), which lives in `documentation/`.
+
+**Which layer?** One question decides: does it age by itself? What happened or still has to happen, dated, goes to `agenda/`. What is true today and is kept up to date goes to `documentation/`, organized by permanent topic, never by project. See [ADR 0027](../../../../docs/adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md).
 
 ## Task
 
@@ -74,7 +76,12 @@ Single most important next step.
 - Key dates
 - Stakeholders
 - Context
+
+## Bitácora
+- **YYYY-MM-DD:** qué pasó — pruebas, reuniones, avances. Lo más nuevo arriba
 ```
+
+What the project *learned* that outlives it —specs, criteria, how the product works— goes to `documentation/productos/<producto>/`, not here. See [ADR 0027](../../../../docs/adr/0027-la-agenda-envejece-la-documentacion-se-mantiene.md).
 
 ## Product
 
@@ -142,33 +149,89 @@ The idea description.
 
 ## Output
 
+Un análisis, una investigación o un informe **fechado**: lo que se averiguó en una sesión. Vive en `agenda/outputs/YYYY-MM-DD-<slug>.md`.
+
+**Una decisión vigente no es un output**: es documentación, y va a `documentation/adr/` (arquitectura) o `documentation/bdr/` (negocio, con la [plantilla BDR](../bdr-template.md)). El output que la fundamentó la enlaza.
+
 ```markdown
 ---
 type: output
 date: YYYY-MM-DD
 tags: [tag1, tag2]
 affects:
-  - operaciones/servicio-tecnico  # wiki files updated as a result of this decision
+  - operaciones/servicio-tecnico  # documentos vigentes que este output hizo cambiar
 ---
 
 # Output Title
 
-## What changed
+## Qué se averiguó
 
-## Why
+## Qué cambia
 
-## Trade-offs
+## Qué queda abierto
 ```
 
 **`affects` field:**
-- List every wiki file whose content was updated as a result of this output.
+- List every documentation file whose content was updated as a result of this output.
 - Use paths relative to the organization's `documentation/` folder without the `.md` extension. A file outside `documentation/` (an ADR, a harness file) takes its repo-relative path.
 - Leave empty (`affects: []`) only if the output is purely analytical (audit, research, UX mapping) with no permanent changes.
-- If the output *should* update a wiki file but hasn't yet, list it anyway — it signals a pending sync.
+- If the output *should* update a documentation file but hasn't yet, list it anyway — it signals a pending sync.
+
+## Deliverable
+
+Una pieza **entregada o publicada a un tercero**: una propuesta comercial, una versión de la lista de precios, un guion, un informe para un cliente. Vive en `agenda/deliverables/YYYY-MM-DD-<slug>.<ext>`, o en una carpeta `YYYY-MM-DD-<slug>/` si lleva fuentes o renders.
+
+Es agenda porque envejece: la propuesta que se mandó el 16/04 sigue diciendo lo que decía aunque los precios cambien. Lo que la respalda y sigue vigente —la estrategia de combos, la política de precios— va a `documentation/`.
+
+```markdown
+---
+type: deliverable
+date: YYYY-MM-DD
+para: companies/GSG          # a quién se entregó, si aplica
+estado: borrador | enviado | aceptado | rechazado | publicado
+tags: [tag1, tag2]
+---
+```
+
+## Company
+
+Una empresa con la que hay relación: cliente, proveedor, socio. Vive en `agenda/companies/<Nombre>.md`. Es el par de `people/`: la persona se enlaza a su empresa y la empresa a sus personas.
+
+```markdown
+---
+type: company
+tags: [cliente-b2b, proveedor]
+last-contact: YYYY-MM-DD
+---
+
+# Nombre
+
+Qué es y qué relación tenemos.
+
+**Contacto:** [[people/Nombre]]
+
+## Historial
+- **YYYY-MM-DD:** qué pasó
+```
+
+## Documento vigente
+
+Todo documento de `documentation/` dice lo que es verdad hoy y **cierra con una sección `## Cambios`**: una línea por cambio de fondo —un precio, una regla, una política—, con la fecha, qué era y qué es, y el enlace a la decisión que lo causó. Las erratas no se anotan.
+
+```markdown
+## Cambios
+
+- 2026-11-12 · Mínimo de pedido G2: 6 → 10 unidades · [BDR-0012](../bdr/0012-…)
+- 2026-09-03 · Se suma el pack de buffers al canal growshop · [output](../../agenda/outputs/2026-09-03-catalogo-overhaul-195.md)
+```
+
+El historial de git tiene el cambio literal; esta sección es el índice que dice cuáles cambios importan y por qué. Va adentro del documento y no en un `changelog.md` aparte, porque un archivo separado envejece sin que nadie lo note.
+
+La bitácora de un proyecto —pruebas, reuniones, avances— no es esto: va al archivo del proyecto en `agenda/projects/`.
 
 ## Handoff
 
-Un handoff es un traspaso entre sesiones: «esto está a medias, seguí desde acá». **Vive en `agenda/handoffs/`, nunca en `outputs/`**, porque envejece al revés que un output: un output es verdad hasta que otra decisión lo revoca; un handoff deja de serlo en cuanto alguien hace el trabajo que describe. Guardados juntos, pesan igual en el filetree y un agente toma por verdad un traspaso que ya se ejecutó.
+Un handoff es un traspaso entre sesiones: «esto está a medias, seguí desde acá». **Vive en `agenda/handoffs/`, nunca en `outputs/`**, porque envejece distinto que un output: un output registra lo que se averiguó en una fecha y eso no deja de haber pasado; un handoff deja de ser cierto en cuanto alguien hace el trabajo que describe. Guardados juntos, pesan igual en el filetree y un agente toma por verdad un traspaso que ya se ejecutó.
 
 ```markdown
 ---
