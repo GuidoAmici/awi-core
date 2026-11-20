@@ -2,6 +2,13 @@
 
 Las versiones `0.3.0` en adelante se reconstruyeron retroactivamente el 2026-07-29 a partir del historial, un hito por decisión de arquitectura registrada. Ver [ADR 0014](docs/adr/0014-el-problema-era-la-distribucion-no-la-composicion.md).
 
+## [0.8.1](https://github.com/GuidoAmici/awi-core/compare/v0.8.0...v0.8.1) (2026-11-20)
+
+
+### Correcciones
+
+* **hooks:** gh-auth-pre sólo pushea repos con commits sin subir ([#117](https://github.com/GuidoAmici/awi-core/issues/117)) ([f11a45e](https://github.com/GuidoAmici/awi-core/commit/f11a45eab8df1bbc044cb1a9e3de35f86624696f))
+
 ## [0.8.0](https://github.com/GuidoAmici/awi-core/compare/v0.7.0...v0.8.0) (2026-11-03)
 
 
