@@ -47,6 +47,12 @@ def commit_and_push(name: str, path: Path) -> str | None:
         rc = git(["commit", "-m", "chore(sync): stage local changes before auth switch"], cwd=path)
         if rc.returncode != 0:
             return f"{name}: commit failed — {rc.stderr.strip()}"
+    # Sin commits locales que falten en un remoto no hay nada que proteger.
+    # Pushear igual falla contra upstreams de sólo lectura (403) y bloquea el
+    # cambio de cuenta sin motivo.
+    unpushed = git(["log", "--branches", "--not", "--remotes", "--oneline"], cwd=path)
+    if unpushed.returncode == 0 and not unpushed.stdout.strip():
+        return None
     rc = git(["push"], cwd=path)
     if rc.returncode != 0:
         return f"{name}: push failed — {rc.stderr.strip()}"
