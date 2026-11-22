@@ -8,6 +8,7 @@ Two layers:
   *_DIR     — absolute Path, used by operational scripts on the live AWI instance
 """
 
+import os
 from pathlib import Path
 
 # ── AWI root ──────────────────────────────────────────────────────────────────
@@ -33,3 +34,9 @@ ORGANIZATIONS_DIR = AWI_ROOT / ORGANIZATIONS_RELDIR
 SYSTEM_AWI_DIR      = AWI_ROOT / SYSTEM_AWI_RELDIR
 SYSTEM_COS_REFS_DIR = AWI_ROOT / SYSTEM_COS_REFS_RELDIR
 SYSTEM_GTD_DIR      = AWI_ROOT / SYSTEM_GTD_RELDIR
+
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
+def claude_config_dir() -> Path:
+    """La config de usuario de Claude Code. Es función porque el entorno puede moverla."""
+    return Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")

@@ -46,7 +46,9 @@ Es un solo comando: explica qué es AWI, vincula tu cuenta de GitHub, toma tus p
 
 ### El plugin de formato
 
-Las reglas de **cómo escribe el agente** salieron a un plugin aparte, porque valen en cualquier sesión y no sólo acá:
+Las reglas de **cómo escribe el agente** salieron a un plugin aparte, porque valen en cualquier sesión y no sólo acá. No tenés que acordarte de instalarlo: si en esta máquina falta, AWI te lo ofrece al abrir la sesión, y si decís que no, no vuelve a preguntar.
+
+Para instalarlo a mano, o en una máquina sin AWI:
 
 ```
 /plugin marketplace add GuidoAmici/awi-core
