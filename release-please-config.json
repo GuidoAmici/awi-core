@@ -19,6 +19,13 @@
         { "type": "docs", "section": "Documentación" },
         { "type": "test", "section": "Tests" },
         { "type": "style", "section": "Estilo", "hidden": true }
+      ],
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugins/answerable/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
       ]
     }
   }
