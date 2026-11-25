@@ -102,14 +102,16 @@
     "mattpocock-skills@mattpocock": true,
     "superpowers@claude-plugins-official": true,
     "github@claude-plugins-official": true,
-    "answerable@awi": true
+    "answerable@awi": true,
+    "linkify@claude-linkify": true
   },
   "extraKnownMarketplaces": {
     "awi": {
       "source": {
         "source": "github",
         "repo": "GuidoAmici/awi-core"
-      }
+      },
+      "autoUpdate": true
     },
     "mattpocock": {
       "source": {
@@ -122,6 +124,13 @@
         "source": "github",
         "repo": "jarrodwatts/claude-hud"
       }
+    },
+    "claude-linkify": {
+      "source": {
+        "source": "github",
+        "repo": "babarot/claude-linkify"
+      },
+      "autoUpdate": true
     }
   }
 }
