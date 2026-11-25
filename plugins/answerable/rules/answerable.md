@@ -228,23 +228,39 @@ La bajada a copy de cara al consumidor —headline, CTA, promesa, prueba— est�
 
 Un `#63`, un `ADR 0021` o un `d0f96fd` no dicen nada por sí mismos: son direcciones, no información. El operador no memoriza el backlog, y un agente que escribe "esto lo cubre #47" está pidiendo que alguien vaya a buscar qué plantea #47 para poder seguir la frase.
 
-**Todo identificador que traiga el agente a la conversación va enlazado y acompañado de qué plantea.** El enlace le ahorra al operador ir a buscarlo; la paráfrasis le ahorra abrirlo para saber de qué se habla. Si el identificador lo escribió el operador, ya sabe de qué habla — la paráfrasis sobra, el enlace no.
+**Todo identificador que traiga el agente a la conversación llega clickeable y acompañado de qué plantea.** El enlace le ahorra al operador ir a buscarlo; la paráfrasis le ahorra abrirlo para saber de qué se habla. Si el identificador lo escribió el operador, ya sabe de qué habla — la paráfrasis sobra, el enlace no.
 
 ### Qué cubre
 
 Cualquier identificador opaco: issues, PRs, ADR, BDR, PRD, SHAs de commit, corridas de CI, milestones. No es una lista cerrada; el criterio es si el identificador, leído solo, dice de qué se trata.
 
-### El enlace
+### Issues y PRs en una respuesta: los enlaza linkify
 
-Un link Markdown cuyo texto es el identificador y cuyo destino es la URL completa. El agente la arma, no la pide:
+En una respuesta al operador o en el informe de un subagente, un issue o un PR **no se escribe como link Markdown**. Se escribe la referencia sola y la vuelve clickeable el mod [linkify](https://github.com/babarot/claude-linkify), que AWI instala. Armar la URL a mano en cada respuesta fallaba seguido, y linkify lo hace siempre igual.
+
+Linkify resuelve la referencia contra el `origin` del directorio de trabajo —en la raíz de AWI, `awi-core`—, así que la forma depende de dónde vive el issue:
+
+| El issue vive en | Se escribe |
+|---|---|
+| El repo del directorio de trabajo | `#63`, o `PR#63` si es un PR |
+| Otro repo del mismo dueño | `newhaze-webapp#63` |
+| Un repo de otro dueño | `owner/repo#63` |
+
+Un `#63` suelto en la raíz de AWI apunta a awi-core: para un issue de una org, el nombre del repo va siempre. La referencia va en texto corrido, nunca en código inline — linkify no toca lo que está entre backticks.
+
+### El resto de los identificadores, y los textos fuera de la conversación
+
+Linkify sólo actúa sobre las respuestas que se dibujan en Claude Code. Para todo lo demás va un link Markdown cuyo texto es el identificador y cuyo destino es la URL completa; el agente la arma, no la pide:
 
 | Identificador | Destino |
 |---|---|
-| Issue | `https://github.com/<owner>/<repo>/issues/<n>` |
-| PR | `https://github.com/<owner>/<repo>/pull/<n>` |
+| Issue, en un archivo versionado | `https://github.com/<owner>/<repo>/issues/<n>` |
+| PR, en un archivo versionado | `https://github.com/<owner>/<repo>/pull/<n>` |
 | Commit | `https://github.com/<owner>/<repo>/commit/<sha>` |
 | Corrida de CI | `https://github.com/<owner>/<repo>/actions/runs/<id>` |
 | ADR, BDR, output | La ruta del archivo, relativa al repo |
+
+En el cuerpo de un issue, un PR o un comentario en GitHub, un issue no necesita link: GitHub enlaza solo `owner/repo#63` y el `#63` del mismo repo. El nombre corto `newhaze-webapp#63` ahí **no** se enlaza; lleva el dueño.
 
 Un identificador que se repite en la misma respuesta se enlaza la primera vez.
 
@@ -252,15 +268,15 @@ Un identificador que se repite en la misma respuesta se enlaza la primera vez.
 
 Una **paráfrasis de una frase**, en el idioma de la conversación — no el título literal. Los títulos son etiquetas de tracker ("pgTAP", "variantes"); la paráfrasis dice qué está en juego.
 
-Referencia primero, tema después:
+Referencia primero, tema después. En una respuesta:
 
 ```markdown
-[newhaze-webapp#63](https://github.com/GuidoAmici/newhaze-webapp/issues/63) — soporte de variantes de producto en el panel B2B
+newhaze-webapp#63 — soporte de variantes de producto en el panel B2B
 [ADR 0021](docs/adr/0021-el-operador-contesta-por-direccion-no-reescribiendo.md) — el operador contesta por dirección
-[d0f96fd](https://github.com/GuidoAmici/my-awi-instance/commit/d0f96fd) — el commit que sacó los codebases del ciclo automático de sync
+[d0f96fd](https://github.com/GuidoAmici/awi-core/commit/d0f96fd) — el commit que sacó los codebases del ciclo automático de sync
 ```
 
-Cross-repo, el texto del enlace lleva el repo: `newhaze-webapp#63`. Dentro del repo en curso, `#63` alcanza.
+El mismo issue en un output o un ADR va con el link entero: `[newhaze-webapp#63](https://github.com/GuidoAmici/newhaze-webapp/issues/63)`.
 
 ### Leer antes de mencionar
 

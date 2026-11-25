@@ -35,7 +35,18 @@ Las cuatro reglas son independientes y se aplican juntas:
 |---|---|
 | Cinco bloques | Qué hice · Qué tenés que saber · Hilos abiertos · Qué propongo · Qué necesito de vos, con número fijo en cada pregunta |
 | El TLDR va primero | Leer sólo las negritas alcanza para tener la respuesta entera |
-| Ningún identificador viaja desnudo | `#47` siempre viene enlazado, con qué es y por qué se menciona |
+| Ningún identificador viaja desnudo | `#47` siempre llega clickeable, con qué es y por qué se menciona |
+
+En las respuestas, los issues y PRs los vuelve clickeables el mod
+[linkify](https://github.com/babarot/claude-linkify), no `answerable`. AWI lo
+instala solo; fuera de AWI, sin linkify esas referencias quedan como texto:
+
+```
+/plugin marketplace add babarot/claude-linkify
+/plugin install linkify@claude-linkify
+```
+
+Linkify pide una versión de Claude Code con mods (2.1.291 o posterior).
 | Los comandos se pegan y corren | Un bloque que copiás sin editar ni una ruta |
 
 ## Origen
