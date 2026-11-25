@@ -14,7 +14,7 @@ este script se ocupa de los dos que puede automatizar (archivos ignorados y
 puerto del dev server) y deja anotados los otros dos.
 
 Uso:
-    python3 worktree.py provision <codebase> <rama> [--base stg] [--sin-install]
+    python3 worktree.py provision <codebase> <rama> [--base prod] [--sin-install]
     python3 worktree.py list
     python3 worktree.py status [<codebase>]
     python3 worktree.py release <codebase>
@@ -217,7 +217,11 @@ def provision(codebase: str, branch: str, base: str | None, install: bool) -> in
     if existe_rama:
         args = ["worktree", "add", str(worktree), branch]
     else:
-        base_ref = base or "origin/stg"
+        # ADR-0035 de newhaze: toda rama sale de prod. El fetch con --prune
+        # evita salir de una punta vieja o de un remote-tracking de una rama
+        # que ya no existe (stg pasó a llamarse test).
+        git(["fetch", "-q", "--prune", "origin"], cwd=principal)
+        base_ref = base or "origin/prod"
         if git(["rev-parse", "--verify", base_ref], cwd=principal).returncode != 0:
             base_ref = "HEAD"
         args = ["worktree", "add", "-b", branch, str(worktree), base_ref]
@@ -470,7 +474,7 @@ def main() -> int:
     p = sub.add_parser("provision", help="Crear y equipar un worktree para una rama")
     p.add_argument("codebase")
     p.add_argument("branch")
-    p.add_argument("--base", default=None, help="Ref desde la que sale la rama nueva (default: origin/stg)")
+    p.add_argument("--base", default=None, help="Ref desde la que sale la rama nueva (default: origin/prod)")
     p.add_argument("--sin-install", action="store_true", help="No correr npm install")
 
     sub.add_parser("list", help="Worktrees de todos los codebases montados")
