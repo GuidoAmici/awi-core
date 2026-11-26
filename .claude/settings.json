@@ -98,7 +98,7 @@
   },
   "enabledPlugins": {
     "claude-hud@claude-hud": false,
-    "vercel@claude-plugins-official": true,
+    "vercel@claude-plugins-official": false,
     "mattpocock-skills@mattpocock": true,
     "superpowers@claude-plugins-official": true,
     "github@claude-plugins-official": true,
