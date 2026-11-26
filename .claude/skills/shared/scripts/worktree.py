@@ -55,6 +55,30 @@ def git(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
     return subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True)
 
 
+FETCH_TIMEOUT_S = 30
+
+
+def fetch_sin_prompt(cwd: Path) -> None:
+    """`git fetch origin` que nunca pide credenciales a nadie.
+
+    Lo corre un subagente sin pantalla: si el credential helper quiere
+    preguntar (una ventana del GCM de Windows, un prompt de terminal), el
+    fetch falla y `provision` sigue con el remote-tracking local, que es
+    mejor que colgarse o abrirle una ventana al operador por cada agente.
+    """
+    # GCM corre del lado de Windows: una variable de WSL sólo cruza si WSLENV la nombra.
+    wslenv = ":".join(filter(None, [os.environ.get("WSLENV"), "GCM_INTERACTIVE"]))
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never", "WSLENV": wslenv}
+    try:
+        subprocess.run(
+            ["git", "fetch", "-q", "--prune", "origin"],
+            cwd=cwd, capture_output=True, text=True, env=env, timeout=FETCH_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"  aviso: el fetch de origin tardó más de {FETCH_TIMEOUT_S}s; sigo con las refs locales",
+              file=sys.stderr)
+
+
 # ── Resolución de codebases ───────────────────────────────────────────────────
 
 def all_codebases() -> dict[str, Path]:
@@ -220,7 +244,7 @@ def provision(codebase: str, branch: str, base: str | None, install: bool) -> in
         # ADR-0035 de newhaze: toda rama sale de prod. El fetch con --prune
         # evita salir de una punta vieja o de un remote-tracking de una rama
         # que ya no existe (stg pasó a llamarse test).
-        git(["fetch", "-q", "--prune", "origin"], cwd=principal)
+        fetch_sin_prompt(principal)
         base_ref = base or "origin/prod"
         if git(["rev-parse", "--verify", base_ref], cwd=principal).returncode != 0:
             base_ref = "HEAD"
