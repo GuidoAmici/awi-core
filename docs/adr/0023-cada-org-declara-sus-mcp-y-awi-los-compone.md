@@ -41,6 +41,8 @@ que trabaje desde AWI.
 | `supabase-newhaze` (`${NEWHAZE_SUPABASE_EDIT}`) | `.mcp.json` de AWI | `newhaze-org/mcp.json` |
 | `mercadopago` | `.mcp.json` de AWI | `afin-org/mcp.json` |
 | `meta-ads`, `arca-afip` | `.mcp.json` de AWI | `newhaze-org/mcp.json` |
+| `blender-1` a `blender-4`, `photoshop-alis` | `.mcp.base.json` | `newhaze-org/mcp.json` (2026-11-26: el trabajo 3D y de imagen es de New Haze) |
+| `sketchup` | `.mcp.base.json` | Eliminado (2026-11-26: no se usa) |
 
 El resto quedó en la base. El operador asignó los dudosos el 2026-10-09: `mercadopago`
 es de Afin, `meta-ads` y `arca-afip` de New Haze, y `filesystem` es de AWI. Mover otro
