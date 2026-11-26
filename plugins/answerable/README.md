@@ -27,7 +27,9 @@ Y adentro de la sesión:
 
 Un hook de `SessionStart` inyecta [`rules/answerable.md`](rules/answerable.md) al
 abrir cada sesión. No hay skills, no hay comandos y no hay estado: las reglas rigen
-desde el primer turno o no rigen.
+desde el primer turno o no rigen. Lo inyectado es la norma, corta; el porqué y los
+ejemplos están en [`rules/answerable-detalle.md`](rules/answerable-detalle.md), que el
+agente lee cuando duda.
 
 Las cuatro reglas son independientes y se aplican juntas:
 
