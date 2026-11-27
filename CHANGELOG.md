@@ -2,6 +2,37 @@
 
 Las versiones `0.3.0` en adelante se reconstruyeron retroactivamente el 2026-07-29 a partir del historial, un hito por decisión de arquitectura registrada. Ver [ADR 0014](docs/adr/0014-el-problema-era-la-distribucion-no-la-composicion.md).
 
+## [0.9.0](https://github.com/GuidoAmici/awi-core/compare/v0.8.0...v0.9.0) (2026-11-27)
+
+
+### Características
+
+* **awi:** linkify enlaza los issues de las respuestas; answerable deja de hacerlo y vuelve a actualizarse ([#122](https://github.com/GuidoAmici/awi-core/issues/122)) ([a725488](https://github.com/GuidoAmici/awi-core/commit/a725488eae09b1293cc07291a711d8a0f9204981))
+
+
+### Correcciones
+
+* **hooks:** gh-auth-pre sólo pushea repos con commits sin subir ([#117](https://github.com/GuidoAmici/awi-core/issues/117)) ([f11a45e](https://github.com/GuidoAmici/awi-core/commit/f11a45eab8df1bbc044cb1a9e3de35f86624696f))
+* **mcp:** supabase-newhaze lee el token de Windows al arrancar ([b9b2039](https://github.com/GuidoAmici/awi-core/commit/b9b20394b706154b67d74f4be410b81c7d34068f))
+* **worktree:** el fetch de provision nunca pide credenciales ([4b13a90](https://github.com/GuidoAmici/awi-core/commit/4b13a90ec5f76b5a11bcbf173d0270a68655b5a4))
+* **worktree:** las ramas nuevas salen de origin/prod y se hace fetch antes ([3da6f27](https://github.com/GuidoAmici/awi-core/commit/3da6f27767bc701804799963c8d4a1a4940b2836))
+
+
+### Rendimiento
+
+* **answerable:** inyectar sólo la norma y dejar el porqué en un detalle ([b58e1d3](https://github.com/GuidoAmici/awi-core/commit/b58e1d344b98041a1606f7eb3e8fa332cb53dd9e))
+
+
+### Mantenimiento
+
+* **mcp:** sketchup sale y blender/photoshop pasan a New Haze ([4e16646](https://github.com/GuidoAmici/awi-core/commit/4e166464bb99789630e3a5566c5ebc3336324a99))
+* **plugins:** apagar el plugin vercel en la raíz de AWI ([f8cda3c](https://github.com/GuidoAmici/awi-core/commit/f8cda3ccdc756ffd3ca84087f6d969d6b281a076))
+
+
+### Documentación
+
+* **awi:** el stack local de Supabase lo baja quien lo levantó ([80d4620](https://github.com/GuidoAmici/awi-core/commit/80d46207a04f2ed0e3d4fbae3409746373350aa6))
+
 ## [0.8.0](https://github.com/GuidoAmici/awi-core/compare/v0.7.0...v0.8.0) (2026-11-03)
 
 
