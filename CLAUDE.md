@@ -35,6 +35,16 @@ bash .claude/hooks/docker-up.sh
 
 Sale enseguida si ya corría, y espera al daemon y no al proceso. Sólo sale con 1 cuando hace falta el operador de verdad — login vencido, actualización pendiente—; ahí se lo decís nombrando qué falló. La trampa de la integración WSL contra interop está en [`docs/agents/docker-wsl.md`](docs/agents/docker-wsl.md).
 
+## El Supabase que levantás, lo bajás vos
+
+Cuando terminás de usar un stack local de Supabase —tests, e2e, migraciones, `db:types`—, lo bajás antes de dar la tarea por cerrada, aunque la sesión siga abierta:
+
+```bash
+supabase stop --workdir <codebase-o-worktree>
+```
+
+Cada stack son ~1,7 GiB y 11 contenedores dentro de la misma VM de WSL donde corren VS Code y todas las sesiones; cuatro stacks olvidados alcanzaron para congelar WSL. `supabase stop` conserva los datos en los volúmenes —nunca `--no-backup`—, así que volver a levantarlo es un `supabase start`. [`supabase-sweep.py`](.claude/hooks/supabase-sweep.py) barre al arrancar cada sesión, pero no toca un stack con lease vigente: no reemplaza bajarlo vos.
+
 ## Contexto compartido
 
 Traer y publicar el contexto de los repos materializados **no se pregunta**: cada momento está anclado como paso numerado de la skill que lo abre —`/today`, `/triage`, `/delegate-issue`, `/break`, `/wrap-session`— y la mecánica vive en `context_sync.py`. Alcanza a agendas y documentación, nunca a los codebases. Los estados `conflicto`, `sensible` y `otra-rama` los decide el operador: [`docs/agents/contexto-compartido.md`](docs/agents/contexto-compartido.md).
