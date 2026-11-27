@@ -29,10 +29,9 @@
       }
     },
     "doppler": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "@dopplerhq/mcp-server"
+        ".claude/hooks/doppler-mcp.sh"
       ],
       "type": "stdio"
     },
